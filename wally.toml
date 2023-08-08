@@ -1,0 +1,9 @@
+[package]
+name = "poopnugget142/poopy"
+version = "0.1.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+
+[dependencies]
+Stew = "solarscuffle-bot/stew@2.2.0"
+Signal = "sleitnick/signal@1.3.0"

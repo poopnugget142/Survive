@@ -1,0 +1,31 @@
+{
+  "name": "Survive",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "Scripts": {
+        "$path": "src/ReplicatedStorage"
+      },
+      "Packages": {
+        "$path": "./Packages"
+      }
+    },
+
+    "ServerScriptService": {
+      "$path": "src/ServerScriptService"
+    },
+
+    "ServerStorage": {
+      "Scripts" : {
+        "$path": "src/ServerStorage"
+      }
+    },
+
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "$path": "src/StarterPlayerScripts"
+      }
+    }
+  }
+}

@@ -157,11 +157,11 @@ export type ComponentData<E, N, C, D> = {
 --[=[
 	@within Stew
 	@interface WorldArgs
-	.On?.Component?.Build ((Name: Name, ComponentData: ComponentData) -> ())?
-	.On?.Component?.Create ((Entity: Entity, Name: Name, Component: Component) -> ())?
-	.On?.Component?.Delete ((Entity: Entity, Name: Name, Deleted: any) -> ())?
-	.On?.Entity?.Create ((Entity: Entity) -> ())?
-	.On?.Entity?.Delete ((Entity: Entity) -> ())?
+	.Component?.Build ((Name: Name, ComponentData: ComponentData) -> ())?
+	.Component?.Create ((Entity: Entity, Name: Name, Component: Component) -> ())?
+	.Component?.Delete ((Entity: Entity, Name: Name, Deleted: any) -> ())?
+	.Entity?.Create ((Entity: Entity) -> ())?
+	.Entity?.Delete ((Entity: Entity) -> ())?
 
 	Optional arguments to build a component with the Component.Build function. Everything is optional, including the On table.
 ]=]
@@ -196,11 +196,11 @@ export type WorldArgs = {
 	._NameToData { [Name]: ComponentData }
 	._EntityToData { [Entity]: EntityData }
 	._SignatureToCollection { [Signature]: Collection }
-	._On.Component.Build (Name : Name, ComponentData : ComponentData) -> ()
-	._On.Component.Create (Entity: Entity, Name: Name, Component: Component) -> ()
-	._On.Component.Delete (Entity: Entity, Name: Name, Deleted: any) -> ()
-	._On.Entity.Create (Entity: Entity) -> ()
-	._On.Entity.Delete (Entity: Entity) -> ()
+	._Component.Build (Name : Name, ComponentData : ComponentData) -> ()
+	._Component.Create (Entity: Entity, Name: Name, Component: Component) -> ()
+	._Component.Delete (Entity: Entity, Name: Name, Deleted: any) -> ()
+	._Entity.Create (Entity: Entity) -> ()
+	._Entity.Delete (Entity: Entity) -> ()
 ]=]
 type WorldCollection = {
 	Get      : (Names : { Name }) -> Collection;
@@ -291,9 +291,9 @@ Stew.World = {}
 
 	Creates a new world, and for convenience creates all methods that pass a world as the first argument in it, too
 ]=]
-function Stew.World.Create(WorldArgs: WorldArgs?) : World
-	local WorldComponent = if WorldArgs then WorldArgs.Component else nil
-	local WorldEntity = if WorldArgs then WorldArgs.Entity else nil
+function Stew.World.Create(WorldArgs : WorldArgs?) : World
+	local WorldComponent = WorldArgs and WorldArgs.Component
+	local WorldEntity = WorldArgs and WorldArgs.Entity
 
 	local World = {
 		_NextPlace = 1;
@@ -305,14 +305,14 @@ function Stew.World.Create(WorldArgs: WorldArgs?) : World
 		};
 
 		_Component = {
-			Build  = if WorldComponent then WorldComponent.Build  else DefaultOn;
-			Create = if WorldComponent then WorldComponent.Create else DefaultOn;
-			Delete = if WorldComponent then WorldComponent.Delete else DefaultOn;
+			Build  = WorldComponent and WorldComponent.Build or DefaultOn;
+			Create = WorldComponent and WorldComponent.Create or DefaultOn;
+			Delete = WorldComponent and WorldComponent.Delete or DefaultOn;
 		};
 
 		_Entity = {
-			Create = if WorldEntity then WorldEntity.Create else DefaultOn;
-			Delete = if WorldEntity then WorldEntity.Delete else DefaultOn;
+			Create = WorldEntity and WorldEntity.Create or DefaultOn;
+			Delete = WorldEntity and WorldEntity.Delete or DefaultOn;
 		};
 	} :: World
 

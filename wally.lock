@@ -3,16 +3,16 @@
 registry = "test"
 
 [[package]]
+name = "data-oriented-house/stew"
+version = "2.2.1"
+dependencies = []
+
+[[package]]
 name = "poopnugget142/poopy"
 version = "0.1.0"
-dependencies = [["Signal", "sleitnick/signal@1.5.0"], ["Stew", "solarscuffle-bot/stew@2.2.0"]]
+dependencies = [["Signal", "sleitnick/signal@1.5.0"], ["Stew", "data-oriented-house/stew@2.2.1"]]
 
 [[package]]
 name = "sleitnick/signal"
 version = "1.5.0"
-dependencies = []
-
-[[package]]
-name = "solarscuffle-bot/stew"
-version = "2.2.0"
 dependencies = []

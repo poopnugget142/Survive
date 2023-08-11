@@ -1,1 +1,1 @@
-return require(script.Parent._Index["solarscuffle-bot_stew@2.2.0"]["stew"])
+return require(script.Parent._Index["data-oriented-house_stew@2.2.1"]["stew"])

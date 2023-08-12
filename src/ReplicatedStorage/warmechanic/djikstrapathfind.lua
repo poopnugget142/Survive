@@ -19,6 +19,8 @@ local stew = require(replicatedStorage.Packages.Stew)
 local world = stew.World.Create()
 module.world = world
 
+local priorityQueue = require(replicatedStorage.Scripts.warmechanic.priorityqueue)
+
 --tileMap entity will contain tile components that hold information
 --local tileMap : any = world.Entity.Create()
 
@@ -81,16 +83,16 @@ end
 --100x100 tiles
 for i = 0, 100 do
 	for j = 0, 100 do
-        --if (i > 45 and i < 55 and j < 80) then
-        --    continue
-        --end
+        if (i > 45 and i < 55 and j < 80) then
+            continue
+        end
         local tile = module.tileBuild(i,j)
         local navData = world.Component.Get(tile, "navData")
-        if (i > 45 and i < 55 and j < 80) then
-            navData.cost = 1000
-        else
+        --if (i > 45 and i < 55 and j < 80) then
+        --    navData.cost = 1000
+        --else
             navData.cost = 1
-        end
+        --end
 	end
 end
 
@@ -167,6 +169,7 @@ module.pathfind = function( ... : Vector2 )
     return true
 end
 
+--[[
 local solveBox = { --5x5 box solve
     Vector2.new(0,1),--0
     Vector2.new(0,2),
@@ -211,10 +214,10 @@ local solveAngs = { --16 angles from 16 outer cells
     300,-- -2,2
     330 -- -1,2
 }
-
+]]
 
 module.solveVector = function(searchPosition : Vector2)
-    
+    --do stuff
 end
 
 return module

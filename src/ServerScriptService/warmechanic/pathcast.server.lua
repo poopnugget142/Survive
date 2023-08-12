@@ -2,6 +2,8 @@ local runService : RunService = game:GetService("RunService")
 
 local replicatedStorage = game:GetService("ReplicatedStorage")
 local djikstra = require(replicatedStorage.Scripts.warmechanic.djikstrapathfind)
+local priorityQueue = require(replicatedStorage.Scripts.warmechanic.priorityqueue)
+
 
 local Players = game:GetService("Players")
 
@@ -25,6 +27,13 @@ runService.Heartbeat:Connect(function(deltaTime)
     
 end)
 ]]
+
+local temp = {1,4,5,2,3}
+for _, number in temp do
+    priorityQueue.enqueue(number)
+end
+local out = priorityQueue.heapSort()
+print(out)
 
 while true do
     local target = workspace:WaitForChild("WarMechanist")

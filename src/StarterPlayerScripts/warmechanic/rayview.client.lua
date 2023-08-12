@@ -5,6 +5,8 @@
     add support for multiple LoS cones
 
     do some trig (cos) math to fix parallax error at tight angles
+
+    texels and raycasts independent
 ]]
 
 -- initialise dependencies
@@ -74,19 +76,15 @@ end
 
 --get the hypotenuse of the screen
 local screenHypo = math.sqrt(cam.ViewportSize.X^2 + cam.ViewportSize.Y^2)
-local triangleLength = screenHypo/2
-local triangleMatrix = {}
 --generate 3 triangles which coexist with the players FoV
 local thetaInverse = 2*math.pi - theta*2
 local thetaInverseI = thetaInverse/3
-local triangleWidthMul = math.tan(thetaInverseI)/3 -- * triangleLength
 --local thetaInverseMul = thetaInverseI/(math.pi/2)
 
 --reused function to set a pixel as transparent
 local function TransparentPixel(i,j)
 	pixelMatrix[i][j].frame.BackgroundColor3 = Color3.new(.1, .1, .1)
 	pixelMatrix[i][j].frame.Transparency = 0.1
-
 end
 
 
@@ -103,7 +101,7 @@ local dynamoHistory = {}
 --line of sight adjustments
 local lineOfSight = true
 --raycasts spread across field of view
-local distRays = 64
+local distRays = 32
 
 --iterate every physics step to see lighting, as well as determine line of sight
 runService.RenderStepped:Connect(function(deltaTime)
@@ -117,7 +115,7 @@ runService.RenderStepped:Connect(function(deltaTime)
 	--dynamic resolution
 	if (dynamicResolution) then
 		--compares the client's current fps to their average fps
-		local currentFps = 1/runService.RenderStepped:Wait()
+		local currentFps = 1/deltaTime
 		historicalFps[#historicalFps+1] = currentFps
 		if (#historicalFps > 100) then
 			table.remove(historicalFps, 1)
@@ -284,7 +282,7 @@ runService.RenderStepped:Connect(function(deltaTime)
 						TransparentPixel(i,j)
 					end
 				else 
-					--TransparentPixel(i,j)
+					TransparentPixel(i,j)
 				end
 
 				--print if there are too many light probes

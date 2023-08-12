@@ -28,13 +28,14 @@ for i = 0, tileSizeI do
 	end
 end
 
+
+--breadth search across tiles
 local adjacents : Vector2 = {
 	Vector2.new(1,0),
 	Vector2.new(0,1),
 	Vector2.new(0,-1),
 	Vector2.new(-1,0),
 }
-
 function Pathfind(startPosition : Vector2)
 	print("Pathfinding Go!")
 	local frontier = {}
@@ -42,38 +43,58 @@ function Pathfind(startPosition : Vector2)
 		position = startPosition,
 		heat = 1
 	}
-	local explored = {}
-	
-	while (#frontier > 0 or frontier[1].position.X >= 50) do
+
+	local exploredPositions = {}
+	while (#frontier > 0) do
 		local current = frontier[1] 
 		
 		for _, adjacent in ipairs(adjacents) do
 			local adjacentPosition = current.position + adjacent
-			if (table.find(explored, adjacentPosition)) then --skip instances that have already been witnessed
+			if (table.find(exploredPositions, adjacentPosition)) then --skip instances that have already been witnessed
 				continue
 			end
 			--print (adjacentPosition)
 			local adjacentTile = tileMatrix[math.round(adjacentPosition.X)][math.round(adjacentPosition.Y)]
 			--print(adjacentTile)
 			
-			local currentCost : number = current.heat
+			local currentHeat : number = current.heat
 			local adjacentCost : number = 0
 				if (not (adjacentTile[1] == nil) ) then adjacentCost = adjacentTile.cost end
 			
-			local newcost = currentCost + adjacentCost
+			local newcost = currentHeat + adjacentCost
 			if newcost < current.heat then
-				current.heat += newcost
+				current.heat = newcost
 			end
-			frontier[#frontier+1] = adjacentTile
+			frontier[#frontier+1] = {
+				position = adjacentPosition,
+				heat = newcost
+			}
 		end
 		
-		explored[#explored+1] = current
+		exploredPositions[#exploredPositions+1] = current.position
+		
+		--table.clear(frontier)
+
+		local temp = {}
+		for t = 1, #frontier-1, 1 do
+			temp[t] = frontier[t+1]
+		end
+		frontier = temp
+
+		
+
+		--table.remove(frontier, 1) -- does not work
 		--frontier[1] = nil -- does not work
 		--table.move(frontier, 2, #frontier, 1, frontier) -- does not work
-		print (frontier)
-		--print (explored)
+
+		--local temp = {}
+		--table.move(frontier, 2, #frontier+1, #frontier, temp)
+		--frontier = temp
+
+		print (frontier[1])
+		--print (exploredPositions)
+		task.wait(0.1)
 	end
-	task.wait(0.001)
 end
 
 Pathfind(Vector2.new(50,50))

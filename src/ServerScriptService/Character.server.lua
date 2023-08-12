@@ -7,6 +7,7 @@ local Inventory = require(ServerStorage.Scripts.Inventory)
 local Assets = ReplicatedStorage.Assets
 
 Players.PlayerAdded:Connect(function(Player)
+    
     local Character = Assets.Characters.Knight:Clone()
     Character:PivotTo(CFrame.new(0, 20, 0))
     Character.Parent = workspace
@@ -16,5 +17,4 @@ Players.PlayerAdded:Connect(function(Player)
 
     task.wait(1)
 
-    
 end)

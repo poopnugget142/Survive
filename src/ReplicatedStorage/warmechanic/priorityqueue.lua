@@ -5,11 +5,29 @@ local module = {}
 local values = {}
 local length : number = 0
 
+export type Comparator = {
+    a: number;
+    b: number;
+}
+--local comparatorValues : table
+
 comparator = function(a, b)
+    --if comparatorValues then
+    --    a = comparatorValues[a]
+    --    b = comparatorValues[b]
+    --else
+        a = values[a]
+        b = values[b]
+    --end
+    --comparatorValues = nil
+
+    --print(a)
+    --print(b)
+
     return(a - b)
 end
 
-module.enqueue = function(value)
+module.enqueue = function(value, comparator : table?)
     if (values.length ~= nil) then
         if (values.length <= length) then --increase array length exponentially depending on value count
             values.length = math.max(1, values.length * 2)
@@ -19,6 +37,10 @@ module.enqueue = function(value)
     end
     values[length+1] = value --add
     length+=1 --add
+    shiftUp()
+
+    --print (tostring(value) .. " added to priority queue")
+    return true
 end
 
 module.dequeue = function()
@@ -32,12 +54,14 @@ module.dequeue = function()
         return node
     end
 
+    shiftDown()
+
     values[1] = values[length] --move the topmost value to the bottom of the binary tree, to do some swapping
     values[length] = nil
     length-=1
-
-    shiftDown() --swapping function
-
+    --shiftDown() --swapping function
+    
+    --print (tostring(node) .. " removed from priority queue")
     return node
 end
 
@@ -72,7 +96,7 @@ shiftUp = function() --move smaller values up the binary tree
     while (true) do
         local parentIndex = parent(index)
 
-        if (parentIndex ~= nil and (comparator( values[index], values[parentIndex] ) < 0) ) then
+        if (parentIndex ~= nil and (comparator( index, parentIndex ) < 0) ) then
             local temp = values[index]
             values[index] = values[parentIndex]
             values[parentIndex] = temp
@@ -91,10 +115,10 @@ shiftDown = function() --move bigger values down the binary tree
         local right = rightChild(index)
         
         local swapCandidiate = index
-        if (left ~= nil and (comparator( values[swapCandidiate], values[left] ) > 0) ) then
+        if (left ~= nil and (comparator( swapCandidiate, left ) > 0) ) then
             swapCandidiate = left
         end
-        if (right ~= nil and (comparator( values[swapCandidiate], values[right]) > 0) ) then
+        if (right ~= nil and (comparator( swapCandidiate, right ) > 0) ) then
             swapCandidiate = right
         end
         if (swapCandidiate ~= index) then --check to see if swap candidate was altered by the two previous ifs
@@ -108,5 +132,4 @@ shiftDown = function() --move bigger values down the binary tree
         return --otherwise break the operation
     end
 end
-
 return module

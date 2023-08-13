@@ -49,9 +49,9 @@ while true do
         math.round(part.Position.Z)
     )
     --local flowfield = djikstra.pathfind(Vector2.new(position.X,position.Z))
-    local flowfield = djikstra2.pathfind(position)
+    local flowfield = djikstra2.pathfind(position--[[, Vector3.new(5,0,5)]])
 
-    repeat task.wait(2) until flowfield
+    repeat task.wait(1) until flowfield
     --local printPath = djikstra.world.Component.Get(djikstra.tileUV(0,0), "pathData")
     --print(printPath.heat)
 end

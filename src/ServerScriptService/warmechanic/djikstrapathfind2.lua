@@ -1,7 +1,8 @@
 --[[ notetaking
 
-change frontier in priority queue to use tiles instead of entities (they get deleted?)
+    find a way to get the number of tiles
 
+    add multiple layers of pathfinding grids eventually
 
 
 
@@ -231,13 +232,13 @@ end
 
 local adjacents = {
     Vector3.new(0,0,1), -- 0
-    --Vector3.new(1,0,1), -- 45
+    Vector3.new(1,0,1), -- 45
     Vector3.new(1,0,0), -- 90
-    --Vector3.new(1,0,-1), -- 135
+    Vector3.new(1,0,-1), -- 135
     Vector3.new(0,0,-1), -- 180
-    --Vector3.new(-1,0,-1), -- 225
+    Vector3.new(-1,0,-1), -- 225
     Vector3.new(-1,0,0), -- 270
-    --Vector3.new(-1,0,1) -- 315
+    Vector3.new(-1,0,1) -- 315
 }
 
 
@@ -255,7 +256,6 @@ module.pathfind = function(... :Vector3)
         world.Component.Delete(pastTile, "frontier_open")
         world.Component.Delete(pastTile, "frontier_closed")
     end
-    task.wait()
 
     local desiredTime = 2 -- desired time to finish tiling
     local desiredTileRate = math.max(1,(#currentTiles / desiredTime)) * 100
@@ -272,29 +272,31 @@ module.pathfind = function(... :Vector3)
     end
 
     while (#frontier > 0) do
-        for i = 1, desiredTileRate do --we need to make more than 1 tile in 0.01 seconds, use a for loop
-            local current = frontier[1]
+        for i = 1, desiredTileRate do --we need to make more than 1 tile in 0.01 seconds, use a loop here
+            local current = dequeue() --pull the next frontier object from the priority queue
                 if (current == nil) then 
                     print("missing entity anomaly")
-                    continue 
-                end
-            local currentEntity = world.Component.Get(frontier[1], "frontier_open")
+                    continue end
+            local currentEntity = world.Component.Get(current, "frontier_open")
                 if (currentEntity == nil) then 
                     print("missing component anomaly")
-                    continue 
-                end
-            local currentHeat = currentEntity.heat--[layer]
+                    continue end
             local currentNav = world.Component.Get(current, "tile_navData")
+                if (currentNav == nil) then 
+                    print("missing tile anomaly")
+                    continue end
+            
+            local currentHeat = currentEntity.heat--[layer]
 
-            world.Component.Create(current, "frontier_closed")
-            --world.Component.Delete(current, "frontier_open")
-            for a, adjacent : Vector3 in adjacents do
+            world.Component.Create(current, "frontier_closed") --close this tile so it cannot be visited by other tiles
+
+            for a, adjacent : Vector3 in adjacents do --check each adjacent tile (8 directional)
                 local adjacentPosition = current + adjacent
 
-                local adjacentNav = world.Component.Get(adjacentPosition, "tile_navData") --ignore tiles that dont exist
-                if (adjacentNav) then --assign heat values to tiles
-                    local adjacentCost : number = adjacentNav.cost--[layer]
-                    local newHeat = currentHeat + adjacentCost-- * adjacent.Magnitude
+                local adjacentNav = world.Component.Get(adjacentPosition, "tile_navData") 
+                if (adjacentNav) then --ignore tiles that dont exist
+                    local adjacentCost : number = adjacentNav.cost--[layer] --assign heat values to tiles
+                    local newHeat = currentHeat + adjacentCost * adjacent.Magnitude --magnitude for euclidean distance
 
                     local exploreCheck = world.Component.Get(adjacentPosition, "frontier_closed") --do not re-add already witnessed tiles to the frontier
                     if (exploreCheck == nil or newHeat < currentHeat) then
@@ -303,9 +305,9 @@ module.pathfind = function(... :Vector3)
                     if (exploreCheck == nil) then
                         if (world.Component.Get(adjacentPosition, "frontier_open") == nil) then 
                             world.Component.Create(adjacentPosition, "frontier_open", newHeat)
-                                world.Component.Create(adjacentPosition, "frontier_closed") --experimental
+                                --world.Component.Create(adjacentPosition, "frontier_closed") --experimental
                             --print(tostring(frontier[1]) .. "; " .. tostring(currentNav.heat) .. " ; " .. tostring(printTally))
-                            printTally+=1
+                            --printTally+=1
                             enqueue(adjacentPosition)
                         else 
                             --print("Duplicate Alert!")
@@ -313,11 +315,6 @@ module.pathfind = function(... :Vector3)
                     end   
                 end   
             end
-            dequeue()
-            if (currentNav == nil) then
-                continue
-            end
-            --print(currentNav)
             currentNav.heat--[[layer]] = currentHeat
             
             --[[
@@ -327,6 +324,9 @@ module.pathfind = function(... :Vector3)
             end
             print(printer)
             ]]
+            if (#frontier == 0) then
+                break
+            end
         end
         task.wait(0.01)
     end

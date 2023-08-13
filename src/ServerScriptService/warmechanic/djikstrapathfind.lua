@@ -24,9 +24,6 @@ module.world = world
 --local priorityQueue = require(replicatedStorage.Scripts.warmechanic.priorityqueue)
 
 
---tileMap entity will contain tile components that hold information
---local tileMap : any = world.Entity.Create()
-
 --helper function
 module.tileUV = function(u, v)
     return tostring(Vector2.new(u,v))
@@ -99,9 +96,7 @@ for i = 0, 80 do
 	end
 end
 
-local desiredTime = 0.5 -- desired time to complete a path request
-local tileCount
-local desiredTiles
+
 
 
 
@@ -261,7 +256,9 @@ end
 
 
 
-
+local desiredTime = 0.5 -- desired time to complete a path request
+local tileCount
+local desiredTiles
 
 --generates tilemap + djikstra's algorithm
 module.pathfind = function( ... : Vector2 )

@@ -30,6 +30,7 @@ local windowFocused = true
 
 --print(cam)
 
+
 --generate a 'lightmap' ui which reflects custom lighting information from the server
 local pixelMatrix = {}
 local pixelSizeIMax = 80

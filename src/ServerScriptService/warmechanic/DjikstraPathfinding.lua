@@ -4,7 +4,7 @@
 
     add multiple layers of pathfinding grids eventually
 
-
+    add support for pathfinding to models (enemies can never catch up to a moving player)
 
 ]]
 
@@ -241,10 +241,10 @@ local adjacents = {
     Vector3.new(-1,0,1) -- 315
 }
 
-local targets : Vector3 = {}
+local targets = {}
 module.targets = targets
 
-module.pathfind = function(... :Vector3)
+module.pathfind = function(...)
     print("Pathfinding Go!")
     targets = { ... }
     module.targets = targets
@@ -265,13 +265,38 @@ module.pathfind = function(... :Vector3)
     --print (desiredTileRate)
 
     --start a new era of target position(s)
-    for t, target in targets do
+    local filterKeys = {} --interpret target types, 
+    local _targets : Vector3 = {} -- ...
+    for t, target in targets do --and filter out invalid options
+        local targetType = type(target)
+        if (targetType == type(Vector3.zero)) then --all vector3s are accepted
+            table.insert(_targets, target)
+        else
+            if (targetType == "userdata") then --basepart positions are accepted
+                table.insert(_targets, target.Position)
+            else 
+                table.insert(filterKeys, t) --remove everything else
+                continue
+            end
+        end
+    end
+    for i, key in filterKeys do --remove bad results
+        table.remove(targets, key - (i-1))
+    end
+    --print(targets)
+    --print(_targets)
+
+    for t, target in _targets do --create nav requests for all good results
+        local target = Vector3.new(
+            math.round(target.X)
+            ,0--math.round(target.Y)
+            ,math.round(target.Z)
+        )
         local nav = world.Component.Get(target, "tile_navData")
         if (nav) then
             world.Component.Create(target, "frontier_open", 1)
             enqueue(target)
         end
-        --print(frontier)
     end
 
     while (#frontier > 0) do

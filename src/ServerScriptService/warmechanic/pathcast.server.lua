@@ -2,7 +2,6 @@ local runService : RunService = game:GetService("RunService")
 
 local replicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
---local djikstra = require(ServerScriptService.warmechanic.djikstrapathfind)
 local djikstra2 = require(ServerScriptService.warmechanic.DjikstraPathfinding)
 local priorityQueue = require(replicatedStorage.Scripts.warmechanic.priorityqueue)
 
@@ -43,15 +42,11 @@ print(out)
 while true do
     local target = workspace:WaitForChild("WarMechanist")
     local part : BasePart = target:WaitForChild("HumanoidRootPart")
-    local position = Vector3.new(
-        math.round(part.Position.X),
-        0, 
-        math.round(part.Position.Z)
-    )
-    --local flowfield = djikstra.pathfind(Vector2.new(position.X,position.Z))
-    local flowfield = djikstra2.pathfind(position--[[, Vector3.new(5,0,5)]])
+    --print(type(target))
+    local velocity = part:GetVelocityAtPosition(part.position)*0.5
+    local position = (part.position + velocity) * Vector3.new(1,0,1)
+    
+    local flowfield = djikstra2.pathfind(part--[[position--[[, Vector3.new(5,0,5)]])
 
     repeat task.wait(0.25) until flowfield
-    --local printPath = djikstra.world.Component.Get(djikstra.tileUV(0,0), "pathData")
-    --print(printPath.heat)
 end

@@ -219,8 +219,8 @@ for i = 0, 100 do
         --end
         local tile = module.tileBuild(_,i,0,j)
         local navData = world.Component.Get(tile, "tile_navData")
-        if (i > 45 and i < 55 and j < 80) then
-            navData.cost = 1000
+        if (i > 45 and i < 55 and j < 70) then
+            navData.cost = 100
         else
             navData.cost = 1
         end
@@ -241,10 +241,13 @@ local adjacents = {
     Vector3.new(-1,0,1) -- 315
 }
 
+local targets : Vector3 = {}
+module.targets = targets
 
 module.pathfind = function(... :Vector3)
     print("Pathfinding Go!")
-    local targets : Vector3 = { ... }
+    targets = { ... }
+    module.targets = targets
 
     --[[if (layer == nil) then
         layer = 1
@@ -257,8 +260,8 @@ module.pathfind = function(... :Vector3)
         world.Component.Delete(pastTile, "frontier_closed")
     end
 
-    local desiredTime = 2 -- desired time to finish tiling
-    local desiredTileRate = math.max(1,(#currentTiles / desiredTime)) * 100
+    local desiredTime = 0.2 -- desired time to finish tiling
+    local desiredTileRate = math.max(1,(--[[#currentTiles]]5000 / desiredTime) * 0.01) 
     --print (desiredTileRate)
 
     --start a new era of target position(s)
@@ -313,7 +316,9 @@ module.pathfind = function(... :Vector3)
                             --print("Duplicate Alert!")
                         end
                     end   
-                end   
+                else
+                    currentHeat += 10000
+                end
             end
             currentNav.heat--[[layer]] = currentHeat
             
@@ -331,6 +336,60 @@ module.pathfind = function(... :Vector3)
         task.wait(0.01)
     end
     return true
+end
+
+local box = { --5x5 box solve
+    Vector3.new(0,0,1),--0
+    Vector3.new(0,0,2),
+    Vector3.new(1,0,2),--30
+    Vector3.new(1,0,1),--45
+    Vector3.new(2,0,2),
+    Vector3.new(2,0,1),--60
+    Vector3.new(1,0,0),--90
+    Vector3.new(2,0,0),
+    Vector3.new(2,0,-1),--120
+    Vector3.new(1,0,-1),--135
+    Vector3.new(2,0,-2),
+    Vector3.new(1,0,-2),--150
+    Vector3.new(0,0,-1),--180
+    Vector3.new(0,0,-2),
+    Vector3.new(-1,0,-2),--210
+    Vector3.new(-1,0,-1),--225
+    Vector3.new(-2,0,-2),
+    Vector3.new(-2,0,-1),--240
+    Vector3.new(-1,0,0),--270
+    Vector3.new(-2,0,0),
+    Vector3.new(-2,0,1),--285
+    Vector3.new(-1,0,1),--300
+    Vector3.new(-2,0,2),
+    Vector3.new(-1,0,2) --330
+}
+
+module.boxSolve = function(position : Vector3)
+    position = Vector3.new(
+        math.round(position.X),
+        math.round(position.Y),
+        math.round(position.Z)
+    )
+
+    local vectors = { }
+    for v, vertex in box do
+		local adjacentPosition = position + vertex.Unit
+
+		local path = world.Component.Get(adjacentPosition, "tile_navData")
+		--print(path.heat)
+		vectors[v] = adjacents[v]--*100
+		if (path) then
+			vectors[v] = vertex * path.heat            
+		end
+	end
+    local finalVector = Vector3.zero
+	for v, vector in vectors do
+		finalVector += vector
+	end
+	finalVector = -finalVector.Unit
+
+    return finalVector
 end
 
 return module

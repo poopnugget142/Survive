@@ -3,7 +3,7 @@ local runService : RunService = game:GetService("RunService")
 local replicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 --local djikstra = require(ServerScriptService.warmechanic.djikstrapathfind)
-local djikstra2 = require(ServerScriptService.warmechanic.djikstrapathfind2)
+local djikstra2 = require(ServerScriptService.warmechanic.DjikstraPathfinding)
 local priorityQueue = require(replicatedStorage.Scripts.warmechanic.priorityqueue)
 
 
@@ -51,7 +51,7 @@ while true do
     --local flowfield = djikstra.pathfind(Vector2.new(position.X,position.Z))
     local flowfield = djikstra2.pathfind(position--[[, Vector3.new(5,0,5)]])
 
-    repeat task.wait(0.5) until flowfield
+    repeat task.wait(0.25) until flowfield
     --local printPath = djikstra.world.Component.Get(djikstra.tileUV(0,0), "pathData")
     --print(printPath.heat)
 end

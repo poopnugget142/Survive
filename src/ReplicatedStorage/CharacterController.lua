@@ -2,7 +2,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local CharacterDataModule = require(ReplicatedStorage.Scripts.CharacterData)
-local CharacterStates = require(ReplicatedStorage.Scripts.CharacterStates)
+local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 
 local FRAMERATE = 1 / 240
 local STIFFNESS = 300
@@ -41,6 +41,9 @@ RunService:BindToRenderStep("PlayerMovement", Enum.RenderPriority.Character.Valu
         local CharacterData = CharacterDataModule.GetCharacterData(Character)
 
         local Primary : BasePart = Character.PrimaryPart
+
+        if not Primary then continue end
+
         local Mover : VectorForce = Primary.Mover
         local Aligner : AlignOrientation = Primary.Aligner
 

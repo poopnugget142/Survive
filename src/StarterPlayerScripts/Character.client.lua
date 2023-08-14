@@ -3,8 +3,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local PlayerMovement = require(ReplicatedStorage.Scripts.PlayerMovement)
 local CharacterController = require(ReplicatedStorage.Scripts.CharacterController)
-local CharacterStates = require(ReplicatedStorage.Scripts.CharacterStates)
-local Gun = require(ReplicatedStorage.Scripts.Items.Gun)
+local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
+local Equipment = require(ReplicatedStorage.Scripts.Equipment)
 
 local Player = Players.LocalPlayer
 
@@ -15,5 +15,5 @@ Player.CharacterAdded:Connect(function(Character)
     PlayerMovement.Component.Create(Player, "PlayerMovement")
 
     --temp
-    Gun.Give(Character)
+    local Entity = Equipment.CreateEntity("Gun")
 end)

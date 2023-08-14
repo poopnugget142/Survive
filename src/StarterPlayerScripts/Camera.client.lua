@@ -12,6 +12,8 @@ local function UpdateCameraPosition()
     local Character : Model = Player.Character
     local Primary : BasePart = Character.PrimaryPart
 
+    if not Primary then return end
+
     local RootOrgin = Primary.Position + RootOffset
 
     Camera.CFrame = CFrame.new(RootOrgin + TopDownOffset, RootOrgin)

@@ -1,0 +1,79 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Remotes = ReplicatedStorage.Remotes
+local Promise = require(ReplicatedStorage.Packages.Promise)
+local EquipmentStates = require(ReplicatedStorage.Scripts.States.Equipment)
+
+local RegisterEquipment : RemoteFunction = Remotes.RegisterEquipment
+local SetEquipmentModel : RemoteEvent = Remotes.SetEquipmentModel
+
+local EquipmentIDs : { [any] : number? }= {}
+local EquipmentEntitys : { [number] : any } = {}
+
+local Module = {}
+
+--Gets the corresponding module script with the item name
+local function GetEquipmentData(ItemName : string) : table
+    local ItemData = script:FindFirstChild(ItemName)
+    if not ItemData then
+        error(ItemName.." does not exist")
+    end
+    return require(ItemData)
+end
+
+local function SetItemID(Entity : any, ItemName : string?)
+    local ItemID = EquipmentIDs[Entity]
+    if ItemID then
+        return ItemID
+    end
+
+    --Asks server for ItemID to mark item with
+    local ItemPromise = Promise.new(function(resolve, reject, onCancel)
+        ItemID = RegisterEquipment:InvokeServer(ItemName)
+        EquipmentStates.Component.Create(Entity, "ItemID", ItemID)
+        EquipmentEntitys[ItemID] = Entity
+
+        local ItemData = GetEquipmentData(ItemName)
+
+        ItemData.ServerGotItemID(Entity, ItemID)
+
+        resolve(ItemID)
+	end)
+
+    EquipmentIDs[Entity] = ItemPromise
+    return ItemPromise
+end
+
+Module.CreateEntity = function(ItemName : string, ItemID : number?, ...)
+    local Entity = Module.GetEntity(ItemID)
+
+    --Entity does not exist on this client
+    if not Entity then
+        Entity = EquipmentStates.Entity.Create()
+        EquipmentStates.Component.Create(Entity, "Name", ItemName)
+        if ItemID then
+            --Entity exists on server
+            EquipmentStates.Component.Create(Entity, "ItemID", ItemID)
+        else
+            --Entity does not exist on server
+            SetItemID(Entity, ItemName)
+        end
+    end
+
+    local ItemData = GetEquipmentData(ItemName)
+
+    ItemData.Give(Entity, ...)
+end
+
+Module.GetEntity = function(ItemId : number) : any
+    return EquipmentEntitys[ItemId]
+end
+
+SetEquipmentModel.OnClientEvent:Connect(function(Instance, ItemID)
+    local Entity = Module.GetEntity(ItemID)
+    local ItemName = EquipmentStates.Component.Get(Entity, "Name")
+    local ItemData = GetEquipmentData(ItemName)
+    ItemData.ServerLoadModel(Entity, Instance)
+end)
+
+return Module

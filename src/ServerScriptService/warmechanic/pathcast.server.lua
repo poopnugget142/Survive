@@ -40,8 +40,10 @@ print(out)
 
 
 while true do
-    local target = workspace:WaitForChild("WarMechanist")
-    local part : BasePart = target:WaitForChild("HumanoidRootPart")
+    local target = workspace.Characters:WaitForChild("Knight")
+    local part : BasePart = target.PrimaryPart
+
+    if not part then return end
     --print(type(target))
     local velocity = part:GetVelocityAtPosition(part.position)*0.5
     local position = (part.position + velocity) * Vector3.new(1,0,1)

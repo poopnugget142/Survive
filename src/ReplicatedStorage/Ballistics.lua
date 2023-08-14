@@ -14,6 +14,7 @@ export type CastBehavior = {
     RaycastParams : RaycastParams;
     Container : Instance;
     CosmeticBulletTemplate : BasePart;
+    LifeTime : number;
     Acceleration : Vector3;
 }
 
@@ -22,6 +23,7 @@ export type Bullet = {
     Position : Vector3;
     CosmeticBulletObject : Instance;
     Caster : Caster;
+    CreatedAt : number;
 }
 
 local Bullets = {}
@@ -45,9 +47,18 @@ Module.CreateCastBehavior = function()
     } :: CastBehavior
 end
 
+Module.StopBullet = function(Bullet : Bullet)
+    local TablePosition = table.find(Bullets, Bullet)
+
+    if not TablePosition then warn("Bullet not able to remove!") end
+
+    table.remove(Bullets, TablePosition)
+end
+
 --Adds a new bullet objecct into the array
 Module.SpawnBullet = function(Caster : Caster, CastBehavior : CastBehavior , Orgin : Vector3, Velocity : Vector3)
     local CosmeticBulletObject = CastBehavior.CosmeticBulletTemplate:Clone()
+    CosmeticBulletObject.CFrame = CFrame.new(Orgin, Orgin + Velocity.Unit)
     CosmeticBulletObject.Anchored = true
     CosmeticBulletObject.Parent = CastBehavior.Container
 
@@ -57,7 +68,7 @@ Module.SpawnBullet = function(Caster : Caster, CastBehavior : CastBehavior , Org
         CosmeticBulletObject = CosmeticBulletObject;
         Caster = Caster;
         CastBehavior = CastBehavior;
-        ExpirationDate = tick() + CastBehavior.LifeTime;
+        CreatedAt = tick();
     }
 
     table.insert(Bullets, Bullet)
@@ -78,17 +89,14 @@ RunService.Heartbeat:Connect(function(DeltaTime)
 
         local RayResult = game.Workspace:Raycast(RayOrigin, RayDirection, CastBehavior.RaycastParams)
 
-        --Remove bullet on hit
+        --On bullet hit
         if RayResult then
             Caster.RayHit:Fire(Bullet, RayResult)
-            table.remove(Bullets, i)
-            continue
         end
 
         --If bullet has exceded it's lifetime then stop bullet
-        if tick() > Bullet.ExpirationDate then
+        if tick() >= Bullet.CreatedAt + CastBehavior.LifeTime then
             Caster.Expired:Fire(Bullet)
-            table.remove(Bullets, i)
             continue
         end
 

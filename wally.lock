@@ -8,9 +8,14 @@ version = "2.2.1"
 dependencies = []
 
 [[package]]
+name = "evaera/promise"
+version = "4.0.0"
+dependencies = []
+
+[[package]]
 name = "poopnugget142/poopy"
 version = "0.1.0"
-dependencies = [["Signal", "sleitnick/signal@1.5.0"], ["Stew", "data-oriented-house/stew@2.2.1"]]
+dependencies = [["Promise", "evaera/promise@4.0.0"], ["Signal", "sleitnick/signal@1.5.0"], ["Stew", "data-oriented-house/stew@2.2.1"]]
 
 [[package]]
 name = "sleitnick/signal"

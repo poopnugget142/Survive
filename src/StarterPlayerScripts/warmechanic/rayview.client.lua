@@ -50,7 +50,7 @@ module.clientGenerateLightingMap()
 for i = 0, pixelSizeIMax do
 	for j = 0, pixelSizeJMax do
 		local dude = Instance.new("Frame")
-		dude.Parent = screenGui
+		dude.Parent = screenGui:WaitForChild("losFrame")
 		dude.Name = tostring(i) .. "," .. tostring(j)
 		dude.BorderSizePixel = 0
 		dude.Transparency = 0.8
@@ -240,7 +240,7 @@ runService.RenderStepped:Connect(function(deltaTime)
 					(i/pixelSizeI)*cam.ViewportSize.X, 
 					(j/pixelSizeJ)*cam.ViewportSize.Y
 				)
-				local rayResult = workspace:Raycast(unitRay.Origin, unitRay.Direction * 1000)
+				local rayResult = workspace:Raycast(unitRay.Origin, unitRay.Direction * 10000)
 
 
 				--send data to server to return lighting information

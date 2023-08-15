@@ -3,9 +3,12 @@ local RunService = game:GetService("RunService")
 local Player = game.Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
-Camera.CameraType = Enum.CameraType.Scriptable
+local isometer = (2^6.1293) --try 2^6.1293 for fun, or 2^0 to turn off
 
-local TopDownOffset = Vector3.new(0, 30, -20)
+Camera.CameraType = Enum.CameraType.Scriptable
+Camera.FieldOfView = 70/isometer
+
+local TopDownOffset = Vector3.new(0, 30, -20)  * isometer
 local RootOffset = Vector3.new(0, 0, -2)
 
 local function UpdateCameraPosition()
@@ -16,7 +19,7 @@ local function UpdateCameraPosition()
 
     local RootOrgin = Primary.Position + RootOffset
 
-    Camera.CFrame = CFrame.new(RootOrgin + TopDownOffset, RootOrgin)
+    Camera.CFrame = CFrame.new(RootOrgin + TopDownOffset, RootOrgin) 
 end
 
 Player.CharacterAdded:Wait()

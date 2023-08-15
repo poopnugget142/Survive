@@ -273,7 +273,7 @@ module.pathfind = function(...)
             table.insert(_targets, target)
         else
             if (targetType == "userdata") then --basepart positions are accepted
-                table.insert(_targets, target.Position)
+                table.insert(_targets, target.Position + target:GetVelocityAtPosition(target.Position))
             else 
                 table.insert(filterKeys, t) --remove everything else
                 continue

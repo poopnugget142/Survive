@@ -4,7 +4,7 @@ local JunkFolder = workspace:WaitForChild("JunkFolder")
 local CharactersFolder = workspace:WaitForChild("Characters")
 
 local EquipmentStates = require(ReplicatedStorage.Scripts.States.Equipment)
-local Ballistics = require(ReplicatedStorage.Scripts.Ballistics)
+local Ballistics = require(ReplicatedStorage.Scripts.Util.Ballistics)
 
 local Caster : Ballistics.Caster = Ballistics.CreateCaster()
 
@@ -49,28 +49,9 @@ Module.LoadModel = function(Entity)
     
 end
 
-Module.Attack = function(Entity, AimPosition)
-    local CastBehavior = EquipmentStates.Component.Get(Entity, "CastBehavior")
-
-    local Player = EquipmentStates.Component.Get(Entity, "Owner")
-    
-    local Character = Player.Character
-
-    local HumanoidRootPart = Character.Model.PrimaryPart
-
-    local Orgin = HumanoidRootPart.Position
-
-    local DistanceToAim = (Orgin-AimPosition).Magnitude
-
-    local Circularity = math.rad( math.random(0, 180) )
-
-    local SpreadAim = AimPosition +
-    ( Vector3.new(math.random(-100, 100)*0.01*math.sin(Circularity), 0, math.random(-100, 100)*0.01*math.cos(Circularity))
-    *(DistanceToAim*math.tan(math.rad(25)/2)) )
-
-    local Direction = CFrame.new(Orgin, SpreadAim).LookVector
-
-    local Bullet = Ballistics.SpawnBullet(Caster, CastBehavior, Orgin, Direction*200)
+--In the future we can check if this really hit but for now we trust it
+Module.Attack = function(Entity, HitCharacter)
+    print(HitCharacter)
 end
 
 return Module

@@ -5,7 +5,7 @@ local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Stew = require(ReplicatedStorage.Packages.Stew)
-local KeyBindings = require(ReplicatedStorage.Scripts.KeyBindings)
+local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
 local CharacterDataModule = require(ReplicatedStorage.Scripts.CharacterData)
 
 local World = Stew.World.Create()

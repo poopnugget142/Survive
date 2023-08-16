@@ -1,23 +1,20 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Stew = require(ReplicatedStorage.Packages.Stew)
+local Util = require(ReplicatedStorage.Scripts.Util)
 
 local World = Stew.World.Create()
 
-local function EasyStewReturn(Entity : any, StewName : string, Item : any)
-    return Item
-end
-
 World.Component.Build("Name", {
-    Constructor = EasyStewReturn;
+    Constructor = Util.EasyStewReturn;
 })
 
 World.Component.Build("ItemID", {
-    Constructor = EasyStewReturn;
+    Constructor = Util.EasyStewReturn;
 })
 
 World.Component.Build("Model", {
-    Constructor = EasyStewReturn;
+    Constructor = Util.EasyStewReturn;
 
     Destructor = function(Entity : any, StewName : string)
         local Model = World.Component.Get(Entity, "Model")
@@ -27,11 +24,11 @@ World.Component.Build("Model", {
 })
 
 World.Component.Build("Owner", {
-    Constructor = EasyStewReturn;
+    Constructor = Util.EasyStewReturn;
 })
 
 World.Component.Build("CastBehavior", {
-    Constructor = EasyStewReturn;
+    Constructor = Util.EasyStewReturn;
 })
 
 --Creates a temporary model that will be destroyed once the server loads its version
@@ -50,7 +47,7 @@ World.Component.Build("LoadingItem", {
 })
 
 World.Component.Build("LoadingConnections", {
-    Constructor = EasyStewReturn;
+    Constructor = Util.EasyStewReturn;
 
     Destructor = function(Entity : any, StewName : string)
         local LoadingConnections = World.Component.Get(Entity, "LoadingConnections")

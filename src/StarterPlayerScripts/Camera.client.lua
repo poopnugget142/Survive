@@ -8,8 +8,8 @@ local isometer = (2^6.1293) --try 2^6.1293 for fun, or 2^0 to turn off
 Camera.CameraType = Enum.CameraType.Scriptable
 Camera.FieldOfView = 70/isometer
 
-local TopDownOffset = Vector3.new(0, 30, -20)  * isometer
-local RootOffset = Vector3.new(0, 0, -2)
+local TopDownOffset = Vector3.new(-20, 30, -20)  * isometer
+local RootOffset = Vector3.new(-2, 0, -2)
 
 local function UpdateCameraPosition()
     local Character : Model = Player.Character

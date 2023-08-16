@@ -5,7 +5,7 @@
 
 ]]
 --initialise dependencies
-local StarterPlayer = game:GetService("StarterPlayer")
+--local StarterPlayer = game:GetService("StarterPlayer")
 local userInputService = game:GetService("UserInputService")
 local runService = game:GetService("RunService")
 local replicatedStorage = game:GetService("ReplicatedStorage")
@@ -29,23 +29,7 @@ for a, asset in assets do
     screenGui:WaitForChild(asset)
 end
 
---[[
-screenGui.mainFrame.inventoryFrame.TextButton.MouseButton1Down:Connect(function()
-    print("Hello!")
-    local object : Frame = screenGui.mainFrame.inventoryFrame.TextButton
-
-    while true do
-        local mouse = userInputService:GetMouseLocation()
-        object.Position = UDim2.new(
-            UDim.new(mouse/cam.ViewportSize.X,0),
-            UDim.new(mouse/cam.ViewportSize.Y,0)
-        )
-        task.wait()
-    end
-end)
-]]
-
-local templates : GuiObject = screenGui.mainFrame.inventoryFrame.holder:GetChildren()
+local templates : GuiObject = screenGui.mainFrame.inventoryFrame.storage:GetChildren()
 
 
 local mouse = player:GetMouse()
@@ -54,6 +38,69 @@ local clicking = false
 local clickPos = UDim2.fromScale(0,0)
 local startPos = UDim2.fromScale(0,0)
 
+
+world.Component.Build("inventory_ItemCell", {
+    Constructor = function(Entity : any, name : string, itemIndex : number)
+        return 
+        {
+            cellPosition = Entity
+            ,_ = nil --no names
+            ,itemIndex = itemIndex
+        }
+    end
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--inventory manipulation
 --mouse enter and mouse leave
 local hoverEvents = {}
 local ActivateButtons = function ()
@@ -88,8 +135,8 @@ userInputService.InputBegan:Connect(function(input)
 				if clickPos and startPos then
 					local delta = userInputService:GetMouseLocation() - clickPos
 					hovering.Position = UDim2.new(
-                        startPos.X.Scale, startPos.X.Offset + math.round(delta.X/50)*50
-                        , startPos.Y.Scale, startPos.Y.Offset + math.round(delta.Y/50)*50
+                        startPos.X.Scale, startPos.X.Offset + delta.X--math.round(delta.X/50)*50
+                        , startPos.Y.Scale, startPos.Y.Offset + delta.Y--math.round(delta.Y/50)*50
                     )
 				end
 
@@ -100,6 +147,7 @@ userInputService.InputBegan:Connect(function(input)
 			repeat task.wait() until clicking == false
             ----
 
+            
             local tempCheck = UDim2.new(
                 startPos.X.Scale, startPos.X.Offset-- + math.round(-100/50)*50
                 , startPos.Y.Scale, startPos.Y.Offset-- + math.round(0/50)*50
@@ -110,6 +158,7 @@ userInputService.InputBegan:Connect(function(input)
                     , startPos.Y.Scale, startPos.Y.Offset
                 )   
             end
+            
 
 			hold:Disconnect()
             ActivateButtons()

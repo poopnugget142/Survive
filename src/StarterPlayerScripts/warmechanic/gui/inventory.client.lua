@@ -129,22 +129,24 @@ local templates : GuiObject = screenGui.mainFrame.inventoryFrame.itemStorage:Get
 
 local mouse = player:GetMouse()
 local hovering = nil
+local itemScale = Vector2.new(2,2)
 local cellPosition = Vector2.new(10,10)
 local component = nil
-local clicking = false
+local picking = nil
 local clickPos = UDim2.fromScale(0,0)
 local startPos = UDim2.fromScale(0,0)
+local startCells = {}
 
 
 
 local hoverEvents = {}
-local ActivateButtons = function ()
+local ActivateButtons = function () --enable modification of the hovering variable
     for _, template in templates do    
         table.insert(hoverEvents,template.MouseEnter:Connect(function() hovering = template end))
         table.insert(hoverEvents,template.MouseLeave:Connect(function() hovering = nil end))
     end
 end
-local DeactivateButtons = function ()
+local DeactivateButtons = function () --disable modification of the hovering variable (the player picks an item)
     for _, template in templates do    
         hoverEvents[1]:Disconnect()
         hoverEvents[2]:Disconnect()
@@ -155,41 +157,51 @@ end
 ActivateButtons()
 
 
+--[==[
+ItemPick = function(item)
+    picking = item
 
-Pickup = function()
-    clicking = true	
-
-    startPos = hovering.Position
+    startPos = picking.Position
 	clickPos = userInputService:GetMouseLocation()
 
-    DeactivateButtons()
+    --DeactivateButtons()
+    --[[
     local hold = runService.RenderStepped:Connect(function()
         --templates[1].Position = UDim2.fromOffset(mouse.X, mouse.Y) 
+        if (picking == nil) then
+            return
+        end
         
         if clickPos and startPos then
-            --local delta = userInputService:GetMouseLocation() - clickPos
-            --hovering.Position = UDim2.new(
-            --    startPos.X.Scale, startPos.X.Offset + delta.X--math.round(delta.X/50)*50
-            --    , startPos.Y.Scale, startPos.Y.Offset + delta.Y--math.round(delta.Y/50)*50
-            --)
-            hovering.Position = UDim2.fromOffset(userInputService:GetMouseLocation().X, userInputService:GetMouseLocation().Y)
+            picking.Position = UDim2.fromOffset(userInputService:GetMouseLocation().X, userInputService:GetMouseLocation().Y)
         end
     end)
-    repeat task.wait() until clicking == false
-    hold:Disconnect()
-    ActivateButtons()
+    ]]
+    while picking do
+        if clickPos and startPos then
+            picking.Position = UDim2.fromOffset(userInputService:GetMouseLocation().X, userInputService:GetMouseLocation().Y)
+        end
+        task.wait()
+    end
 
-    return Putdown()
+
+    --repeat task.wait() until picking == nil
+    --hold:Disconnect()
+    --ActivateButtons()
+
+    return ItemPut()
 end
 
-Putdown = function()
+ItemPut = function()
     component = world.Component.Get( itemCells[cellPosition.X-5][cellPosition.Y-5], "inventory_itemCell")
     if (component ~= nil) then
         print(component)
-        component.frame.BackgroundColor3 = Color3.fromRGB(129,129,129)
+        
     end
 
-    local testScale = Vector2.new(1,1)
+    
+
+    local testScale = Vector2.new(2,2)
     cellPosition = Vector2.new(
             (math.round(hovering.AbsolutePosition.X/cam.ViewportSize.X*20+0.5) -- +0.5 added due to roblox weirdness, check later in case of bugs
                 + select(2, math.modf((testScale.X+1)/2)) --use modulo to determine whether an item should exist on or in between cells
@@ -205,25 +217,107 @@ Putdown = function()
     component = world.Component.Get( itemCells[cellPosition.X-5][cellPosition.Y-5], "inventory_itemCell")
     if (component ~= nil) then
         print(component)
-        component.frame.BackgroundColor3 = Color3.fromHSV(0,1,1)
+        component.frame.BackgroundColor3 = Color3.fromHSV(0,0,1)
     end
 
     return
 end
+]==]
+
+roundItemPosition = function()
+    return Vector2.new(
+        math.round( --X
+            (hovering.AbsolutePosition.X/cam.ViewportSize.X+0.025)*20
+        ) + select(2, math.modf((itemScale.X-1)/2))
+        ,math.round( --Y
+        (hovering.AbsolutePosition.Y/cam.ViewportSize.Y+0.05)*20 + 1
+        ) + select(2, math.modf((itemScale.Y-1)/2))
+    )
+end
+itemCellsCheck = function(roundedPosition)
+    local output = {}
+
+    for i = 1, itemScale.X, 1 do
+        local shiftX = i - ((itemScale.X-1)/2) - 1
+        for j = 1, itemScale.Y, 1 do
+            
+
+            local shiftY = j - ((itemScale.Y-1)/2) - 1
+            local newCellPosition = Vector2.new(
+                    roundedPosition.X + shiftX -5
+                    ,roundedPosition.Y + shiftY -5
+            )
+            print(newCellPosition)
+
+
+            table.insert(output, newCellPosition)
+        end
+    end
+
+    return output
+end
+
+ItemPick = function(item)
+    picking = item
+
+    startPos = picking.Position
+	clickPos = userInputService:GetMouseLocation()
+
+    local roundedPosition = roundItemPosition()
+
+    startCells = itemCellsCheck(roundedPosition)
+
+    while picking do
+        if clickPos and startPos then
+            picking.Position = UDim2.fromOffset(userInputService:GetMouseLocation().X, userInputService:GetMouseLocation().Y)
+        end
+        task.wait()
+    end
+
+    return ItemPut()
+end
+
+ItemPut = function()
+    local startComponents = {}
+    for c, cell in startCells do
+        local component = world.Component.Get(itemCells[cell.X][cell.Y], "inventory_itemCell")
+        if (component == nil) then
+            break
+        end
+        print(component)
+        table.insert(startComponents, component)
+        --component.frame.BackgroundColor3 = Color3.fromHSV(0,0,0.505)
+    end
+
+    local roundedPosition = roundItemPosition()
+    hovering.Position = UDim2.fromScale(roundedPosition.X/20, roundedPosition.Y/20)
+    local cells = itemCellsCheck(roundedPosition)
+
+    for c, cell in cells do
+        local component = world.Component.Get(itemCells[cell.X][cell.Y], "inventory_itemCell")
+        if (component ~= nil) then
+            print(component)
+            component.frame.BackgroundColor3 = Color3.fromHSV(0,0,1)
+        end
+    end
+end
 
 
 
-
-
-local delta
 userInputService.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 and hovering then
-		Pickup()
-	end
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        if hovering and not picking then
+            ItemPick(hovering)
+        else
+            picking = nil
+        end
+    end
 end)
 
+--[[
 userInputService.InputEnded:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		if clicking then clicking = false end
+		if picking then picking = false end
 	end
 end)
+]]

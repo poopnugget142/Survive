@@ -3,7 +3,7 @@ local RunService = game:GetService("RunService")
 local Player = game.Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
-local isometer = (2^6.1293) --try 2^6.1293 for fun, or 2^0 to turn off
+local isometer = (2^2) --try 2^6.1293 for fun, or 2^0 to turn off
 
 Camera.CameraType = Enum.CameraType.Scriptable
 Camera.FieldOfView = 70/isometer

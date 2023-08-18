@@ -2,31 +2,45 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CollectionService = game:GetService("CollectionService")
 
 local Stew = require(ReplicatedStorage.Packages.Stew)
-local Util = require(ReplicatedStorage.Scripts.Util)
+local Signal = require(ReplicatedStorage.Packages.Signal)
 
-local World = Stew.World.Create()
+local World = Stew.world()
 
-World.Component.Build("Moving")
-World.Component.Build("AutoRotate")
+local Module = {}
 
-World.Component.Build("Health", {
-    Constructor = Util.EasyStewReturn;
+Module.Moving = World.tag("Moving")
+Module.AutoRotate = World.tag("AutoRotate")
+
+Module.Health = World.factory("Health", {
+    add = function(Factory, Entity : Model, Health : number)
+        return {
+            Current = Health;
+            Update = Signal.new();
+        }
+    end;
+
+    remove = function(Factory, Entity : Model)
+        local HealthData = World.get(Entity).Health
+        HealthData.Update:Destroy()
+    end;
 })
 
-World.Component.Build("Character", {
-    Constructor = function(Entity : Model, Name : string)
+Module.Character = World.factory("Character", {
+    add = function(Factory, Entity : Model)
         CollectionService:AddTag(Entity, "Character")
 
         return true
     end;
 })
 
-World.Component.Build("Baddie", {
-    Constructor = function(Entity : Model, Name : string)
+Module.Baddie = World.factory("Baddie", {
+    add = function(Factory, Entity : Model)
         CollectionService:AddTag(Entity, "Baddie")
 
         return true
     end;
 })
 
-return World
+Module.World = World
+
+return Module

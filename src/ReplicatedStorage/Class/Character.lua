@@ -1,4 +1,7 @@
 local CollectionService = game:GetService("CollectionService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 
 local Module = {}
 
@@ -12,4 +15,11 @@ Module.FindFirstCharacter = function(Object : Instance)
     return Module.FindFirstCharacter(Ancestor)
 end
 
-return Module
+Module.UpdateHealth = function(Character : Model, NewHealth : number)
+    local HealthData = CharacterStates.World.get(Character).Health
+
+    HealthData.Current = NewHealth
+    HealthData.Update:Fire()
+end
+
+return Module 

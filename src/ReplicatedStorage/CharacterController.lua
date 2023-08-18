@@ -15,7 +15,7 @@ local Module = {}
 Module.New = function(Character : Model)
     CharacterDataModule.CreateCharacterData(Character)
 
-    CharacterStates.Component.Create(Character, "AutoRotate")
+    CharacterStates.AutoRotate.add(Character)
 end
 
 local function StepSpring(framerate, position, velocity, destination, stiffness, damping, precision)
@@ -34,10 +34,8 @@ local function StepSpring(framerate, position, velocity, destination, stiffness,
 	return newPosition, newVelocity
 end
 
-local MovingCharacters = CharacterStates.Collection.Get{"Moving"}
-
 RunService:BindToRenderStep("PlayerMovement", Enum.RenderPriority.Character.Value, function(DeltaTime : number)
-    for Character : Model in MovingCharacters do
+    for Character : Model in CharacterStates.World.query{CharacterStates.Moving} do
         local CharacterData = CharacterDataModule.GetCharacterData(Character)
 
         local Primary : BasePart = Character.PrimaryPart
@@ -47,7 +45,7 @@ RunService:BindToRenderStep("PlayerMovement", Enum.RenderPriority.Character.Valu
         local Mover : VectorForce = Primary.Mover
         local Aligner : AlignOrientation = Primary.Aligner
 
-        local AutoRotate = CharacterStates.Component.Get(Character, "AutoRotate")
+        local AutoRotate = CharacterStates.World.get(Character).AutoRotate
 
         local Velocity = Primary.AssemblyLinearVelocity
         local CurrentVelocityX = Velocity.X

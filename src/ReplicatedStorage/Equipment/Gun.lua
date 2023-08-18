@@ -41,7 +41,11 @@ Module.ServerGotItemID = function(Entity, ItemID)
         local HumanoidRootPart = Character.Model.PrimaryPart
         local Orgin = HumanoidRootPart.Position
 
-        local AimPosition = PlayerModule.MouseCast(TerrainParams, 200).Position
+        local MouseCast = PlayerModule.MouseCast(TerrainParams, 10000)
+        if not MouseCast then return end
+
+        local AimPosition = MouseCast.Position
+        
         local DistanceToAim = (Orgin-AimPosition).Magnitude
         local Circularity = math.rad( math.random(0, 180) )
 
@@ -65,7 +69,7 @@ Module.ServerGotItemID = function(Entity, ItemID)
         local CharacterDirection = CFrame.new(TerrainResult.Position, Orgin).LookVector
         local CharacterResult = workspace:Raycast(TerrainResult.Position, CharacterDirection*200, CharacterParams)
 
-        if not CharacterResult then print("Miss") return end
+        if not CharacterResult then return end
 
         local HitPart = CharacterResult.Instance
         local HitCharacter = CharacterModule.FindFirstCharacter(HitPart)

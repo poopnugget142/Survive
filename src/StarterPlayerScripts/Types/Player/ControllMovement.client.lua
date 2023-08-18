@@ -1,14 +1,9 @@
---TODO!
---Move this to playerscripts with a new PlayerStates
-
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Stew = require(ReplicatedStorage.Packages.Stew)
 local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
 local CharacterDataModule = require(ReplicatedStorage.Scripts.CharacterData)
-
-local World = Stew.World.Create()
+local PlayerStates = require(ReplicatedStorage.Scripts.States.Player)
 
 local MoveDirections = {
 	["Move Forward"] = Vector3.new(0, 0, 1).Unit;
@@ -21,8 +16,9 @@ local MoveDirection = Vector3.new(0,0,0)
 
 local CurrentMoveDirections = {}
 
-World.Component.Build("PlayerMovement", {
-    Constructor = function(Entity : Stew.Entity<any>, Name : Stew.Name)
+PlayerStates["ControllMovement"] = PlayerStates.World.factory("ControllMovement", ({
+	add = function(Factory, Entity : Player)
+		--Binds all input to their keys
 		for ActionName, Direction in MoveDirections do
 			KeyBindings.BindAction(ActionName, Enum.UserInputState.Begin, function()
 				CurrentMoveDirections[ActionName] = Direction
@@ -34,23 +30,22 @@ World.Component.Build("PlayerMovement", {
 			end)
 		end
 
-		return true
+        return true
     end;
 
-	Destructor = function(Entity : Stew.Entity<any>, Name : Stew.Name)
+	remove = function(Factory, Entity : Player)
+		--Removes key bindings
 		for ActionName, Direction in MoveDirections do
 			KeyBindings.UnbindAction(ActionName, Enum.UserInputState.Begin)
 			KeyBindings.UnbindAction(ActionName, Enum.UserInputState.End)
 		end
 
 		CurrentMoveDirections = {}
-	end
-})
+	end;
+}))
 
-local PlayerMovingCharacters : Stew.Collection = World.Collection.Get{"PlayerMovement"}
-
-RunService:BindToRenderStep("PlayerMovement", Enum.RenderPriority.Character.Value, function()
-    for Player : Player in PlayerMovingCharacters do
+RunService:BindToRenderStep("ControllMovement", Enum.RenderPriority.Character.Value, function()
+    for Player : Player in PlayerStates.World.query{PlayerStates.ControllMovement} do
         MoveDirection = Vector3.new(0,0,0)
 
         for _, Direction in pairs(CurrentMoveDirections) do --only does things when keys are being held down
@@ -62,5 +57,3 @@ RunService:BindToRenderStep("PlayerMovement", Enum.RenderPriority.Character.Valu
         CharacterData.MoveDirection = MoveDirection
     end
 end)
-
-return World

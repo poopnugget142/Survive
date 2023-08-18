@@ -1,6 +1,6 @@
 local Module = {}
 
-Module.EasyStewReturn = function (Entity : any, StewName : string, Item : any)
+Module.EasyStewReturn = function (Factory, Entity : any, Item : any)
     return Item
 end
 

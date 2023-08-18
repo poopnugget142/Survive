@@ -30,7 +30,9 @@ local function SetItemID(Entity : any, ItemName : string?)
     --Asks server for ItemID to mark item with
     local ItemPromise = Promise.new(function(resolve, reject, onCancel)
         ItemID = RegisterEquipment:InvokeServer(ItemName)
-        EquipmentStates.Component.Create(Entity, "ItemID", ItemID)
+
+        EquipmentStates.ItemID.add(Entity, ItemID)
+
         EquipmentEntitys[ItemID] = Entity
 
         local ItemData = GetEquipmentData(ItemName)
@@ -49,11 +51,13 @@ Module.CreateEntity = function(ItemName : string, ItemID : number?, ...)
 
     --Entity does not exist on this client
     if not Entity then
-        Entity = EquipmentStates.Entity.Create()
-        EquipmentStates.Component.Create(Entity, "Name", ItemName)
+        Entity = EquipmentStates.World.entity()
+
+        EquipmentStates.Name.add(Entity, ItemName)
+
         if ItemID then
             --Entity exists on server
-            EquipmentStates.Component.Create(Entity, "ItemID", ItemID)
+            EquipmentStates.ItemID.add(Entity, ItemID)
         else
             --Entity does not exist on server
             SetItemID(Entity, ItemName)
@@ -71,7 +75,8 @@ end
 
 SetEquipmentModel.OnClientEvent:Connect(function(Instance, ItemID)
     local Entity = Module.GetEntity(ItemID)
-    local ItemName = EquipmentStates.Component.Get(Entity, "Name")
+    local EntityData = EquipmentStates.World.get(Entity)
+    local ItemName = EntityData.Name
     local ItemData = GetEquipmentData(ItemName)
     ItemData.ServerLoadModel(Entity, Instance)
 end)

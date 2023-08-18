@@ -35,17 +35,17 @@ Module.AddEquipment = function(Player : Player, ItemName : string, ItemID : numb
 
     if not Entity then
         ItemID = NextId()
-        Entity = EquipmentStates.Entity.Create()
+        Entity = EquipmentStates.World.entity()
 
-        EquipmentStates.Component.Create(Entity, "ItemID", ItemID)
+        EquipmentStates.ItemID.add(Entity, ItemID)
     else
-        EquipmentStates.Component.Delete(Entity, "Owner")
-        EquipmentStates.Component.Create(Entity, "Owner", Player)
+        EquipmentStates.Owner.remove(Entity)
+        EquipmentStates.Owner.add(Entity, Player)
         return
     end
 
-    EquipmentStates.Component.Create(Entity, "Name", ItemName)
-    EquipmentStates.Component.Create(Entity, "Owner", Player)
+    EquipmentStates.Name.add(Entity, ItemName)
+    EquipmentStates.Owner.add(Entity, Player)
     
     Equipment[ItemID] = Entity
 
@@ -69,7 +69,6 @@ Module.CreateEquipment = function(Player : Player, ItemName : string) : number
 
     local Entity = PendingEquipment[Player][ItemName]
 
-
     --If not entity wait for it
     if not Entity then
         local Worked
@@ -89,15 +88,16 @@ Module.CreateEquipment = function(Player : Player, ItemName : string) : number
     local Entity = PendingEquipment[Player][ItemName]
     PendingEquipment[Player][ItemName] = nil
 
-    return EquipmentStates.Component.Get(Entity, "ItemID")
+    return EquipmentStates.World.get(Entity).ItemID
 end
 
 Module.SetEquipmentModel = function(Player : Player, ItemID : number)
     local Entity = Equipment[ItemID]
-    local ItemName = EquipmentStates.Component.Get(Entity, "Name")
+    local EntityData = EquipmentStates.World.get(Entity)
+    local ItemName = EntityData.Name
     local EquipmentData = GetEquipmentData(ItemName)
     local Model : Model = EquipmentData.LoadModel(Entity)
-    EquipmentStates.Component.Create(Entity, "Model", Model)
+    EquipmentStates.Model.add(Entity, Model)
     Model:SetAttribute("ItemID", ItemID)
 
     SetEquipmentModel:FireClient(Player, Model, ItemID)
@@ -105,7 +105,8 @@ end
 
 Module.CustomAction = function(ActionName : string, Player : Player, ItemID : number, ...)
     local Entity = Equipment[ItemID]
-    local ItemName = EquipmentStates.Component.Get(Entity, "Name")
+    local EntityData = EquipmentStates.World.get(Entity)
+    local ItemName = EntityData.Name
     local EquipmentData = GetEquipmentData(ItemName)
     EquipmentData[ActionName](Entity, ...)
 end

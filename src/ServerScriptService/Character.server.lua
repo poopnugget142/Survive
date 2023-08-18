@@ -15,7 +15,5 @@ Players.PlayerAdded:Connect(function(Player)
 
     Player.Character = Character
 
-    task.wait(1)
-
     Equipment.AddEquipment(Player, "Gun")
 end)

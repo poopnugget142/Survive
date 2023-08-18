@@ -5,7 +5,7 @@ local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 
 local Module = {}
 
---Returns the first ancestor Model of Object that has an "Baddie" tag, nil if none are found
+--Returns the first ancestor Model of Object that has an "Character" tag, nil if none are found
 Module.FindFirstCharacter = function(Object : Instance)
     if CollectionService:HasTag(Object, "Character") then return Object end
 

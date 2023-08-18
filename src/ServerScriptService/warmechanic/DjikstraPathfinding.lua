@@ -210,8 +210,8 @@ end
 
 --grid initialisation
 --100x100 tiles
-for i = 0, 100 do
-	for j = 0, 100 do
+for i = 0, 200 do
+	for j = 0, 200 do
         --if (i > 45 and i < 55 and j < 70) then
         --    continue
         --end
@@ -243,7 +243,6 @@ local targets = {}
 module.targets = targets
 
 module.pathfind = function(...)
-    print("Pathfinding Go!")
     targets = { ... }
     module.targets = targets
 

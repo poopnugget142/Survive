@@ -53,6 +53,7 @@ RunService:BindToRenderStep("ControllMovement", Enum.RenderPriority.Character.Va
         end
 
         local CharacterData = CharacterDataModule.GetCharacterData(Player.Character)
+		CharacterData.WalkSpeed = 30
 
         CharacterData.MoveDirection = MoveDirection
     end

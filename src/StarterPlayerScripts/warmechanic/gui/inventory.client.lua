@@ -5,6 +5,8 @@
 
     rehash modulo math later to be in terms of inventory frame size rather than screen size,
         so conversions dont need to be done between them
+
+    add support for multiple inventories / subinventories in inventories (ammo case in player backpack)
 ]]
 --initialise dependencies
 --local StarterPlayer = game:GetService("StarterPlayer")
@@ -43,6 +45,7 @@ world.Component.Build("inventory_itemCell", {
     end
 })
 
+--generate 10x10 inventory cells
 local itemCells = {}
 for i = 0, 10 do
     for j = 0, 10 do
@@ -52,7 +55,7 @@ for i = 0, 10 do
 
         local instance : GuiObject = screenGui.mainFrame.inventoryFrame.prefabs.itemCell:Clone()
         instance.Parent = screenGui.mainFrame.inventoryFrame.cellStorage
-        instance.Position = UDim2.fromScale(0.25+i/20,0.25+j/20)
+        instance.Position = UDim2.fromScale(0.25+i/20,0.25+j/20) --rewrite later to use start + end positions
         instance.BackgroundTransparency = 0
 
         local entity = world.Entity.Create()--world.Entity.Register( tostring(Vector2.new(i,j)) )
@@ -76,49 +79,6 @@ for i = 0, 10 do
     end
 end
 print(itemCells)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -290,9 +250,10 @@ ItemPut = function()
     end
 
     local roundedPosition = roundItemPosition()
-    hovering.Position = UDim2.fromScale(roundedPosition.X/20, roundedPosition.Y/20)
+    --hovering.Position = UDim2.fromScale(roundedPosition.X/20, roundedPosition.Y/20)
     local cells = itemCellsCheck(roundedPosition)
 
+    local endComponents = {}
     for c, cell in cells do
         local component = world.Component.Get(itemCells[cell.X][cell.Y], "inventory_itemCell")
         if (component ~= nil) then
@@ -300,6 +261,25 @@ ItemPut = function()
             component.frame.BackgroundColor3 = Color3.fromHSV(0,0,1)
         end
     end
+
+    --#region --pseudocode
+    if true then
+        local nextItem = nil
+        for c, component in endComponents do
+            local index = component.ItemIndex
+            if (index ~= nil) then
+                if (nextItem == nil) then
+                    --nextItem = items[index]
+                    nextItem = templates[index]
+                else
+                    print("more than 1 item! cannot swap")
+                    return false
+                end
+            end
+        end
+        hovering.Position = UDim2.fromScale(roundedPosition.X/20, roundedPosition.Y/20)
+    end
+    --#endregion
 end
 
 

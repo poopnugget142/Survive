@@ -34,7 +34,8 @@ local function StepSpring(framerate, position, velocity, destination, stiffness,
 	return newPosition, newVelocity
 end
 
-RunService:BindToRenderStep("PlayerMovement", Enum.RenderPriority.Character.Value, function(DeltaTime : number)
+--RunService:BindToRenderStep("PlayerMovement", Enum.RenderPriority.Character.Value, function(DeltaTime : number)
+RunService.Heartbeat:Connect(function(DeltaTime)
     for Character : Model in CharacterStates.World.query{CharacterStates.Moving} do
         local CharacterData = CharacterDataModule.GetCharacterData(Character)
 

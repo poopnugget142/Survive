@@ -14,40 +14,37 @@ local module = { }
 local replicatedStorage = game:GetService("ReplicatedStorage")
 
 local stew = require(replicatedStorage.Packages.Stew)
-local world = stew.World.Create()
+local world = stew.world()
 module.world = world
 
 --tile / priority components
-world.Component.Build("frontier_open", { --frontier is stored in stew components, can use getall frontier
-    Constructor = function(Entity : any, name : string, heat : number)
+frontier_open = world.factory("frontier_open", { --frontier is stored in stew components, can use getall frontier
+    add = function(_, Entity : any, heat : number)
         return
         {
-            tile = Entity,
-            _ = nil, --no names
-            heat = heat
+            tile = Entity
+            ,heat = heat
         }
-    end
+    end;
 })
-world.Component.Build("frontier_closed", { --empty component used for frontier ignorance
-    Constructor = function(Entity : any, name : string)
+frontier_closed = world.factory("frontier_closed", { --empty component used for frontier ignorance
+    add = function(_, Entity : any, string)
         return
         {
-            tile = Entity,
-            _ = nil
+            tile = Entity
         }
-    end
+    end;
 })
 
-world.Component.Build("tile_navData", { --navData stores tile cost and heat data on all layers
-    Constructor = function(Entity : any, name : string, cost)
+tile_navData = world.factory("tile_navData", { --navData stores tile cost and heat data on all layers
+    add = function(_, Entity : any, cost)
         return
         {
-            tile = Entity,
-            _ = nil, --no names
-            cost = cost,
-            heat = 0
+            tile = Entity
+            ,cost = cost
+            ,heat = 0
         }
-    end
+    end;
 })
 
 
@@ -59,8 +56,8 @@ local length : number = 0
 local printTally = 0
 
 comparator = function(a, b)
-    local _a = world.Component.Get(frontier[a], "frontier_open").heat
-    local _b = world.Component.Get(frontier[b], "frontier_open").heat
+    local _a = world.get(frontier[a]).frontier_open.heat
+    local _b = world.get(frontier[b]).frontier_open.heat
     if (_a == nil or _b == nil) then
         return 0
     end
@@ -187,8 +184,9 @@ module.tileBuild = function(target:Vector3?, u:number?, v:number?, w:number?)
     end 
 
 
-    world.Entity.Register(position)
-    world.Component.Create(position, "tile_navData", 1)
+    world.entity(position)
+    tile_navData.add(position, 1)
+    --world.Component.Create(position, "tile_navData", 1)
 
     tileMap[position] = position --adding tileUV to a tileMap gives more options and allows for #tileMap
 
@@ -218,7 +216,7 @@ for i = 0, 100 do
         --    continue
         --end
         local tile = module.tileBuild(_,i,0,j)
-        local navData = world.Component.Get(tile, "tile_navData")
+        local navData = world.get(tile).tile_navData
         if (i > 45 and i < 55 and j < 70) then
             navData.cost = 100
         else
@@ -254,10 +252,10 @@ module.pathfind = function(...)
     end]]
 
     --cleanup past frontier information
-    local currentTiles = world.Collection.Get{"tile_navData"}
+    local currentTiles = world.query{tile_navData}
     for pastTile in currentTiles do
-        world.Component.Delete(pastTile, "frontier_open")
-        world.Component.Delete(pastTile, "frontier_closed")
+        frontier_open.remove(pastTile)
+        frontier_closed.remove(pastTile)
     end
 
     local desiredTime = 0.2 -- desired time to finish tiling
@@ -292,9 +290,9 @@ module.pathfind = function(...)
             ,0--math.round(target.Y)
             ,math.round(target.Z)
         )
-        local nav = world.Component.Get(target, "tile_navData")
+        local nav = world.get(target).tile_navData
         if (nav) then
-            world.Component.Create(target, "frontier_open", 1)
+            frontier_open.add(target, 1)
             enqueue(target)
         end
     end
@@ -305,34 +303,35 @@ module.pathfind = function(...)
                 if (current == nil) then 
                     print("missing entity anomaly")
                     continue end
-            local currentEntity = world.Component.Get(current, "frontier_open")
+            local currentEntity = world.get(current).frontier_open
                 if (currentEntity == nil) then 
                     print("missing component anomaly")
                     continue end
-            local currentNav = world.Component.Get(current, "tile_navData")
+            local currentNav = world.get(current).tile_navData
                 if (currentNav == nil) then 
                     print("missing tile anomaly")
                     continue end
             
             local currentHeat = currentEntity.heat--[layer]
+            --print(currentHeat) ---<<<<----
 
-            world.Component.Create(current, "frontier_closed") --close this tile so it cannot be visited by other tiles
+            frontier_closed.add(current) --close this tile so it cannot be visited by other tiles
 
             for a, adjacent : Vector3 in adjacents do --check each adjacent tile (8 directional)
                 local adjacentPosition = current + adjacent
 
-                local adjacentNav = world.Component.Get(adjacentPosition, "tile_navData") 
+                local adjacentNav = world.get(adjacentPosition).tile_navData
                 if (adjacentNav) then --ignore tiles that dont exist
                     local adjacentCost : number = adjacentNav.cost--[layer] --assign heat values to tiles
                     local newHeat = currentHeat + adjacentCost * adjacent.Magnitude --magnitude for euclidean distance
 
-                    local exploreCheck = world.Component.Get(adjacentPosition, "frontier_closed") --do not re-add already witnessed tiles to the frontier
+                    local exploreCheck = world.get(adjacentPosition).frontier_closed --do not re-add already witnessed tiles to the frontier
                     if (exploreCheck == nil or newHeat < currentHeat) then
                         adjacentNav.heat--[[layer]]= newHeat
                     end
                     if (exploreCheck == nil) then
-                        if (world.Component.Get(adjacentPosition, "frontier_open") == nil) then 
-                            world.Component.Create(adjacentPosition, "frontier_open", newHeat)
+                        if (world.get(adjacentPosition).frontier_open == nil) then 
+                            frontier_open.add(adjacentPosition, newHeat)
                                 --world.Component.Create(adjacentPosition, "frontier_closed") --experimental
                             --print(tostring(frontier[1]) .. "; " .. tostring(currentNav.heat) .. " ; " .. tostring(printTally))
                             --printTally+=1
@@ -401,7 +400,7 @@ module.boxSolve = function(position : Vector3)
     for v, vertex in box do
 		local adjacentPosition = position + vertex.Unit
 
-		local path = world.Component.Get(adjacentPosition, "tile_navData")
+		local path = world.get(adjacentPosition).tile_navData
 		--print(path.heat)
 		vectors[v] = adjacents[v]--*100
 		if (path) then

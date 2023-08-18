@@ -22,7 +22,7 @@ local playerGui = player:WaitForChild("PlayerGui")
 local screenGui : ScreenGui = playerGui:WaitForChild("ScreenGui")
 
 local stew = require(replicatedStorage.Packages.Stew)
-local world = stew.World.Create()
+local world = stew.world()
 
 local assets = {
      "mainFrame"
@@ -33,8 +33,8 @@ for a, asset in assets do
     screenGui:WaitForChild(asset)
 end
 
-world.Component.Build("inventory_itemCell", {
-    Constructor = function(Entity : any, name : string, frame : Frame)
+inventory_itemCell = world.factory("inventory_itemCell", {
+    Constructor = function(_, Entity : any, frame : Frame)
         return 
         {
             cellPosition = Entity
@@ -58,10 +58,10 @@ for i = 0, 10 do
         instance.Position = UDim2.fromScale(0.25+i/20,0.25+j/20) --rewrite later to use start + end positions
         instance.BackgroundTransparency = 0
 
-        local entity = world.Entity.Create()--world.Entity.Register( tostring(Vector2.new(i,j)) )
+        local entity = world.entity()--world.Entity.Register( tostring(Vector2.new(i,j)) )
         --print(entity)
         if (entity ~= nil) then
-            local component = world.Component.Create(entity, "inventory_itemCell", instance)
+            local component = inventory_itemCell.add(entity, instance)
             print(component)
 
             itemCells[i][j] = entity
@@ -89,7 +89,7 @@ local templates : GuiObject = screenGui.mainFrame.inventoryFrame.itemStorage:Get
 
 local mouse = player:GetMouse()
 local hovering = nil
-local itemScale = Vector2.new(2,2)
+local itemScale = Vector2.new(1,1)
 local cellPosition = Vector2.new(10,10)
 local component = nil
 local picking = nil
@@ -246,7 +246,7 @@ ItemPut = function()
         end
         print(component)
         table.insert(startComponents, component)
-        --component.frame.BackgroundColor3 = Color3.fromHSV(0,0,0.505)
+        component.frame.BackgroundColor3 = Color3.fromHSV(0,0,0.505)
     end
 
     local roundedPosition = roundItemPosition()
@@ -267,7 +267,7 @@ ItemPut = function()
         local nextItem = nil
         for c, component in endComponents do
             local index = component.ItemIndex
-            if (index ~= nil) then
+            if (index ~= nil) then  
                 if (nextItem == nil) then
                     --nextItem = items[index]
                     nextItem = templates[index]

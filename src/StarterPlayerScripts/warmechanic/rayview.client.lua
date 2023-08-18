@@ -6,7 +6,9 @@
 
     do some trig (cos) math to fix parallax error at tight angles
 
-    texels and raycasts independent
+    texels and raycasts independent, allow for double the frame count + bilinear filtering
+	
+	rewrite the entire system to use stew (its better)
 ]]
 
 -- initialise dependencies

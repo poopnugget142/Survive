@@ -12,6 +12,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local Debris = game:GetService("Debris")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 local Remotes = ReplicatedStorage.Remotes
 local JunkFolder = workspace:WaitForChild("JunkFolder")
@@ -113,6 +114,7 @@ Module.ServerGotItemID = function(Entity, ItemID)
             if not TerrainResult then continue end
 
             local Part = Instance.new("Part")
+            Part.Color = Color3.new(1, 0, 0)
             Part.Anchored = true
             Part.CanCollide = false
             Part.Position = TerrainResult.Position
@@ -131,6 +133,19 @@ Module.ServerGotItemID = function(Entity, ItemID)
 
             local HitPart = CharacterResult.Instance
             local HitCharacter = CharacterModule.FindFirstCharacter(HitPart)
+
+            local OldHighlight = HitCharacter:FindFirstChildWhichIsA("Highlight")
+            if OldHighlight then
+                OldHighlight:Destroy()
+            end
+
+            local Highlight = Instance.new("Highlight")
+            Highlight.Parent = HitCharacter
+            Highlight.FillColor = Color3.fromRGB(255, 0, 0)
+            Highlight.FillTransparency = 0
+            TweenService:Create(Highlight, TweenInfo.new(0.5), {["FillTransparency"] = 1}):Play()
+            TweenService:Create(Highlight, TweenInfo.new(0.5), {["OutlineTransparency"] = 1}):Play()
+            Debris:AddItem(Highlight, 0.5)
 
             Attack:FireServer(ItemID, HitCharacter)
         end

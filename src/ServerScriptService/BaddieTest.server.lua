@@ -3,7 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 local Enums = require(ReplicatedStorage.Scripts.Enums)
 
-local GuysSpawn = 0
+local GuysSpawn = 100
 
 for x = 1, math.sqrt(GuysSpawn) do
     task.wait()

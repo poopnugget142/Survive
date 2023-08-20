@@ -77,7 +77,7 @@ Module.SpawnBullet = function(Caster : Caster, CastBehavior : CastBehavior , Org
 end
 
 --Cycles through all the bullets and run physics updates on it
-RunService.Heartbeat:Connect(function(DeltaTime)
+RunService.RenderStepped:Connect(function(DeltaTime)
     for i, Bullet : Bullet in pairs (Bullets) do
         local Caster : Caster = Bullet.Caster
         local CastBehavior : CastBehavior = Bullet.CastBehavior

@@ -18,7 +18,6 @@ CharacterStates[Enums.Baddies.Guy] = CharacterStates.World.factory(Enums.Baddies
         local HealthData = CharacterStates.Health.add(Entity, 100)
         CharacterController.New(Entity)
         CharacterStates.Moving.add(Entity)
-        
 
         CollectionService:AddTag(Entity, "Baddie")
         

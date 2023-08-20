@@ -40,8 +40,7 @@ print(out)
 
 
 while true do
-    --local target = workspace.Characters:WaitForChild("Knight")
-    local target = workspace:WaitForChild("WarMechanist")
+    local target = workspace.Characters:WaitForChild("poopnugget142")
     local part : BasePart = target.PrimaryPart
 
     if not part then return end

@@ -34,7 +34,7 @@ for a, asset in assets do
 end
 
 inventory_itemCell = world.factory("inventory_itemCell", {
-    Constructor = function(_, Entity : any, frame : Frame)
+    add = function(_, Entity : any, frame : Frame)
         return 
         {
             cellPosition = Entity
@@ -240,7 +240,7 @@ end
 ItemPut = function()
     local startComponents = {}
     for c, cell in startCells do
-        local component = world.Component.Get(itemCells[cell.X][cell.Y], "inventory_itemCell")
+        local component = world.get(itemCells[cell.X][cell.Y]).inventory_itemCell
         if (component == nil) then
             break
         end
@@ -255,7 +255,7 @@ ItemPut = function()
 
     local endComponents = {}
     for c, cell in cells do
-        local component = world.Component.Get(itemCells[cell.X][cell.Y], "inventory_itemCell")
+        local component = world.get(itemCells[cell.X][cell.Y]).inventory_itemCell
         if (component ~= nil) then
             print(component)
             component.frame.BackgroundColor3 = Color3.fromHSV(0,0,1)

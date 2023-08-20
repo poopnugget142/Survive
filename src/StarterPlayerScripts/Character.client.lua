@@ -9,11 +9,13 @@ local Equipment = require(ReplicatedStorage.Scripts.Equipment)
 local Player = Players.LocalPlayer
 
 Player.CharacterAdded:Connect(function(Character)
+    --[[
     CharacterController.New(Character)
 
     CharacterStates.Moving.add(Character)
 
     PlayerStates.ControllMovement.add(Player)
+    ]]
 
     --temp
     local Entity = Equipment.CreateEntity("Gun")

@@ -14,6 +14,6 @@ SetEquipmentModel.OnServerEvent:Connect(Equipment.SetEquipmentModel)
 
 for _, Remote : RemoteEvent in CustomActions:GetChildren() do
     Remote.OnServerEvent:Connect(function(Player : Player, ItemID : number, ...)
-        Equipment.CustomAction(Remote.Name, Player, ItemID, ...)
+        --Equipment.CustomAction(Remote.Name, Player, ItemID, ...)
     end)
 end

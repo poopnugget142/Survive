@@ -8,12 +8,14 @@ local Equipment = require(ServerStorage.Scripts.Equipment)
 
 Players.PlayerAdded:Connect(function(Player)
     
+    --[[
     local Character = Assets.Characters.Knight:Clone()
     Character:PivotTo(CFrame.new(0, 20, 0))
     Character.Parent = workspace.Characters
     Character.PrimaryPart:SetNetworkOwner(Player)
 
     Player.Character = Character
+    ]]
 
     Equipment.AddEquipment(Player, "Gun")
 end)

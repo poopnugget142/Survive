@@ -18,7 +18,7 @@ local world = stew.world()
 module.world = world
 
 --tile / priority components
-frontier_open = world.factory("frontier_open", { --frontier is stored in stew components, can use getall frontier
+local frontier_open = world.factory("frontier_open", { --frontier is stored in stew components, can use getall frontier
     add = function(_, Entity : any, heat : number)
         return
         {
@@ -27,7 +27,7 @@ frontier_open = world.factory("frontier_open", { --frontier is stored in stew co
         }
     end;
 })
-frontier_closed = world.factory("frontier_closed", { --empty component used for frontier ignorance
+local frontier_closed = world.factory("frontier_closed", { --empty component used for frontier ignorance
     add = function(_, Entity : any, string)
         return
         {
@@ -36,7 +36,7 @@ frontier_closed = world.factory("frontier_closed", { --empty component used for 
     end;
 })
 
-tile_navData = world.factory("tile_navData", { --navData stores tile cost and heat data on all layers
+local tile_navData = world.factory("tile_navData", { --navData stores tile cost and heat data on all layers
     add = function(_, Entity : any, cost)
         return
         {

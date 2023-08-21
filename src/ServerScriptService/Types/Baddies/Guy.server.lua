@@ -15,7 +15,9 @@ local function OnHit(Entity : Model)
 
     --I'VE DIED NOOOOOOOOOOO
     if HealthData.Current <= 0 then
+        print("Killed a dude")
         CharacterStates.World.kill(Entity)
+        Entity:Destroy()
     end
 end
 

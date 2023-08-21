@@ -55,7 +55,7 @@ local length : number = 0
 
 local printTally = 0
 
-comparator = function(a, b)
+local comparator = function(a, b)
     local _a = world.get(frontier[a]).frontier_open.heat
     local _b = world.get(frontier[b]).frontier_open.heat
     if (_a == nil or _b == nil) then
@@ -66,45 +66,7 @@ comparator = function(a, b)
     return(_a - _b)
 end
 
-enqueue = function(value)
-    if (frontier.length ~= nil) then
-        if (frontier.length <= length) then --increase array length exponentially depending on value count
-            frontier.length = math.max(1, frontier.length * 2)
-        end
-    else
-        frontier.length = 1
-    end
-    frontier[length+1] = value --add
-    length+=1 --add
-    shiftUp()
-
-    --print (tostring(value) .. " added to priority queue")
-    return true
-end
-
-dequeue = function()
-    if (length == 0) then return nil end --skip if theres nothing to remove
-
-    local node = frontier[1] --look at our first value
-
-    if (length == 1) then --if theres only one value, we require no further computations
-        length = 0 
-        frontier[1] = nil
-        return node
-    end
-
-    --shiftDown()
-
-    frontier[1] = frontier[length] --move the topmost value to the bottom of the binary tree, to do some swapping
-    frontier[length] = nil
-    length-=1
-    shiftDown() --swapping function
-    
-    --print (tostring(node) .. " removed from priority queue")
-    return node
-end
-
-heapSort = function()
+local heapSort = function()
     local out = {}
     for e = 1, length do
         table.insert(out, module.dequeue())
@@ -114,22 +76,22 @@ heapSort = function()
 end
 
 
-parent = function(nodeIndex : number) --called for a child to get the node in the tree level above it
+local parent = function(nodeIndex : number) --called for a child to get the node in the tree level above it
     if (nodeIndex == 1) then return nil end
     return math.floor(nodeIndex/2)
 end
-leftChild = function(nodeIndex : number) --called for a parent to get the left child
+local leftChild = function(nodeIndex : number) --called for a parent to get the left child
     local child = (nodeIndex*2)
     if (child >= length) then return nil end
     return child
 end
-rightChild = function(nodeIndex : number) --called for a parent to get the right child
+local rightChild = function(nodeIndex : number) --called for a parent to get the right child
     local child = (nodeIndex*2)+1
     if (child >= length) then return nil end
     return child
 end
 
-shiftUp = function() --move smaller frontier up the binary tree
+local shiftUp = function() --move smaller frontier up the binary tree
     local index = length
 
     while (true) do
@@ -146,7 +108,7 @@ shiftUp = function() --move smaller frontier up the binary tree
     end
 end
 
-shiftDown = function() --move bigger frontier down the binary tree
+local shiftDown = function() --move bigger frontier down the binary tree
     local index = 1
 
     while true do
@@ -170,6 +132,44 @@ shiftDown = function() --move bigger frontier down the binary tree
 
         return --otherwise break the operation
     end
+end
+
+local enqueue = function(value)
+    if (frontier.length ~= nil) then
+        if (frontier.length <= length) then --increase array length exponentially depending on value count
+            frontier.length = math.max(1, frontier.length * 2)
+        end
+    else
+        frontier.length = 1
+    end
+    frontier[length+1] = value --add
+    length+=1 --add
+    shiftUp()
+
+    --print (tostring(value) .. " added to priority queue")
+    return true
+end
+
+local dequeue = function()
+    if (length == 0) then return nil end --skip if theres nothing to remove
+
+    local node = frontier[1] --look at our first value
+
+    if (length == 1) then --if theres only one value, we require no further computations
+        length = 0 
+        frontier[1] = nil
+        return node
+    end
+
+    --shiftDown()
+
+    frontier[1] = frontier[length] --move the topmost value to the bottom of the binary tree, to do some swapping
+    frontier[length] = nil
+    length-=1
+    shiftDown() --swapping function
+    
+    --print (tostring(node) .. " removed from priority queue")
+    return node
 end
 
 -- tile functions ###################################################################################

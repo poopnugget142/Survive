@@ -20,8 +20,6 @@ Module.Attack = function(Entity, HitCharacter)
     local CurrentHealth = HitData.Health.Current
 
     CharacterModule.UpdateHealth(HitCharacter, CurrentHealth-10)
-
-    print(CurrentHealth)
 end
 
 return Module

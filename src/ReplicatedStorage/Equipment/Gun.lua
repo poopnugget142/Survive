@@ -64,11 +64,6 @@ local Module = {}
 
 Module.Give = function(Entity, ItemModel)
 
-    --[[
-    KeyBindings.BindAction("Attack", Enum.UserInputState.Begin, function()
-        
-    end)
-    ]]
 end
 
 Module.ServerGotItemID = function(Entity, ItemID)
@@ -127,12 +122,19 @@ Module.ServerGotItemID = function(Entity, ItemID)
             
 
             local CharacterDirection = CFrame.new(TerrainResult.Position, Origin).LookVector
-            local CharacterResult = workspace:Raycast(TerrainResult.Position, CharacterDirection*200, CharacterParams)
+            local DistanceToTerrain = (TerrainResult.Position - Origin).Magnitude
+            
+            --We set the ray length to the distance to character so you don't shoot people behind you
+            local CharacterResult = workspace:Raycast(TerrainResult.Position, CharacterDirection*DistanceToTerrain, CharacterParams)
 
             if not CharacterResult then continue end
 
             local HitPart = CharacterResult.Instance
             local HitCharacter = CharacterModule.FindFirstCharacter(HitPart)
+
+            if not HitCharacter then continue end
+
+            Attack:FireServer(ItemID, HitCharacter)
 
             local OldHighlight = HitCharacter:FindFirstChildWhichIsA("Highlight")
             if OldHighlight then
@@ -146,8 +148,6 @@ Module.ServerGotItemID = function(Entity, ItemID)
             TweenService:Create(Highlight, TweenInfo.new(0.5), {["FillTransparency"] = 1}):Play()
             TweenService:Create(Highlight, TweenInfo.new(0.5), {["OutlineTransparency"] = 1}):Play()
             Debris:AddItem(Highlight, 0.5)
-
-            Attack:FireServer(ItemID, HitCharacter)
         end
     end)
 
@@ -157,8 +157,6 @@ Module.ServerGotItemID = function(Entity, ItemID)
     end)
     --SetEquipmentModel:FireServer(ItemID)
 end
-
-
 
 Module.ServerLoadModel = function(Entity, ItemModel : Model)
     

@@ -31,6 +31,26 @@ Module.Character = World.factory("Character", {
 
         return true
     end;
+
+    remove = function(Factory, Entity : Model)
+        CollectionService:RemoveTag(Entity, "Character")
+    end;
+})
+
+Module.MovementData = World.factory("MovementData", {
+    add = function(Factory, Entity : Model)
+        return {
+            MoveDirection =  Vector3.new();
+            LookDirection = Vector3.new();
+            AccumulatedTime = 0;
+        }
+    end;
+})
+
+Module.WalkSpeed = World.factory("WalkSpeed", {
+    add = function(Factory, Entity : Model, WalkSpeed : number)
+        return WalkSpeed
+    end;
 })
 
 Module.Baddie = World.factory("Baddie", {
@@ -38,6 +58,10 @@ Module.Baddie = World.factory("Baddie", {
         CollectionService:AddTag(Entity, "Baddie")
 
         return true
+    end;
+
+    remove = function(Factory, Entity : Model)
+        CollectionService:RemoveTag(Entity, "Baddie")
     end;
 })
 

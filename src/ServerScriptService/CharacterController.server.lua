@@ -1,7 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local CharacterDataModule = require(ReplicatedStorage.Scripts.CharacterData)
 local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 
 local FRAMERATE = 1 / 240
@@ -10,13 +9,6 @@ local DAMPING = 30
 local PRECISION = 0.001
 
 local Module = {}
-
---Establish default values
-Module.New = function(Character : Model)
-    CharacterDataModule.CreateCharacterData(Character)
-
-    CharacterStates.AutoRotate.add(Character)
-end
 
 local function StepSpring(framerate, position, velocity, destination, stiffness, damping, precision)
 	local displacement = position - destination
@@ -34,10 +26,10 @@ local function StepSpring(framerate, position, velocity, destination, stiffness,
 	return newPosition, newVelocity
 end
 
---RunService:BindToRenderStep("PlayerMovement", Enum.RenderPriority.Character.Value, function(DeltaTime : number)
 RunService.Heartbeat:Connect(function(DeltaTime)
     for Character : Model in CharacterStates.World.query{CharacterStates.Moving} do
-        local CharacterData = CharacterDataModule.GetCharacterData(Character)
+        local CharacterData = CharacterStates.World.get(Character)
+        local MovementData = CharacterData.MovementData
 
         local Primary : BasePart = Character.PrimaryPart
 
@@ -54,7 +46,7 @@ RunService.Heartbeat:Connect(function(DeltaTime)
 
         local TargetVelocity = Vector3.new()
 
-        local MoveDirection = CharacterData.MoveDirection -- Would explode if Y wasn't 0
+        local MoveDirection = MovementData.MoveDirection -- Would explode if Y wasn't 0
 
         if MoveDirection.Magnitude > 0 then
             --If MoveDirection magnititude is 0 then we get nan
@@ -62,36 +54,36 @@ RunService.Heartbeat:Connect(function(DeltaTime)
 
             --If autorotate is on and were moving then make character face towards move direction
             if AutoRotate then
-                CharacterData.LookDirection = MoveDirection
+                MovementData.LookDirection = MoveDirection
             end
         end
 
-        local LookDirection = Vector3.new(-CharacterData.LookDirection.X, 0, CharacterData.LookDirection.Z)
+        local LookDirection = Vector3.new(-MovementData.LookDirection.X, 0, MovementData.LookDirection.Z)
 
         if LookDirection.Magnitude > 0 then
             Aligner.Attachment0.CFrame = CFrame.lookAt(Vector3.new(), LookDirection)
         end
 
         --Incremeants time
-        CharacterData.AccumulatedTime = (CharacterData.AccumulatedTime or 0) + DeltaTime
+        MovementData.AccumulatedTime = (MovementData.AccumulatedTime or 0) + DeltaTime
 
-        while CharacterData.AccumulatedTime >= FRAMERATE do
-            CharacterData.AccumulatedTime -= FRAMERATE
+        while MovementData.AccumulatedTime >= FRAMERATE do
+            MovementData.AccumulatedTime -= FRAMERATE
 
-            CurrentVelocityX, CharacterData.CurrentAccelerationX = StepSpring(
+            CurrentVelocityX, MovementData.CurrentAccelerationX = StepSpring(
                 FRAMERATE,
                 CurrentVelocityX,
-                CharacterData.CurrentAccelerationX or 0,
+                MovementData.CurrentAccelerationX or 0,
                 TargetVelocity.X,
                 STIFFNESS,
                 DAMPING,
                 PRECISION
             )
 
-            CurrentVelocityZ, CharacterData.CurrentAccelerationZ = StepSpring(
+            CurrentVelocityZ, MovementData.CurrentAccelerationZ = StepSpring(
                 FRAMERATE,
                 CurrentVelocityZ,
-                CharacterData.CurrentAccelerationZ or 0,
+                MovementData.CurrentAccelerationZ or 0,
                 TargetVelocity.Z,
                 STIFFNESS,
                 DAMPING,
@@ -102,7 +94,7 @@ RunService.Heartbeat:Connect(function(DeltaTime)
         Mover.Enabled = true
 
         --Applies forces
-        Mover.Force = Vector3.new(CharacterData.CurrentAccelerationX, 0, CharacterData.CurrentAccelerationZ)*Primary.AssemblyMass
+        Mover.Force = Vector3.new(MovementData.CurrentAccelerationX, 0, MovementData.CurrentAccelerationZ)*Primary.AssemblyMass
     end
 end)
 

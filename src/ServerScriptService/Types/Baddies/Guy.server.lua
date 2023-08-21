@@ -7,19 +7,31 @@ local CharactersFolder = workspace:WaitForChild("Characters")
 
 local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 local Enums = require(ReplicatedStorage.Scripts.Enums)
-
 local pathfinding = require(serverScriptService.warmechanic.DjikstraPathfinding)
-local characterData = require(ReplicatedStorage.Scripts.CharacterData)
-local CharacterController = require(ReplicatedStorage.Scripts.CharacterController)
 local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
+
+local function OnHit(Entity : Model)
+    local HealthData = CharacterStates.Health.add(Entity, 100)
+
+    --I'VE DIED NOOOOOOOOOOO
+    if HealthData.Current <= 0 then
+        CharacterStates.World.kill(Entity)
+    end
+end
 
 CharacterStates[Enums.Baddies.Guy] = CharacterStates.World.factory(Enums.Baddies.Guy, {
     add = function(Factory, Entity : Model)
         local HealthData = CharacterStates.Health.add(Entity, 100)
-        CharacterController.New(Entity)
-        CharacterStates.Moving.add(Entity)
 
-        CollectionService:AddTag(Entity, "Baddie")
+        HealthData.Update:Connect(function() OnHit(Entity) end)
+
+        CharacterStates.Character.add(Entity)
+        CharacterStates.Baddie.add(Entity)
+
+        CharacterStates.MovementData.add(Entity)
+        CharacterStates.WalkSpeed.add(Entity, 16)
+        CharacterStates.AutoRotate.add(Entity)
+        CharacterStates.Moving.add(Entity)
         
         return true
     end
@@ -92,9 +104,9 @@ RunService.Heartbeat:Connect(function(deltaTime)
             MoveAwayVector = -(BaddieAveragePosition)
         end
 
-        if (travel ~= Vector3.zero and travel ~= nil) then 
-            local charDatum = characterData.GetCharacterData(Character)
-            charDatum.MoveDirection = ((travel)+(MoveAwayVector*2)).Unit
+        if (travel ~= Vector3.zero and travel ~= nil) then
+            local MovementData = CharacterStates.World.get(Character).MovementData
+            MovementData.MoveDirection = ((travel)+(MoveAwayVector*2)).Unit
         end
 	    --return travel
     end

@@ -44,6 +44,9 @@ local caster = ballistics.CreateCaster()
 local bullet = Instance.new("Part")
     bullet.Anchored = true 
     bullet.CanCollide = false
+    bullet.Size = Vector3.new(0.2, 0.2, 2)
+    bullet.Color = Color3.fromRGB(255, 248, 35)
+    bullet.Material = Enum.Material.Neon
 
 local castBehaviour = ballistics.CreateCastBehavior()
     castBehaviour.CosmeticBulletTemplate = bullet

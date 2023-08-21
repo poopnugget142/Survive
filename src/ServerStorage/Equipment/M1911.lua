@@ -17,6 +17,9 @@ end
 --In the future we can check if this really hit but for now we trust it
 Module.Attack = function(Entity, HitCharacter)
     local HitData = CharacterStates.World.get(HitCharacter)
+
+    if not HitData.Character then return end
+
     local CurrentHealth = HitData.Health.Current
 
     CharacterModule.UpdateHealth(HitCharacter, CurrentHealth-10)

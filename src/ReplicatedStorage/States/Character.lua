@@ -10,6 +10,7 @@ local Module = {}
 
 Module.Moving = World.tag("Moving")
 Module.AutoRotate = World.tag("AutoRotate")
+Module.LookAtMouse = World.tag("LookAtMouse")
 
 Module.Health = World.factory("Health", {
     add = function(Factory, Entity : Model, Health : number)

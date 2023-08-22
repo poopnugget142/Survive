@@ -11,42 +11,11 @@
 local module = { }
 
 --initialise dependencies
-local replicatedStorage = game:GetService("ReplicatedStorage")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local stew = require(replicatedStorage.Packages.Stew)
-local world = stew.world()
+local TileStates = require(ReplicatedStorage.Scripts.States.Tile)
+local world = TileStates.World
 module.world = world
-
---tile / priority components
-local frontier_open = world.factory("frontier_open", { --frontier is stored in stew components, can use getall frontier
-    add = function(_, Entity : any, heat : number)
-        return
-        {
-            tile = Entity
-            ,heat = heat
-        }
-    end;
-})
-local frontier_closed = world.factory("frontier_closed", { --empty component used for frontier ignorance
-    add = function(_, Entity : any, string)
-        return
-        {
-            tile = Entity
-        }
-    end;
-})
-
-local tile_navData = world.factory("tile_navData", { --navData stores tile cost and heat data on all layers
-    add = function(_, Entity : any, cost)
-        return
-        {
-            tile = Entity
-            ,cost = cost
-            ,heat = 0
-        }
-    end;
-})
-
 
 -- priority queue for pathfinding quality ########################################################
 -- special thanks https://youtu.be/M6OW0KNkhhs ###################################################
@@ -185,7 +154,8 @@ module.tileBuild = function(target:Vector3?, u:number?, v:number?, w:number?)
 
 
     world.entity(position)
-    tile_navData.add(position, 1)
+    TileStates.NavData.add(position, 1)
+    --tile_navData.add(position, 1)
     --world.Component.Create(position, "tile_navData", 1)
 
     tileMap[position] = position --adding tileUV to a tileMap gives more options and allows for #tileMap
@@ -210,8 +180,8 @@ end
 
 --grid initialisation
 --100x100 tiles
-for i = 0, 200 do
-	for j = 0, 200 do
+for i = 0, 100 do
+	for j = 0, 100 do
         --if (i > 45 and i < 55 and j < 70) then
         --    continue
         --end
@@ -251,10 +221,10 @@ module.pathfind = function(...)
     end]]
 
     --cleanup past frontier information
-    local currentTiles = world.query{tile_navData}
+    local currentTiles = world.query{TileStates.NavData}
     for pastTile in currentTiles do
-        frontier_open.remove(pastTile)
-        frontier_closed.remove(pastTile)
+        TileStates.FrontierOpen.remove(pastTile)
+        TileStates.FrontierClosed.remove(pastTile)
     end
 
     local desiredTime = 0.2 -- desired time to finish tiling
@@ -291,7 +261,7 @@ module.pathfind = function(...)
         )
         local nav = world.get(target).tile_navData
         if (nav) then
-            frontier_open.add(target, 1)
+            TileStates.FrontierOpen.add(target, 1)
             enqueue(target)
         end
     end
@@ -314,7 +284,7 @@ module.pathfind = function(...)
             local currentHeat = currentEntity.heat--[layer]
             --print(currentHeat) ---<<<<----
 
-            frontier_closed.add(current) --close this tile so it cannot be visited by other tiles
+            TileStates.FrontierClosed.add(current) --close this tile so it cannot be visited by other tiles
 
             for a, adjacent : Vector3 in adjacents do --check each adjacent tile (8 directional)
                 local adjacentPosition = current + adjacent
@@ -330,7 +300,7 @@ module.pathfind = function(...)
                     end
                     if (exploreCheck == nil) then
                         if (world.get(adjacentPosition).frontier_open == nil) then 
-                            frontier_open.add(adjacentPosition, newHeat)
+                            TileStates.FrontierOpen.add(adjacentPosition, newHeat)
                                 --world.Component.Create(adjacentPosition, "frontier_closed") --experimental
                             --print(tostring(frontier[1]) .. "; " .. tostring(currentNav.heat) .. " ; " .. tostring(printTally))
                             --printTally+=1

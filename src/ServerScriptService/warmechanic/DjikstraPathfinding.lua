@@ -25,8 +25,8 @@ local length : number = 0
 local printTally = 0
 
 local comparator = function(a, b)
-    local _a = world.get(frontier[a]).frontier_open.heat
-    local _b = world.get(frontier[b]).frontier_open.heat
+    local _a = world.get(frontier[a]).FrontierOpen.Heat
+    local _b = world.get(frontier[b]).FrontierOpen.Heat
     if (_a == nil or _b == nil) then
         return 0
     end
@@ -185,12 +185,12 @@ for i = 0, 100 do
         --if (i > 45 and i < 55 and j < 70) then
         --    continue
         --end
-        local tile = module.tileBuild(_,i,0,j)
-        local navData = world.get(tile).tile_navData
+        local Tile = module.tileBuild(_,i,0,j)
+        local NavData = world.get(Tile).NavData
         if (i > 45 and i < 55 and j < 70) then
-            navData.cost = 100
+            NavData.cost = 100
         else
-            navData.cost = 1
+            NavData.cost = 1
         end
 	end
 end
@@ -259,7 +259,7 @@ module.pathfind = function(...)
             ,0--math.round(target.Y)
             ,math.round(target.Z)
         )
-        local nav = world.get(target).tile_navData
+        local nav = world.get(target).NavData
         if (nav) then
             TileStates.FrontierOpen.add(target, 1)
             enqueue(target)
@@ -273,16 +273,16 @@ module.pathfind = function(...)
                 if (current == nil) then 
                     print("missing entity anomaly")
                     continue end
-            local currentEntity = world.get(current).frontier_open
+            local currentEntity = world.get(current).FrontierOpen
                 if (currentEntity == nil) then 
                     print("missing component anomaly")
                     continue end
-            local currentNav = world.get(current).tile_navData
+            local currentNav = world.get(current).NavData
                 if (currentNav == nil) then 
                     print("missing tile anomaly")
                     continue end
             
-            local currentHeat = currentEntity.heat--[layer]
+            local currentHeat = currentEntity.Heat--[layer]
             --print(currentHeat) ---<<<<----
 
             TileStates.FrontierClosed.add(current) --close this tile so it cannot be visited by other tiles
@@ -290,17 +290,17 @@ module.pathfind = function(...)
             for a, adjacent : Vector3 in adjacents do --check each adjacent tile (8 directional)
                 local adjacentPosition = current + adjacent
 
-                local adjacentNav = world.get(adjacentPosition).tile_navData
+                local adjacentNav = world.get(adjacentPosition).NavData
                 if (adjacentNav) then --ignore tiles that dont exist
-                    local adjacentCost : number = adjacentNav.cost--[layer] --assign heat values to tiles
+                    local adjacentCost : number = adjacentNav.Cost--[layer] --assign heat values to tiles
                     local newHeat = currentHeat + adjacentCost * adjacent.Magnitude --magnitude for euclidean distance
 
-                    local exploreCheck = world.get(adjacentPosition).frontier_closed --do not re-add already witnessed tiles to the frontier
+                    local exploreCheck = world.get(adjacentPosition).FrontierClosed --do not re-add already witnessed tiles to the frontier
                     if (exploreCheck == nil or newHeat < currentHeat) then
-                        adjacentNav.heat--[[layer]]= newHeat
+                        adjacentNav.Heat--[[layer]]= newHeat
                     end
                     if (exploreCheck == nil) then
-                        if (world.get(adjacentPosition).frontier_open == nil) then 
+                        if (world.get(adjacentPosition).FrontierOpen == nil) then 
                             TileStates.FrontierOpen.add(adjacentPosition, newHeat)
                                 --world.Component.Create(adjacentPosition, "frontier_closed") --experimental
                             --print(tostring(frontier[1]) .. "; " .. tostring(currentNav.heat) .. " ; " .. tostring(printTally))
@@ -376,11 +376,11 @@ module.boxSolve = function(position : Vector3)
     for v, vertex in box do
 		local adjacentPosition = position + vertex.Unit
 
-		local path = world.get(adjacentPosition).tile_navData
+		local path = world.get(adjacentPosition).NavData
 		--print(path.heat)
 		vectors[v] = adjacents[v]--*100
 		if (path) then
-			vectors[v] = vertex * path.heat            
+			vectors[v] = vertex * path.Heat            
 		end
 	end
     local finalVector = Vector3.zero

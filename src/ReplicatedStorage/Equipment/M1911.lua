@@ -13,14 +13,12 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local Debris = game:GetService("Debris")
-local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Remotes = ReplicatedStorage.Remotes
 local JunkFolder = workspace:WaitForChild("JunkFolder")
 local CharactersFolder = workspace:WaitForChild("Characters")
 
-local Equipment = require(script.Parent)
 local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
 local ballistics = require(ReplicatedStorage.Scripts.Util.Ballistics)
 local ballistics2 = require(ReplicatedStorage.Scripts.Util.ballistics2)
@@ -160,6 +158,9 @@ Module.ServerGotItemID = function(Entity, ItemID)
         shooting = false
         --print(shooting)
     end)
+end
+
+Module.Equip = function(Entity)
     --SetEquipmentModel:FireServer(ItemID)
 end
 

@@ -41,8 +41,8 @@ print(out)
 
 while true do
     --debug.profilebegin("Pathcast Begin")
-    --local target = workspace.Characters:WaitForChild("poopnugget142")
-    local target = workspace.Characters:WaitForChild("WarMechanist")
+    local target = workspace.Characters:WaitForChild("poopnugget142")
+    --local target = workspace.Characters:WaitForChild("WarMechanist")
     local part : BasePart = target.PrimaryPart
 
     if not part then return end

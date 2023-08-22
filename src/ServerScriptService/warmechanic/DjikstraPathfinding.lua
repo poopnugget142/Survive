@@ -210,8 +210,8 @@ end
 
 --grid initialisation
 --100x100 tiles
-for i = 0, 200 do
-	for j = 0, 200 do
+for i = 0, 100 do
+	for j = 0, 100 do
         --if (i > 45 and i < 55 and j < 70) then
         --    continue
         --end
@@ -297,7 +297,8 @@ module.pathfind = function(...)
     end
 
     while (#frontier > 0) do
-        for i = 1, desiredTileRate do --we need to make more than 1 tile in 0.01 seconds, use a loop here
+        for _ = 1, desiredTileRate, 1 do --we need to make more than 1 tile in 0.01 seconds, use a loop here
+            debug.profilebegin("pathfind_tile")
             local current = dequeue() --pull the next frontier object from the priority queue
                 if (current == nil) then 
                     print("missing entity anomaly")
@@ -352,12 +353,18 @@ module.pathfind = function(...)
             end
             print(printer)
             ]]
+            debug.profileend()
             if (#frontier == 0) then
                 break
             end
         end
+        --if (#frontier == 0) then
+        --    print("Breaker!")
+        --    break
+        --end
         task.wait(0.01)
     end
+
     return true
 end
 

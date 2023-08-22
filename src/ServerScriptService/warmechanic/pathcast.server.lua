@@ -40,7 +40,9 @@ print(out)
 
 
 while true do
-    local target = workspace.Characters:WaitForChild("poopnugget142")
+    --debug.profilebegin("Pathcast Begin")
+    --local target = workspace.Characters:WaitForChild("poopnugget142")
+    local target = workspace.Characters:WaitForChild("WarMechanist")
     local part : BasePart = target.PrimaryPart
 
     if not part then return end
@@ -51,4 +53,6 @@ while true do
     local flowfield = djikstra2.pathfind(part--[[position--[[, Vector3.new(5,0,5)]])
 
     repeat task.wait(0.25) until flowfield
+
+    --debug.profileend()
 end

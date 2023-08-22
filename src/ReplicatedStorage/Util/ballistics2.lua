@@ -84,6 +84,7 @@ Module.SpawnBullet = function(CastBehavior : CastBehavior , Position : Vector3, 
     return Bullet
 end
 
+local cam = workspace.CurrentCamera
 --Cycles through all the bullets and run physics updates on it
 RunService.Heartbeat:Connect(function(DeltaTime)
     for i, Bullet : Bullet in pairs (Bullets) do
@@ -91,7 +92,9 @@ RunService.Heartbeat:Connect(function(DeltaTime)
         --local CastBehavior : CastBehavior = Bullet.CastBehavior
 
         local distance : number = Bullet.Target - Bullet.Origin
-
+        --TESTING
+        
+        
         --Progress visual bullet forward
         if Bullet.CosmeticBulletObject then
             --local BulletLength = Bullet.CosmeticBulletObject.Size.Z / 2
@@ -103,13 +106,20 @@ RunService.Heartbeat:Connect(function(DeltaTime)
                 return
             end
 
+            local upLayerAlpha : number = 0
+            if (Bullet.Alpha < 0.9 and Bullet.Alpha ~= 0) then
+                upLayerAlpha = 0.1 -- (0 => 1) interpolate between real bullet position and camera                
+            end
+
             local position = Bullet.CastBehavior.MoveFunction(Bullet.Origin, Bullet.Target, Bullet.Alpha)
             local nextPosition = Bullet.CastBehavior.MoveFunction(Bullet.Origin, Bullet.Target, Bullet.Alpha+10^-2)
             Bullet.CosmeticBulletObject.CFrame = CFrame.new(
-                position,
-                position + (nextPosition-position).Unit
+                position
+                ,position + (nextPosition-position).Unit
             )-- * CFrame.new(0, 0, -(Bullet.Target-position).Magnitude)
-            Bullet.CosmeticBulletObject.Position = position
+            Bullet.CosmeticBulletObject.Position = position:Lerp(cam.CFrame.Position, upLayerAlpha)
+
+            Bullet.CosmeticBulletObject.Size = Bullet.CosmeticBulletObject.Size:Lerp(Vector3.zero, upLayerAlpha)
         end
 
         Bullet.Alpha += (Bullet.Speed/distance.magnitude) * DeltaTime

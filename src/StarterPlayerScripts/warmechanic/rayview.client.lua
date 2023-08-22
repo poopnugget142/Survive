@@ -184,7 +184,8 @@ runService.RenderStepped:Connect(function(deltaTime)
 	if (lineOfSight) then
 		--filters
 		local raycastParams = RaycastParams.new()
-		raycastParams.FilterDescendantsInstances = player.Character:GetChildren()
+		--raycastParams.FilterDescendantsInstances = player.Character:GetChildren()
+		raycastParams.FilterDescendantsInstances = {workspace.Characters, workspace.JunkFolder}
 		raycastParams.FilterType = Enum.RaycastFilterType.Exclude
 		raycastParams.IgnoreWater = true
 

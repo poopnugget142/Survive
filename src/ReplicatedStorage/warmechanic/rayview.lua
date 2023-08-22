@@ -23,16 +23,16 @@ module.clientGenerateLightingMap = function()
 			)
 			tileMatrix[i][j] = {
 				identifier = "(" .. tostring(i) .. "+" .. tostring(j) .. ")",
-			--[[color = Vector3.new(
-				math.random(0.5,1),
-				math.random(0.5,1),
-				math.random(0.5,1)
-			)]]
 				color = Vector3.new(
+					math.random(0.5,1),
+					math.random(0.5,1),
+					math.random(0.5,1)
+				)
+				--[[color = Vector3.new(
 					math.sqrt((tileSizeI - i)^2 + (tileSizeJ - j)^2) / math.sqrt((tileSizeI)^2 + (tileSizeJ)^2),
 					math.sqrt(i^2 + j^2) / math.sqrt(tileSizeI^2 + tileSizeJ^2),
 					0
-				)
+				)]]
 				--color = Vector3.new(preColor.R, preColor.G, preColor.B)
 				,--alpha = math.random(0.5,1)
 				alpha = 0.75

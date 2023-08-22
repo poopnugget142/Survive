@@ -4,6 +4,8 @@
     seperate spread into mechanical spread and deviation (recoil) later on
         im thinking deviation has a velocity / acceleration that changes as the player fires the gun
         if you were to equip a laser pointer, youd be able to see where the next bullet will go and account for spread
+
+    update backward raycasting to consider circle size
 ]]
 
 
@@ -79,7 +81,7 @@ Module.ServerGotItemID = function(Entity, ItemID)
 
         while shooting do
             --print(shooting)
-            task.wait(60/600)
+            task.wait(60/6000)
             local Character = Player.Character
             --local HumanoidRootPart = Character.Model.PrimaryPart
             local HumanoidRootPart = Character.PrimaryPart
@@ -102,7 +104,7 @@ Module.ServerGotItemID = function(Entity, ItemID)
                     math.random(-spreadPermutations, spreadPermutations)/spreadPermutations * Circularity
                     , 0
                     , math.random(-spreadPermutations, spreadPermutations)/spreadPermutations * (1-Circularity)
-                ).Unit * (DistanceToAim*math.tan(math.rad(25)/2)) --offset 
+                ).Unit * (DistanceToAim*math.tan(math.rad(5)/2)) --offset 
                 * math.random(-spreadPermutations, spreadPermutations)/spreadPermutations
             ) --+ deviation
             --print(deviation)
@@ -128,7 +130,7 @@ Module.ServerGotItemID = function(Entity, ItemID)
             local DistanceToTerrain = (TerrainResult.Position - Origin).Magnitude
             
             --We set the ray length to the distance to character so you don't shoot people behind you
-            local CharacterResult = workspace:Raycast(TerrainResult.Position, CharacterDirection*DistanceToTerrain, CharacterParams)
+            local CharacterResult = workspace:Raycast(TerrainResult.Position, CharacterDirection*2--[[*DistanceToTerrain]], CharacterParams)
 
             if not CharacterResult then continue end
 

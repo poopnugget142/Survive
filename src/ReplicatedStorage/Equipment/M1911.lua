@@ -79,7 +79,7 @@ Module.ServerGotItemID = function(Entity, ItemID)
 
         while shooting do
             --print(shooting)
-            task.wait(60/6000)
+            task.wait(60/600)
             local Character = Player.Character
             --local HumanoidRootPart = Character.Model.PrimaryPart
             local HumanoidRootPart = Character.PrimaryPart
@@ -128,7 +128,7 @@ Module.ServerGotItemID = function(Entity, ItemID)
             local DistanceToTerrain = (TerrainResult.Position - Origin).Magnitude
             
             --We set the ray length to the distance to character so you don't shoot people behind you
-            local CharacterResult = workspace:Raycast(TerrainResult.Position, CharacterDirection*2--[[*DistanceToTerrain]], CharacterParams)
+            local CharacterResult = workspace:Raycast(TerrainResult.Position, CharacterDirection*3--[[*DistanceToTerrain]], CharacterParams)
 
             if not CharacterResult then continue end
 

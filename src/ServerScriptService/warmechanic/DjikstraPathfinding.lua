@@ -14,132 +14,19 @@ local module = { }
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local TileStates = require(ReplicatedStorage.Scripts.States.Tile)
+local PriorityQueue = require(ReplicatedStorage.Scripts.Util.PriorityQueue)
+
 local world = TileStates.World
 module.world = world
 
 -- priority queue for pathfinding quality ########################################################
 -- special thanks https://youtu.be/M6OW0KNkhhs ###################################################
-local frontier = {}
-local length : number = 0
+local frontier = PriorityQueue.Create()
+frontier.ComparatorGetFunction = function(Value : any)
+    return world.get(frontier.Values[Value]).FrontierOpen.Heat
+end
 
 local printTally = 0
-
-local comparator = function(a, b)
-    local _a = world.get(frontier[a]).FrontierOpen.Heat
-    local _b = world.get(frontier[b]).FrontierOpen.Heat
-    if (_a == nil or _b == nil) then
-        return 0
-    end
-    --print(_a)
-
-    return(_a - _b)
-end
-
-local heapSort = function()
-    local out = {}
-    for e = 1, length do
-        table.insert(out, module.dequeue())
-    end
-
-    return out
-end
-
-
-local parent = function(nodeIndex : number) --called for a child to get the node in the tree level above it
-    if (nodeIndex == 1) then return nil end
-    return math.floor(nodeIndex/2)
-end
-local leftChild = function(nodeIndex : number) --called for a parent to get the left child
-    local child = (nodeIndex*2)
-    if (child >= length) then return nil end
-    return child
-end
-local rightChild = function(nodeIndex : number) --called for a parent to get the right child
-    local child = (nodeIndex*2)+1
-    if (child >= length) then return nil end
-    return child
-end
-
-local shiftUp = function() --move smaller frontier up the binary tree
-    local index = length
-
-    while (true) do
-        local parentIndex = parent(index)
-
-        if (parentIndex ~= nil and (comparator( index, parentIndex ) < 0) ) then
-            local temp = frontier[index]
-            frontier[index] = frontier[parentIndex]
-            frontier[parentIndex] = temp
-            continue
-        end
-
-        return
-    end
-end
-
-local shiftDown = function() --move bigger frontier down the binary tree
-    local index = 1
-
-    while true do
-        local left = leftChild(index)
-        local right = rightChild(index)
-        
-        local swapCandidiate = index
-        if (left ~= nil and (comparator( swapCandidiate, left ) > 0) ) then
-            swapCandidiate = left
-        end
-        if (right ~= nil and (comparator( swapCandidiate, right ) > 0) ) then
-            swapCandidiate = right
-        end
-        if (swapCandidiate ~= index) then --check to see if swap candidate was altered by the two previous ifs
-            local temp = frontier[index]
-            frontier[index] = frontier[swapCandidiate]
-            frontier[swapCandidiate] = temp
-            index = swapCandidiate
-            continue
-        end
-
-        return --otherwise break the operation
-    end
-end
-
-local enqueue = function(value)
-    if (frontier.length ~= nil) then
-        if (frontier.length <= length) then --increase array length exponentially depending on value count
-            frontier.length = math.max(1, frontier.length * 2)
-        end
-    else
-        frontier.length = 1
-    end
-    frontier[length+1] = value --add
-    length+=1 --add
-    shiftUp()
-
-    --print (tostring(value) .. " added to priority queue")
-    return true
-end
-
-local dequeue = function()
-    if (length == 0) then return nil end --skip if theres nothing to remove
-
-    local node = frontier[1] --look at our first value
-
-    if (length == 1) then --if theres only one value, we require no further computations
-        length = 0 
-        frontier[1] = nil
-        return node
-    end
-
-    --shiftDown()
-
-    frontier[1] = frontier[length] --move the topmost value to the bottom of the binary tree, to do some swapping
-    frontier[length] = nil
-    length-=1
-    shiftDown() --swapping function
-    
-    --print (tostring(node) .. " removed from priority queue")
-    return node
-end
 
 -- tile functions ###################################################################################
 local tileMap = {}
@@ -262,14 +149,14 @@ module.pathfind = function(...)
         local nav = world.get(target).NavData
         if (nav) then
             TileStates.FrontierOpen.add(target, 1)
-            enqueue(target)
+            frontier:Enqueue(target)
         end
     end
 
-    while (#frontier > 0) do
+    while (#frontier.Values > 0) do
         for _ = 1, desiredTileRate, 1 do --we need to make more than 1 tile in 0.01 seconds, use a loop here
             debug.profilebegin("pathfind_tile")
-            local current = dequeue() --pull the next frontier object from the priority queue
+            local current = frontier:Dequeue() --pull the next frontier object from the priority queue
                 if (current == nil) then 
                     print("missing entity anomaly")
                     continue end
@@ -305,7 +192,7 @@ module.pathfind = function(...)
                                 --world.Component.Create(adjacentPosition, "frontier_closed") --experimental
                             --print(tostring(frontier[1]) .. "; " .. tostring(currentNav.heat) .. " ; " .. tostring(printTally))
                             --printTally+=1
-                            enqueue(adjacentPosition)
+                            frontier:Enqueue(adjacentPosition)
                         else 
                             --print("Duplicate Alert!")
                         end
@@ -324,7 +211,7 @@ module.pathfind = function(...)
             print(printer)
             ]]
             debug.profileend()
-            if (#frontier == 0) then
+            if (#frontier.Values == 0) then
                 break
             end
         end

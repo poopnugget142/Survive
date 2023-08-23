@@ -8,6 +8,11 @@ version = "0.3.1"
 dependencies = []
 
 [[package]]
+name = "evaera/cmdr"
+version = "1.12.0"
+dependencies = []
+
+[[package]]
 name = "evaera/promise"
 version = "4.0.0"
 dependencies = []
@@ -15,7 +20,7 @@ dependencies = []
 [[package]]
 name = "poopnugget142/poopy"
 version = "0.1.0"
-dependencies = [["Promise", "evaera/promise@4.0.0"], ["Signal", "sleitnick/signal@1.5.0"], ["Stew", "data-oriented-house/rbxstew@0.3.1"]]
+dependencies = [["Cmdr", "evaera/cmdr@1.12.0"], ["Promise", "evaera/promise@4.0.0"], ["Signal", "sleitnick/signal@1.5.0"], ["Stew", "data-oriented-house/rbxstew@0.3.1"]]
 
 [[package]]
 name = "sleitnick/signal"

@@ -4,7 +4,6 @@ function Queue:Comparator(a, b)
     local _a = self.ComparatorGetFunction(a)
     local _b = self.ComparatorGetFunction(b)
     if (_a == nil or _b == nil) then
-        print("b")
         return 0
     end
 
@@ -92,7 +91,8 @@ function Queue:Enqueue(Value)
     self.Length+=1 --add
     self:ShiftUp()
 
-    --print (tostring(value) .. " added to priority queue")
+    print(self.Values)
+
     return true
 end
 
@@ -107,14 +107,11 @@ function Queue:Dequeue()
         return node
     end
 
-    --shiftDown()
-
     self.Values[1] = self.Values[self.Length] --move the topmost value to the bottom of the binary tree, to do some swapping
     self.Values[self.Length] = nil
     self.Length-=1
     self:ShiftDown() --swapping function
     
-    --print (tostring(node) .. " removed from priority queue")
     return node
 end
 
@@ -124,7 +121,8 @@ Module.Create = function(ComparatorGetFunction : any)
     local NewQueue = setmetatable(Queue, {})
     NewQueue.Length = 0
     NewQueue.Length2 = 0
-    NewQueue.ComparatorGetFunction = ComparatorGetFunction or nil
+    NewQueue.ComparatorGetFunction = ComparatorGetFunction or function (Value) return Value
+    end
     NewQueue.Values = {}
 
     return NewQueue

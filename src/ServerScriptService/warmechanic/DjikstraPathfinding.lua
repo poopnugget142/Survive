@@ -6,6 +6,7 @@
 
     add support for pathfinding to models (enemies can never catch up to a moving player)
 
+    break when frontier reaches furthest enemy (save time)
 ]]
 
 local module = { }

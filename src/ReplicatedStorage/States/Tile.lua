@@ -14,8 +14,8 @@ Module.FrontierOpen = World.factory("FrontierOpen", {
     add = function(_, Entity : any, Heat : number)
         return
         {
-            Tile = Entity,
-            Heat = Heat
+            Tile = Entity
+            ,Heat = Heat
         }
     end;
 })
@@ -33,9 +33,9 @@ Module.NavData = World.factory("NavData", {
     add = function(_, Entity : any, Cost : number)
         return
         {
-            Tile = Entity,
-            Cost = Cost,
-            Heat = 0
+            Tile = Entity
+            ,Cost = Cost
+            ,Heat = 0
         }
     end;
 })

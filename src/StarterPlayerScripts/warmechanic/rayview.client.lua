@@ -54,16 +54,21 @@ for i = 0, pixelSizeIMax do
 		local dude = Instance.new("Frame")
 		dude.Parent = screenGui:WaitForChild("losFrame")
 		dude.Name = tostring(i) .. "," .. tostring(j)
-		dude.BorderSizePixel = 0
+		dude.BorderSizePixel = 1/pixelSizeJMax
 		dude.Transparency = 0.8
 
 		dude.Position = UDim2.new(
-			i/pixelSizeIMax, 
-			0, 
-			j/pixelSizeJMax, 
-			0
+			i/pixelSizeIMax
+			,0
+			,j/pixelSizeJMax
+			,0
 		)
-		dude.Size = UDim2.new(1/pixelSizeIMax, 0, 1/pixelSizeJMax, 0)
+		dude.Size = UDim2.new(
+			0--1/pixelSizeIMax
+			,0
+			,0--1/pixelSizeJMax
+			,0
+		)
 
 		if not pixelMatrix[i] then
 			pixelMatrix[i] = {}
@@ -95,7 +100,7 @@ local debugger = {}
 
 --dynamic resolution adjustments
 local dynamicResolution = true
-local desiredFps = 60
+local desiredFps = 30
 local desiredCount = 1800
 --ignore
 local historicalFps = {}

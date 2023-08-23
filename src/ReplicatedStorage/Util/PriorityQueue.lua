@@ -91,8 +91,6 @@ function Queue:Enqueue(Value)
     self.Length+=1 --add
     self:ShiftUp()
 
-    print(self.Values)
-
     return true
 end
 

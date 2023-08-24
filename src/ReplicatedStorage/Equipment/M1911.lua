@@ -161,6 +161,7 @@ Module.ServerGotItemID = function(Entity, ItemID)
 end
 
 Module.Equip = function(Entity)
+    print("Equiped Pistol")
     --SetEquipmentModel:FireServer(ItemID)
 end
 

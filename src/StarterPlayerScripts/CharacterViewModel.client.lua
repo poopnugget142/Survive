@@ -13,8 +13,12 @@ Camera.Parent = ViewportFrame
 local Character : Model
 local Animator : Animator
 
-local LoadedAnimation : AnimationTrack
+local RealCharacter : Model
+local RealAnimator : Animator
 
+local PlayingAnimations = {}
+
+--Cloning character to put into viewmodel
 local function AddCharacter()
     repeat task.wait() until Player:HasAppearanceLoaded()
 
@@ -30,29 +34,57 @@ local function AddCharacter()
     Character.Parent = WorldModel
 end
 
-local function UpdateAnimations(RealCharacter : Model)
-    local RealAnimator : Animator = RealCharacter.Humanoid.Animator
+--This checks what animations are playing and applies them to the viewmodel
+--We don't have the animation fade time which will cause some visual errors
+local function UpdateAnimations()
+    if not RealCharacter then return end
 
-    --With the system as is we can't have overlapping animations which is very bad
-    --This also doesn't copy over animation weight or... animation fade time
-    RealAnimator.AnimationPlayed:Connect(function(AnimationTrack : AnimationTrack)
-        if LoadedAnimation then
-            LoadedAnimation:Stop()
+    --Create a list of animations that need to be cancelled
+    local StoppedAnimations = table.clone(PlayingAnimations)
+
+    for _, AnimationTrack : AnimationTrack in RealAnimator:GetPlayingAnimationTracks() do
+        local AnimationName = AnimationTrack.Animation.Name
+
+        if StoppedAnimations[AnimationName] then
+            StoppedAnimations[AnimationName] = nil
         end
 
-        LoadedAnimation = Animator:LoadAnimation(AnimationTrack.Animation)
-        LoadedAnimation:Play()
-    end)
+        --Play new animations here
+        local ViewmodelAnimationTrack = PlayingAnimations[AnimationName]
+        if not ViewmodelAnimationTrack then
+            ViewmodelAnimationTrack = Animator:LoadAnimation(AnimationTrack.Animation)
+            ViewmodelAnimationTrack:Play(nil, AnimationTrack.WeightTarget, AnimationTrack.Speed)
+            PlayingAnimations[AnimationName] = ViewmodelAnimationTrack
+        end
+
+        ViewmodelAnimationTrack:AdjustSpeed(AnimationTrack.Speed)
+        ViewmodelAnimationTrack:AdjustWeight(AnimationTrack.WeightTarget)
+    end
+
+    --Stopping old animations
+    for AnimationName, AnimationTrack : AnimationTrack in StoppedAnimations do
+        AnimationTrack:Stop()
+        PlayingAnimations[AnimationName] = nil
+    end
+end
+
+--Used to have the viewmodel mimic the animations of the bound character
+local function BindRigToCharacter(AddedCharacter : Model)
+    RealCharacter = AddedCharacter
+    RealAnimator = RealCharacter.Humanoid.Animator
+    PlayingAnimations = {}
 end
 
 if Player.Character then
     AddCharacter()
-    UpdateAnimations(Player.Character)
+    BindRigToCharacter(Player.Character)
 end
 
-Player.CharacterAdded:Connect(function(RealCharacter : Model)
+Player.CharacterAdded:Connect(function(AddedCharacter : Model)
     if not Character then
         AddCharacter()
     end
-    UpdateAnimations(RealCharacter)
+    BindRigToCharacter(AddedCharacter)
 end)
+
+RunService:BindToRenderStep("UpdateAnimations", Enum.RenderPriority.Last.Value, UpdateAnimations)

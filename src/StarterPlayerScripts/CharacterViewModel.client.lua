@@ -58,7 +58,7 @@ local function UpdateAnimations()
         end
 
         ViewmodelAnimationTrack:AdjustSpeed(AnimationTrack.Speed)
-        ViewmodelAnimationTrack:AdjustWeight(AnimationTrack.WeightTarget)
+        ViewmodelAnimationTrack:AdjustWeight(AnimationTrack.WeightCurrent)
     end
 
     --Stopping old animations

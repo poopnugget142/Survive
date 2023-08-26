@@ -93,7 +93,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
         local BaddieAveragePosition = Vector3.zero
         for i, OtherCharacter : Model in NearbyBaddies do
             local Difference = (OtherCharacter.PrimaryPart.Position-root.Position)/3
-            BaddieAveragePosition += Difference*(Difference.Magnitude^0.5)
+            BaddieAveragePosition += Difference*(3-Difference.Magnitude)^2
         end
         BaddieAveragePosition = BaddieAveragePosition/(math.max(#NearbyBaddies, 1))
 
@@ -107,7 +107,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
 
         if (travel ~= Vector3.zero and travel ~= nil) then
             local MovementData = CharacterStates.World.get(Character).MovementData
-            MovementData.MoveDirection = ((travel*2)+(MoveAwayVector*1)).Unit
+            MovementData.MoveDirection = ((travel*1)+(MoveAwayVector*1)).Unit
         end
 	    --return travel
     end

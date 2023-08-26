@@ -69,8 +69,8 @@ end
 --grid initialisation
 --100x100 tiles
 local TileSize = Vector3.new(5,5,5)
-for i = 0, 100 do
-	for j = 0, 100 do
+for i = 0, 70 do
+	for j = 0, 70 do
         --if (i > 45 and i < 55 and j < 70) then
         --    continue
         --end
@@ -116,7 +116,7 @@ module.pathfind = function(...)
         TileStates.FrontierClosed.remove(pastTile)
     end
 
-    local desiredTime = 0.2 -- desired time to finish tiling
+    local desiredTime = 0.1 -- desired time to finish tiling
     local desiredTileRate = math.max(1,(--[[#currentTiles]]5000 / desiredTime) * 0.01) 
     --print (desiredTileRate)
 

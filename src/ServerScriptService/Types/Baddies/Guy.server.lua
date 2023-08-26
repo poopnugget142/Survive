@@ -74,7 +74,8 @@ RunService.Heartbeat:Connect(function(deltaTime)
         end
 
         --Get nearby parts that belong to baddies
-        local NearbyBaddieParts = workspace:GetPartBoundsInRadius(root.Position, 3, NearbyParams)
+        local NearbyBaddieDistance = 3
+        local NearbyBaddieParts = workspace:GetPartBoundsInRadius(root.Position, NearbyBaddieDistance, NearbyParams)
 
         local NearbyBaddies = {}
 
@@ -92,10 +93,10 @@ RunService.Heartbeat:Connect(function(deltaTime)
         --Calculate the average position
         local BaddieAveragePosition = Vector3.zero
         for i, OtherCharacter : Model in NearbyBaddies do
-            local Difference = (OtherCharacter.PrimaryPart.Position-root.Position)/3
-            BaddieAveragePosition += Difference*(3-Difference.Magnitude)^2
+            local Difference = (OtherCharacter.PrimaryPart.Position-root.Position)
+            BaddieAveragePosition += Difference*(math.max(0.1, 1-Difference.Magnitude/NearbyBaddieDistance))^0.5
         end
-        BaddieAveragePosition = BaddieAveragePosition/(math.max(#NearbyBaddies, 1))
+        BaddieAveragePosition = BaddieAveragePosition--/(math.max(#NearbyBaddies, 1))
 
         --Reverse the vector
         local MoveAwayVector
@@ -107,7 +108,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
 
         if (travel ~= Vector3.zero and travel ~= nil) then
             local MovementData = CharacterStates.World.get(Character).MovementData
-            MovementData.MoveDirection = ((travel*1)+(MoveAwayVector*1)).Unit
+            MovementData.MoveDirection = ((travel*2)+(MoveAwayVector*1)).Unit
         end
 	    --return travel
     end

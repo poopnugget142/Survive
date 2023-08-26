@@ -11,23 +11,39 @@ ViewportFrame.CurrentCamera = Camera
 Camera.Parent = ViewportFrame
 
 local Character : Model
-local Animator : Animator
 
 local RealCharacter : Model
-local RealAnimator : Animator
-
-local PlayingAnimations = {}
+local RealParts = {}
 
 local Isometer = (2^1)
 
 --Cloning character to put into viewmodel
-local function AddCharacter()
+local function BindRigToCharacter(AddedCharacter : Model)
     repeat task.wait() until Player:HasAppearanceLoaded()
+
+    if Character then
+        Character:Destroy()
+    end
+
+    RealCharacter = AddedCharacter
 
     --Turn archivable to true so we can clone
     Player.Character.Archivable = true
     Character = Player.Character:Clone()
-    Animator = Character.Humanoid.Animator
+
+    Character.HumanoidRootPart.Anchored = true
+
+    for _, Instance in Character:GetDescendants() do
+        if Instance:IsA("Script") or Instance:IsA("Motor6D")  then
+            Instance:Destroy()
+            continue
+        end
+    end
+
+    for _, Part in AddedCharacter:GetChildren() do
+        if not Part:IsA("BasePart") or Part.Name == "HumanoidRootPart" then continue end
+        table.insert(RealParts, Part)
+    end
 
     Character:PivotTo(CFrame.new(0, 0, 0))
 
@@ -37,56 +53,20 @@ local function AddCharacter()
     Character.Parent = WorldModel
 end
 
---This checks what animations are playing and applies them to the viewmodel
---We don't have the animation fade time which will cause some visual errors
+--Able to 100% accurately represent animations at the subtle cost of smoothness
 local function UpdateAnimations()
-    if not RealCharacter then return end
+    for _, Part : BasePart in RealParts do
+        local RootOffset = RealCharacter.HumanoidRootPart.CFrame:ToObjectSpace(Part.CFrame)
 
-    --Create a list of animations that need to be cancelled
-    local StoppedAnimations = table.clone(PlayingAnimations)
-
-    for _, AnimationTrack : AnimationTrack in RealAnimator:GetPlayingAnimationTracks() do
-        local AnimationName = AnimationTrack.Animation.Name
-
-        if StoppedAnimations[AnimationName] then
-            StoppedAnimations[AnimationName] = nil
-        end
-
-        --Play new animations here
-        local ViewmodelAnimationTrack = PlayingAnimations[AnimationName]
-        if not ViewmodelAnimationTrack then
-            ViewmodelAnimationTrack = Animator:LoadAnimation(AnimationTrack.Animation)
-            ViewmodelAnimationTrack:Play(nil, AnimationTrack.WeightTarget, AnimationTrack.Speed)
-            PlayingAnimations[AnimationName] = ViewmodelAnimationTrack
-        end
-
-        ViewmodelAnimationTrack:AdjustSpeed(AnimationTrack.Speed)
-        ViewmodelAnimationTrack:AdjustWeight(AnimationTrack.WeightCurrent)
+        Character[Part.Name].CFrame = Character.HumanoidRootPart.CFrame*RootOffset
     end
-
-    --Stopping old animations
-    for AnimationName, AnimationTrack : AnimationTrack in StoppedAnimations do
-        AnimationTrack:Stop()
-        PlayingAnimations[AnimationName] = nil
-    end
-end
-
---Used to have the viewmodel mimic the animations of the bound character
-local function BindRigToCharacter(AddedCharacter : Model)
-    RealCharacter = AddedCharacter
-    RealAnimator = RealCharacter.Humanoid.Animator
-    PlayingAnimations = {}
 end
 
 if Player.Character then
-    AddCharacter()
     BindRigToCharacter(Player.Character)
 end
 
 Player.CharacterAdded:Connect(function(AddedCharacter : Model)
-    if not Character then
-        AddCharacter()
-    end
     BindRigToCharacter(AddedCharacter)
 end)
 

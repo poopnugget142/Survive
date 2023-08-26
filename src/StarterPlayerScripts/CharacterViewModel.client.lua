@@ -18,6 +18,8 @@ local RealAnimator : Animator
 
 local PlayingAnimations = {}
 
+local Isometer = (2^1)
+
 --Cloning character to put into viewmodel
 local function AddCharacter()
     repeat task.wait() until Player:HasAppearanceLoaded()
@@ -29,7 +31,8 @@ local function AddCharacter()
 
     Character:PivotTo(CFrame.new(0, 0, 0))
 
-    Camera.CFrame = CFrame.new(Vector3.new(2, 2, -4), Character.PrimaryPart.Position)
+    Camera.FieldOfView = 70/Isometer
+    Camera.CFrame = CFrame.new(Vector3.new(2, 2, -4)*Isometer, Character.PrimaryPart.Position)
 
     Character.Parent = WorldModel
 end

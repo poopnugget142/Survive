@@ -118,8 +118,8 @@ RunService.Heartbeat:Connect(function(DeltaTime)
                 ,position + (nextPosition-position).Unit
             )-- * CFrame.new(0, 0, -(Bullet.Target-position).Magnitude)
             Bullet.CosmeticBulletObject.Position = position:Lerp(cam.CFrame.Position, upLayerAlpha)
-
-            Bullet.CosmeticBulletObject.Size = Bullet.CosmeticBulletObject.Size:Lerp(Vector3.zero, upLayerAlpha)
+            local size = Vector3.new(5,5,15)--Bullet.CosmeticBulletObject.Size
+            Bullet.CosmeticBulletObject.Size = Vector3.zero:Lerp(size,upLayerAlpha)--Bullet.CosmeticBulletObject.Size:Lerp(Vector3.zero, upLayerAlpha)
         end
 
         Bullet.Alpha += (Bullet.Speed/distance.magnitude) * DeltaTime

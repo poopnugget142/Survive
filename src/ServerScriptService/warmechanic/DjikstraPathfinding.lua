@@ -68,6 +68,7 @@ end
 
 --grid initialisation
 --100x100 tiles
+local TileSize = Vector3.new(5,5,5)
 for i = 0, 100 do
 	for j = 0, 100 do
         --if (i > 45 and i < 55 and j < 70) then
@@ -75,10 +76,10 @@ for i = 0, 100 do
         --end
         local Tile = module.tileBuild(_,i,0,j)
         local NavData = world.get(Tile).NavData
-        if (i > 45 and i < 55 and j < 70) then
-            NavData.cost = 100
+        if (i > 45/TileSize.X and i < 55/TileSize.X and j < 70/TileSize.Z) then
+            NavData.Cost = 1000
         else
-            NavData.cost = 1
+            NavData.Cost = 1
         end
 	end
 end
@@ -143,9 +144,9 @@ module.pathfind = function(...)
 
     for t, target in _targets do --create nav requests for all good results
         local target = Vector3.new(
-            math.round(target.X)
+            math.round(target.X/TileSize.X)
             ,0--math.round(target.Y)
-            ,math.round(target.Z)
+            ,math.round(target.Z/TileSize.Z)
         )
         local nav = world.get(target).NavData
         if (nav) then
@@ -255,10 +256,10 @@ local box = { --5x5 box solve
 
 module.boxSolve = function(position : Vector3)
     position = Vector3.new(
-        math.round(position.X),
-        math.round(position.Y),
-        math.round(position.Z)
-    )
+        math.round(position.X/TileSize.X),
+        math.round(position.Y/TileSize.Y),
+        math.round(position.Z/TileSize.Z)
+    ) 
 
     local vectors = { }
     for v, vertex in box do

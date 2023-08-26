@@ -3,7 +3,7 @@ local RunService = game:GetService("RunService")
 local Player : Player = game.Players.LocalPlayer
 
 local HUD : ScreenGui = Player.PlayerGui:WaitForChild("HUD")
-local ViewportFrame : ViewportFrame = HUD.CharacterAppearance
+local ViewportFrame : ViewportFrame = HUD.Frame.CharacterAppearance
 local WorldModel : WorldModel = ViewportFrame.WorldModel
 
 local Camera : Camera = Instance.new("Camera")

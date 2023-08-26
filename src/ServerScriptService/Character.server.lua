@@ -10,6 +10,6 @@ Players.PlayerAdded:Connect(function(Player)
     Equipment.AddEquipment(Player, "M1911")
     Player.CharacterAdded:Connect(function(Character)
         task.wait()
-        Character.Parent = workspace.Characters
+        Character.Parent = workspace.Characters.Players
     end)
 end)

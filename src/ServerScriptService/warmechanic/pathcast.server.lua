@@ -39,25 +39,32 @@ print(priorityQueue.heapSort())
 local out = priorityQueue.heapSort()
 print(out)
 ]]
+--[[
 local queue = priorityQueue2.Create()
 for _, number in temp do
     queue:Enqueue(number)
 end
 print(queue:HeapSort())
-
+]]
 
 while true do
     --debug.profilebegin("Pathcast Begin")
-    local target = workspace.Characters:WaitForChild("poopnugget142")
+    --local target = workspace.Characters:WaitForChild("poopnugget142")
     --local target = workspace.Characters:WaitForChild("WarMechanist")
-    local part : BasePart = target.PrimaryPart
+    local targets = workspace.Characters.Players:GetChildren()
+    local parts = {}
+    for _, target in targets do
+        table.insert(parts, target.PrimaryPart)
+    end
 
-    if not part then return end
+    --local part : BasePart = target.PrimaryPart
+
+    if not parts then return end
     --print(type(target))
-    local velocity = part:GetVelocityAtPosition(part.position)*0.5
-    local position = (part.position + velocity) * Vector3.new(1,0,1)
+    --local velocity = part:GetVelocityAtPosition(part.position)*0.5
+    --local position = (part.position + velocity) * Vector3.new(1,0,1)
     
-    local flowfield = djikstra2.pathfind(part--[[position--[[, Vector3.new(5,0,5)]])
+    local flowfield = djikstra2.pathfind(table.unpack(parts)--[[position--[[, Vector3.new(5,0,5)]])
 
     repeat task.wait(0.25) until flowfield
 

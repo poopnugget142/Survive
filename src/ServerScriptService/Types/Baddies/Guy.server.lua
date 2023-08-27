@@ -30,7 +30,7 @@ CharacterStates[Enums.Baddies.Guy] = CharacterStates.World.factory(Enums.Baddies
         CharacterStates.Baddie.add(Entity)
 
         CharacterStates.MovementData.add(Entity)
-        CharacterStates.WalkSpeed.add(Entity, 20)
+        CharacterStates.WalkSpeed.add(Entity, 16)
         CharacterStates.AutoRotate.add(Entity)
         CharacterStates.Moving.add(Entity)
         

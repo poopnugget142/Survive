@@ -35,7 +35,7 @@ local function BindRigToCharacter(AddedCharacter : Model)
 
     for _, Instance in Character:GetDescendants() do
         if Instance:IsA("Script") or Instance:IsA("Motor6D")  then
-            Instance:Destroy()
+            --Instance:Destroy()
             continue
         end
     end
@@ -58,6 +58,7 @@ local function UpdateAnimations()
     for _, Part : BasePart in RealParts do
         local RootOffset = RealCharacter.HumanoidRootPart.CFrame:ToObjectSpace(Part.CFrame)
 
+        Character[Part.Name].Anchored = true
         Character[Part.Name].CFrame = Character.HumanoidRootPart.CFrame*RootOffset
     end
 end

@@ -108,7 +108,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
 
         if (travel ~= Vector3.zero and travel ~= nil) then
             local MovementData = CharacterStates.World.get(Character).MovementData
-            MovementData.MoveDirection = ((travel*2)+(MoveAwayVector*1)).Unit
+            MovementData.MoveDirection = ((travel*3)+(MoveAwayVector*1)).Unit
         end
 	    --return travel
     end

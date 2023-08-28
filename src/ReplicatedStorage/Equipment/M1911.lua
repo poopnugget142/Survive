@@ -128,7 +128,7 @@ Module.ServerGotItemID = function(Entity, ItemID)
             local DistanceToTerrain = (TerrainResult.Position - Origin).Magnitude
             
             --We set the ray length to the distance to character so you don't shoot people behind you
-            local CharacterResult = workspace:Spherecast(TerrainResult.Position, 0.5, -CharacterDirection*3--[[*DistanceToTerrain]], CharacterParams)
+            local CharacterResult = workspace:Spherecast(TerrainResult.Position, 0.5, CharacterDirection*3--[[*DistanceToTerrain]], CharacterParams)
 
             if not CharacterResult then continue end
 

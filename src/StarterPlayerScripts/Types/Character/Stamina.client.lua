@@ -72,6 +72,12 @@ RunService.RenderStepped:Connect(function(DeltaTime)
 
         local Fill : Frame = Stamina.Bar.Back.Fill
         Fill.Size = UDim2.new(Stamina.Current/Stamina.Max, 0, 1, 0)
+        local fillgradient = Fill.UIGradient.Offset
+        Fill.UIGradient.Offset = fillgradient - Vector2.new(
+            1/60 * 3 --delta
+            - (math.sign(fillgradient.X-1)+1) --if fillgradient.x > 1
+            + (math.sign(fillgradient.X+1)-1) --if fillgradient.x < 1
+        ,0)
 
         if Stamina.Current <= 0 then
             CharacterStates.Sprinting.remove(Character)

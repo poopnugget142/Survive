@@ -4,6 +4,7 @@ local InputActions = {
     ["Move Left"] = {Enum.KeyCode.A};
     ["Move Right"] = {Enum.KeyCode.D};
     ["Attack"] = {Enum.UserInputType.MouseButton1};
+    ["Sprint"] = {Enum.KeyCode.LeftShift};
 }
 
 local InputFunctions = {}

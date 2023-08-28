@@ -10,4 +10,5 @@ Player.CharacterAdded:Connect(function(Character)
     --temp
     local Entity = Equipment.CreateEntity("M1911")
     CharacterStates.LookAtMouse.add(Character)
+    CharacterStates.Stamina.add(Character, 5)
 end)

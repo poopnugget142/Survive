@@ -27,7 +27,7 @@ CharacterStates.Stamina = CharacterStates.World.factory("Stamina", {
 CharacterStates.Sprinting = CharacterStates.World.factory("Sprinting", {
     add = function(Factory, Entity : Model)
 
-        Entity.Humanoid.WalkSpeed = 24
+        --Entity.Humanoid.WalkSpeed = 24
 
         return true
     end;
@@ -48,20 +48,26 @@ end)
 RunService.RenderStepped:Connect(function(DeltaTime)
     for Character in CharacterStates.World.query{CharacterStates.Stamina} do
         local CharacterData = CharacterStates.World.get(Character)
-
         local Stamina = CharacterData.Stamina
+        local alpha = Stamina.Current/Stamina.Max
 
         if CharacterData.Sprinting then
             Stamina.Current -= DeltaTime
             Stamina.Bar.Enabled = true
+            Character.Humanoid.WalkSpeed = 16*(1-alpha) + 24*alpha --warmechanic code
         elseif Stamina.Current < Stamina.Max then
-            Stamina.Current += DeltaTime
+            Stamina.Current = math.min(
+                Stamina.Current + DeltaTime/2
+                ,Stamina.Max
+            )
+            --Stamina.Current += DeltaTime
             Stamina.Bar.Enabled = true
 
-            if Stamina.Current > Stamina.Max then
-                Stamina.Current = Stamina.Max
+            if Stamina.Current >= Stamina.Max then
+                --Stamina.Current = Stamina.Max
                 Stamina.Bar.Enabled = false
             end
+            Character.Humanoid.WalkSpeed = 16
         end
 
         local Fill : Frame = Stamina.Bar.Back.Fill

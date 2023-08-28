@@ -48,7 +48,7 @@ local function BindRigToCharacter(AddedCharacter : Model)
     Character:PivotTo(CFrame.new(0, 0, 0))
 
     Camera.FieldOfView = 70/Isometer
-    Camera.CFrame = CFrame.new(Vector3.new(2, 2, -4)*Isometer, Character.PrimaryPart.Position)
+    Camera.CFrame = CFrame.new(Vector3.new(2.25, 2.25, -4.5)*Isometer, Character.PrimaryPart.Position)
 
     Character.Parent = WorldModel
 end

@@ -54,6 +54,9 @@ RunService.RenderStepped:Connect(function(DeltaTime)
         if CharacterData.Sprinting then
             Stamina.Current -= DeltaTime
             Stamina.Bar.Enabled = true
+            
+            --it's not good to have speed that makes you move at inconsisten speeds
+            --(IT'S ALSO CONFUSING TO THE PLAYER)
             Character.Humanoid.WalkSpeed = 16*(1-alpha) + 24*alpha --warmechanic code
         elseif Stamina.Current < Stamina.Max then
             Stamina.Current = math.min(
@@ -81,7 +84,6 @@ RunService.RenderStepped:Connect(function(DeltaTime)
 
         if Stamina.Current <= 0 then
             CharacterStates.Sprinting.remove(Character)
-            print("Stopped")
         end
     end
 end)

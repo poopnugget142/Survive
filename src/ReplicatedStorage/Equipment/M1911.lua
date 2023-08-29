@@ -12,56 +12,19 @@
 --initialise dependencies
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
-local Debris = game:GetService("Debris")
-local TweenService = game:GetService("TweenService")
 
 local Remotes = ReplicatedStorage.Remotes
-local JunkFolder = workspace:WaitForChild("JunkFolder")
-local CharactersFolder = workspace:WaitForChild("Characters")
 
 local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
-local ballistics = require(ReplicatedStorage.Scripts.Util.Ballistics)
-local ballistics2 = require(ReplicatedStorage.Scripts.Util.ballistics2)
-local PlayerModule = require(ReplicatedStorage.Scripts.Class.Player)
-local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
+local GunModule = require(ReplicatedStorage.Scripts.Class.Gun)
+local Enums = require(ReplicatedStorage.Scripts.Enums)
+
+local GunEnum = Enums.Gun.M1911
 
 local Attack : RemoteEvent = Remotes.Custom.Attack
 local SetEquipmentModel : RemoteEvent = Remotes.SetEquipmentModel
 
 local Player = Players.LocalPlayer
-
-local TerrainParams = RaycastParams.new()
-TerrainParams.IgnoreWater = true
-TerrainParams.FilterType = Enum.RaycastFilterType.Exclude
-TerrainParams.FilterDescendantsInstances = {JunkFolder, CharactersFolder}
-
-local CharacterParams = RaycastParams.new()
-CharacterParams.IgnoreWater = true
-CharacterParams.FilterType = Enum.RaycastFilterType.Include
-CharacterParams.FilterDescendantsInstances = {CharactersFolder.Baddies}
-
-local caster = ballistics.CreateCaster()
-local bullet = Instance.new("Part")
-    bullet.Anchored = true 
-    bullet.CanCollide = false
-    bullet.Size = Vector3.new(0.2, 0.2, 2)
-    bullet.Color = Color3.fromRGB(255, 248, 35)
-    bullet.Material = Enum.Material.Neon
-
-local castBehaviour = ballistics.CreateCastBehavior()
-    castBehaviour.CosmeticBulletTemplate = bullet
-    castBehaviour.Acceleration = Vector3.zero
-    castBehaviour.Container = JunkFolder
-
-local castBehaviour2 = ballistics2.CreateCastBehavior()
-    castBehaviour2.CosmeticBulletTemplate = bullet
-    castBehaviour2.Container = JunkFolder
-    castBehaviour2.MoveFunction = function(origin : Vector3, target : Vector3, alpha : number)
-        local alphaMax = math.min(alpha, 1)
-        local position : Vector3 = origin:Lerp(target, alpha) --+ Vector3.yAxis*math.sin(alphaMax*math.pi)*(target-origin).Magnitude*0.5
-        return position
-    end
-
 
 local Module = {}
 
@@ -85,72 +48,13 @@ Module.ServerGotItemID = function(Entity, ItemID)
             local HumanoidRootPart = Character.PrimaryPart
             local Origin = HumanoidRootPart.Position
 
-            local MouseCast = PlayerModule.MouseCast(TerrainParams, 10000)
-            if not MouseCast then continue end
+            local BulletResult = GunModule.BulletShoot(Origin)
 
-            local AimPosition = MouseCast.Position
-            
-            local DistanceToAim = (AimPosition-Origin).Magnitude
+            --AlphaPart.Spawn(CastBehaviour, Origin, TerrainResult.Position * Vector3.new(1,0,1) + Origin * Vector3.yAxis, 200)
 
-            local spreadPermutations = 10^5 --number of subdivisions of 1 that can occur due to math.random
+            GunModule.CreateTracer(Origin, BulletResult.TerrainResult.Position, GunEnum, Enums.Bullet["9mmTracer"])
 
-            --deviation += Vector3.xAxis--(AimPosition-Origin)
-            
-            local Circularity = math.sin(math.rad( math.random(0, 180))) --defines the hit position of a bullet in a circular spread
-            local AimTarget = AimPosition + (
-                Vector3.new(
-                    math.random(-spreadPermutations, spreadPermutations)/spreadPermutations * Circularity
-                    , 0
-                    , math.random(-spreadPermutations, spreadPermutations)/spreadPermutations * (1-Circularity)
-                ).Unit * (DistanceToAim*math.tan(math.rad(5)/2)) --offset 
-                * math.random(-spreadPermutations, spreadPermutations)/spreadPermutations
-            ) --+ deviation
-            --print(deviation)
-
-            local TerrainDirection = CFrame.new(Origin, AimTarget).LookVector
-            local TerrainResult = workspace:Raycast(Origin, TerrainDirection*200, TerrainParams)
-            if not TerrainResult then continue end
-
-            local Part = Instance.new("Part")
-            Part.Color = Color3.new(1, 0, 0)
-            Part.Anchored = true
-            Part.CanCollide = false
-            Part.Position = TerrainResult.Position
-            Part.Size = Vector3.new(0.5, 0.5, 0.5)
-            Part.Parent = JunkFolder
-            Debris:AddItem(Part, 1)
-
-            --ballistics.SpawnBullet(caster, castBehaviour, Origin, (TerrainResult.Position - Origin).Unit*Vector3.new(1,0,1)*100)
-            ballistics2.SpawnBullet(castBehaviour2, Origin, TerrainResult.Position * Vector3.new(1,0,1) + Origin * Vector3.yAxis, 200)
-            
-
-            local CharacterDirection = CFrame.new(TerrainResult.Position, Origin).LookVector
-            local DistanceToTerrain = (TerrainResult.Position - Origin).Magnitude
-            
-            --We set the ray length to the distance to character so you don't shoot people behind you
-            local CharacterResult = workspace:Spherecast(TerrainResult.Position, 0.5, CharacterDirection*3--[[*DistanceToTerrain]], CharacterParams)
-
-            if not CharacterResult then continue end
-
-            local HitPart = CharacterResult.Instance
-            local HitCharacter = CharacterModule.FindFirstCharacter(HitPart)
-
-            if not HitCharacter then continue end
-
-            Attack:FireServer(ItemID, HitCharacter)
-
-            local OldHighlight = HitCharacter:FindFirstChildWhichIsA("Highlight")
-            if OldHighlight then
-                OldHighlight:Destroy()
-            end
-
-            local Highlight = Instance.new("Highlight")
-            Highlight.Parent = HitCharacter
-            Highlight.FillColor = Color3.fromRGB(255, 0, 0)
-            Highlight.FillTransparency = 0
-            TweenService:Create(Highlight, TweenInfo.new(0.5), {["FillTransparency"] = 1}):Play()
-            TweenService:Create(Highlight, TweenInfo.new(0.5), {["OutlineTransparency"] = 1}):Play()
-            Debris:AddItem(Highlight, 0.5)
+            Attack:FireServer(ItemID, BulletResult.TerrainResult.Position, BulletResult.HitCharacter)
         end
     end)
 

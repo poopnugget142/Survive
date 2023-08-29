@@ -7,6 +7,12 @@ end
 
 return {
     Baddies = {
-        Guy = NextId()
-    }
+        Guy = NextId();
+    },
+    Gun = {
+        M1911 = NextId();
+    },
+    Bullet = {
+        ["9mmTracer"] = NextId()
+    };
 }

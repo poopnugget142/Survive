@@ -7,6 +7,8 @@ local World = Stew.world()
 
 local Module = {}
 
+Module.Shooting = World.tag("Shooting")
+
 Module.Name = World.factory("Name", {
     add = Util.EasyStewReturn;
 })

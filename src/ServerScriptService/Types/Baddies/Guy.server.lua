@@ -41,7 +41,7 @@ CharacterStates[Enums.Baddies.Guy] = CharacterStates.World.factory(Enums.Baddies
 local NearbyParams = OverlapParams.new()
 NearbyParams.FilterDescendantsInstances = {CharactersFolder.Baddies}
 NearbyParams.FilterType = Enum.RaycastFilterType.Include
-NearbyParams.RespectCanCollide = true
+NearbyParams.RespectCanCollide = false
 
 
 RunService.Heartbeat:Connect(function(deltaTime)

@@ -143,7 +143,7 @@ Module.ServerGotItemID = function(Entity, ItemID)
 
             if not BulletResult.TerrainResult then continue end
 
-            GunModule.CreateTracer(Origin, BulletResult.TerrainResult.Position, GunEnum, Enums.Bullet["9mmTracer"])
+            GunModule.CreateTracer(Origin, BulletResult.TerrainResult.Position*Vector3.new(1,0,1) + Origin*Vector3.yAxis, GunEnum, Enums.Bullet["9mmTracer"])
 
             Attack:FireServer(ItemID, BulletResult.TerrainResult.Position, BulletResult.HitCharacter)
         end

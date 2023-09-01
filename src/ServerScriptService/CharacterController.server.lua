@@ -10,14 +10,15 @@ local PRECISION = 0.001
 
 local Module = {}
 
+
 local function StepSpring(framerate, position, velocity, destination, stiffness, damping, precision)
-	local displacement = position - destination
-	local springForce = -stiffness * displacement
-	local dampForce = -damping * velocity
+	local displacement = position - destination             --s
+	local springForce = -stiffness * displacement           --stretch the acceleration depending on target distance
+	local dampForce = -damping * velocity                   --constrain acceleration from going too high
 
 	local acceleration = springForce + dampForce
-	local newVelocity = velocity + acceleration * framerate
-	local newPosition = position + velocity * framerate
+	local newVelocity = velocity + acceleration * framerate --v = u + at
+	local newPosition = position + velocity * framerate     --s = ut
 
 	if math.abs(newVelocity) < precision and math.abs(destination - newPosition) < precision then
 		return destination, 0
@@ -25,6 +26,7 @@ local function StepSpring(framerate, position, velocity, destination, stiffness,
 
 	return newPosition, newVelocity
 end
+
 
 RunService.Heartbeat:Connect(function(DeltaTime)
     for Character : Model in CharacterStates.World.query{CharacterStates.Moving} do
@@ -35,14 +37,17 @@ RunService.Heartbeat:Connect(function(DeltaTime)
 
         if not Primary then continue end
 
+        --[[ --no mover / aligner
         local Mover : VectorForce = Primary.Mover
         local Aligner : AlignOrientation = Primary.Aligner
+        ]]
 
         local AutoRotate = CharacterStates.World.get(Character).AutoRotate
 
-        local Velocity = Primary.AssemblyLinearVelocity
+        local Velocity = MovementData.Velocity or Vector3.zero
         local CurrentVelocityX = Velocity.X
         local CurrentVelocityZ = Velocity.Z
+
 
         local TargetVelocity = Vector3.new()
 
@@ -60,9 +65,11 @@ RunService.Heartbeat:Connect(function(DeltaTime)
 
         local LookDirection = Vector3.new(-MovementData.LookDirection.X, 0, MovementData.LookDirection.Z)
 
+        --[[ --no mover / aligner
         if LookDirection.Magnitude > 0 then
             Aligner.Attachment0.CFrame = CFrame.lookAt(Vector3.new(), LookDirection)
         end
+        ]]
 
         --Incremeants time
         MovementData.AccumulatedTime = (MovementData.AccumulatedTime or 0) + DeltaTime
@@ -91,10 +98,15 @@ RunService.Heartbeat:Connect(function(DeltaTime)
             )
         end
 
-        Mover.Enabled = true
+        Velocity = Vector3.new(CurrentVelocityX, 0, CurrentVelocityZ)
+        MovementData.Velocity = Velocity
+
+        Character:PivotTo(CFrame.new(Primary.Position + MovementData.Velocity * DeltaTime))
+
+        --Mover.Enabled = true
 
         --Applies forces
-        Mover.Force = Vector3.new(MovementData.CurrentAccelerationX, 0, MovementData.CurrentAccelerationZ)*Primary.AssemblyMass
+        --Mover.Force = Vector3.new(MovementData.CurrentAccelerationX, 0, MovementData.CurrentAccelerationZ)*Primary.AssemblyMass
     end
 end)
 

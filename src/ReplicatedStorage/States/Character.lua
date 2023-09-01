@@ -43,6 +43,8 @@ Module.MovementData = World.factory("MovementData", {
         return {
             MoveDirection =  Vector3.new();
             LookDirection = Vector3.new();
+            Velocity = Vector3.new();
+            Acceleration = Vector3.new();
             AccumulatedTime = 0;
         }
     end;

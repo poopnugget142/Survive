@@ -11,6 +11,6 @@ return function (context, Amount)
         CharacterStates[Enums.Baddies.Guy].add(Nasty)
 
         Nasty.Parent = workspace.Characters.Baddies
-        Nasty.PrimaryPart:SetNetworkOwner(nil)
+        --Nasty.PrimaryPart:SetNetworkOwner(nil)
     end
 end

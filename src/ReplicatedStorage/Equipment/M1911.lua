@@ -49,16 +49,25 @@ Module.Give = function(Entity)
     --IK Attachments
     local IKGoal = Instance.new("Attachment")
     IKGoal.Parent = HumanoidRootPart
-    IKGoal.Position = Vector3.new(1.5, 0.5, -1.5)
+    IKGoal.Position = Vector3.new(0.5, 0.5, -1.5)
     IKGoal.CFrame *= CFrame.Angles(math.rad(90), 0, 0)
     IKGoal.Name = "IKGoal"
 
     local Pole = Instance.new("Attachment")
     Pole.Parent = HumanoidRootPart
-    Pole.Position = Vector3.new(1, 0, 1)
+    Pole.Position = Vector3.new(10, 0, 1)
     Pole.Name = "Pole"
 
+    --[[
+        note from yours truly
+        i commented out your constraints because they dont really seem to be doing much
+            (the arm and the elbow dont connect very well?)
+        
+        i advise hard coding some rotation adjustments instead
+    ]]
+
     --Elbow Constraint
+
     local RightElbowConstraint = Instance.new("HingeConstraint")
     RightElbowConstraint.Visible = true
     RightElbowConstraint.Parent = Character.RightLowerArm
@@ -76,6 +85,7 @@ Module.Give = function(Entity)
     RightElbowConstraint.Attachment1 = RightElbowConstraintAttachment1
 
     --Wrist Constraint
+    
     local RightWristConstraint = Instance.new("BallSocketConstraint")
     RightWristConstraint.Parent = Character.RightHand
     RightWristConstraint.Name = "LeftWristConstraint"
@@ -94,7 +104,7 @@ Module.Give = function(Entity)
 
     RightWristConstraint.LimitsEnabled = true
     RightWristConstraint.UpperAngle = 80
-
+    
     --IK Control Set up
     local IKControl = Instance.new("IKControl")
     IKControl.Name = "RightArmControl"

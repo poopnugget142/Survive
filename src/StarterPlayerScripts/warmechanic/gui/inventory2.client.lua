@@ -25,40 +25,46 @@ local stew = require(replicatedStorage.Packages.Stew)
 local world = stew.world()
 
 
-inventory_cellFlag = world.factory("inventory_cellFlag", {
-    add = function(_, Entity : any, GuiObject : GuiButton)
-        return 
-        {
-            cell = Entity
-            ,_ = nil --no names
-            ,itemIndex = nil
-            ,GuiObject = GuiObject
-        }
-    end
-})
+type InventoryCell = {
+    Dummy : GuiObject; --frame
+    CellItemIndex : number; --index that leads to item
+}
+type InventoryItem = {
+    Dummy : GuiObject; --frame
+    ItemShape : table; --table of vector2 offsets that define shape
+    ItemPosition : Vector2; --position relative to inventory origin (0,0 = top left)
+}
 
 
---what other information does this item contain? talk with poop later
-inventory_item = world.factory("inventory_item", { 
-    add = function(_, Entity : any, positions : table, GuiObject : GuiObject)
-        return
-        {
-            item = Entity
-            ,_ = nil --no names
-            ,GuiObject = GuiObject
-        }
-    end
-})
+local frameStartPosition = screenGui.mainFrame.inventoryFrame.cellStorage.AbsolutePosition * screenGui.mainFrame.inventoryFrame.cellStorage.AbsoluteSize
 
-local frameStartPosition = screenGui.mainFrame.inventoryFrame.cellStorage.AbsolutePosition - screenGui.mainFrame.inventoryFrame.cellStorage.AbsoluteSize/2
+local BuildCell = function(Position : Vector2) -- silly function for creating a new cell
+    return {
+        Dummy = nil;
+        CellPosition = Position;
+        CellItemIndex = nil;
+    }
+end :: InventoryCell
+local BuildItem = function() -- silly function for creating a new item
+    return {
+        Dummy = nil;
+        ItemShape = nil;
+        ItemPosition = nil;
+    }
+end :: InventoryItem
 
+
+local ItemCells = {}
+local itemItems = {}
+local CellHovering : InventoryCell
+local ItemHovering : InventoryItem--item the player is hovering (directly) over
+local ItemPicking : InventoryItem--item the player has picked with their mouse
 
 --generate 10x10 inventory cells
-local itemCells = {}
 for i = 1, 10 do
     for j = 1, 10 do
-        if not itemCells[i] then
-			itemCells[i] = {}
+        if not ItemCells[i] then
+			ItemCells[i] = {}
 		end
 
         local instance : GuiObject = screenGui.mainFrame.inventoryFrame.prefabs.itemCell:Clone()
@@ -68,59 +74,90 @@ for i = 1, 10 do
         instance.Size = UDim2.fromScale(1/10,1/10)
         instance.BackgroundTransparency = 0
         
-        instance.MouseEnter:Connect(function() 
-            print(i .. ", " .. j) 
-            instance.BackgroundColor3 = Color3.fromHSV(0,0,.5)
-        end)
+        local NewCell : InventoryCell = BuildCell(Vector2.new(i,j))
+        NewCell.Dummy = instance
+        NewCell.CellPosition = Vector2.new(i,j)
+        NewCell.CellItemIndex = nil
+
         instance.MouseLeave:Connect(function() 
+            CellHovering = nil
+            ItemHovering = nil
             instance.BackgroundColor3 = Color3.fromHSV(0,0,1)
         end)
+        instance.MouseEnter:Connect(function() 
+            --print(NewCell) 
+            task.wait()
+            CellHovering = NewCell
+            print(CellHovering)
+            if (NewCell.CellItemIndex ~= nil) then --check to see if cell has item
+                ItemHovering = itemItems[NewCell.CellItemIndex]
+                print(ItemHovering)
+            end
+            instance.BackgroundColor3 = Color3.fromHSV(0,0,.5)
+        end)
 
-        local entity = world.entity(Vector2.new(i,j))--world.Entity.Register( tostring(Vector2.new(i,j)) )
-        --print(entity)
-        if (entity ~= nil) then
-            --local component = inventory_cellFlag.add(entity, instance)
-            --print(component)
-
-            itemCells[i][j] = entity
-        end
+        ItemCells[i][j] = NewCell
 
         --print("iterate")
     end
 end
-print(itemCells)
+--print(ItemCells)
 
-local itemItems = {}
+if true then --debug test item
+    local newDummy : GuiObject = screenGui.mainFrame.inventoryFrame.prefabs.itemButton:Clone()
+    newDummy.Parent = screenGui.mainFrame.inventoryFrame.itemStorage
+    newDummy.Position = UDim2.fromScale((1-0.5)/10,(1-0.5)/10)
+    newDummy.Size = UDim2.fromScale(1/10,1/10)
+    newDummy.BackgroundTransparency = 0
 
---local testItemScale = Vector2.new(1,1)
+    local newItem : InventoryItem = BuildItem()
+    newItem.Dummy = newDummy
+    newItem.ItemShape = {Vector2.new(0,0)}
+    newItem.ItemPosition = Vector2.new(1,1)
+    table.insert(itemItems, newItem)
 
-if true then
-    local instance : GuiObject = screenGui.mainFrame.inventoryFrame.prefabs.itemButton:Clone()
-    instance.Parent = screenGui.mainFrame.inventoryFrame.itemStorage
-    instance.Position = UDim2.fromScale((1-0.5)/10,(1-0.5)/10)
-    instance.Size = UDim2.fromScale(1/10,1/10)
-    instance.BackgroundTransparency = 0
-
-    local entity = world.entity()
-    if (entity ~= nil) then
-        local component = inventory_item.add(entity, {Vector2.new(1,1)}, instance)
-        --print(component)
-
-        itemItems[1] = entity
-    end
-    --print(itemItems)
+    ItemCells[1][1].CellItemIndex = 1
 end
-local templates : GuiObject = screenGui.mainFrame.inventoryFrame.itemStorage:GetChildren()
+--local templates : GuiObject = screenGui.mainFrame.inventoryFrame.itemStorage:GetChildren()
+
+--left click handler, pick up and put down items
+userInputService.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        if ItemHovering and not ItemPicking then
+            ItemPicking = ItemHovering
+            ItemHovering = nil
+        else
+            if ItemPicking then
+                --dummy stuff
+                ItemPicking.Dummy.Parent = screenGui.mainFrame.inventoryFrame.itemStorage
+                ItemPicking.Dummy.Position = UDim2.fromScale((CellHovering.CellPosition.X-0.5)/10,(CellHovering.CellPosition.Y-0.5)/10)
+                
+                for _, ItemOffset in ItemPicking.ItemShape do --delete previous item reference
+                    ItemCells[ItemPicking.ItemPosition.X + ItemOffset.X][ItemPicking.ItemPosition.Y + ItemOffset.Y-1].CellItemIndex = nil
+                end
+                --local itemIndex = table.find(itemItems, ItemPicking)
+                for _, ItemOffset in ItemPicking.ItemShape do --add new item reference
+                    ItemCells[CellHovering.CellPosition.X + ItemOffset.X][CellHovering.CellPosition.Y + ItemOffset.Y-1].CellItemIndex = 1--itemIndex
+                end
+                ItemPicking.ItemPosition = CellHovering.CellPosition
+                --CellHovering.MouseEnter()
+                print("Bing Chilling!")
+                ItemHovering = ItemPicking --allows the player to pick up the item directly after placing it
+                ItemPicking = nil
+            end
+            
+        end
+    end
+end)
 
 
 
 
 
 
-
-
-
-
-
-
-
+runService.RenderStepped:Connect(function(deltaTime)
+    if ItemPicking then
+        ItemPicking.Dummy.Parent = screenGui
+        ItemPicking.Dummy.Position = UDim2.fromOffset(userInputService:GetMouseLocation().X, userInputService:GetMouseLocation().Y)
+    end
+end)

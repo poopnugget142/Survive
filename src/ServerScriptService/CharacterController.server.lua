@@ -1,12 +1,17 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+--for raycastparams
+local CharactersFolder = workspace:WaitForChild("Characters")
+local JunkFolder = workspace:WaitForChild("JunkFolder")
+
 local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 
 local FRAMERATE = 1 / 240
 local STIFFNESS = 300
 local DAMPING = 30
 local PRECISION = 0.001
+local STEPHEIGHT = 1
 
 local Module = {}
 
@@ -27,6 +32,10 @@ local function StepSpring(framerate, position, velocity, destination, stiffness,
 	return newPosition, newVelocity
 end
 
+local TerrainParams = RaycastParams.new()
+TerrainParams.IgnoreWater = true
+TerrainParams.FilterType = Enum.RaycastFilterType.Exclude
+TerrainParams.FilterDescendantsInstances = {JunkFolder, CharactersFolder}
 
 RunService.Heartbeat:Connect(function(DeltaTime)
     for Character : Model in CharacterStates.World.query{CharacterStates.Moving} do
@@ -55,7 +64,7 @@ RunService.Heartbeat:Connect(function(DeltaTime)
 
         if MoveDirection.Magnitude > 0 then
             --If MoveDirection magnititude is 0 then we get nan
-            TargetVelocity = Vector3.new(MoveDirection.X, 0, MoveDirection.Z).Unit * CharacterData.WalkSpeed
+            TargetVelocity = (MoveDirection*Vector3.new(1,0,1)).Unit * CharacterData.WalkSpeed
 
             --If autorotate is on and were moving then make character face towards move direction
             if AutoRotate then
@@ -63,13 +72,14 @@ RunService.Heartbeat:Connect(function(DeltaTime)
             end
         end
 
-        local LookDirection = Vector3.new(-MovementData.LookDirection.X, 0, MovementData.LookDirection.Z)
+        --local LookDirection = Vector3.new(-MovementData.LookDirection.X, 0, MovementData.LookDirection.Z)
 
         --[[ --no mover / aligner
         if LookDirection.Magnitude > 0 then
             Aligner.Attachment0.CFrame = CFrame.lookAt(Vector3.new(), LookDirection)
         end
         ]]
+        --Primary.CFrame = Primary.CFrame * CFrame.lookAt(Vector3.new(), LookDirection)
 
         --Incremeants time
         MovementData.AccumulatedTime = (MovementData.AccumulatedTime or 0) + DeltaTime
@@ -98,10 +108,59 @@ RunService.Heartbeat:Connect(function(DeltaTime)
             )
         end
 
+        --raycasting
         Velocity = Vector3.new(CurrentVelocityX, 0, CurrentVelocityZ)
+
+
+
+        local wallCheck : RaycastResult = workspace:Raycast(
+            Primary.Position+Velocity*DeltaTime+Vector3.yAxis*100
+            ,-Vector3.yAxis*(100+STEPHEIGHT+0.001)
+            ,TerrainParams
+        )
+        local step = 0
+        if (wallCheck) then
+            step = 100-wallCheck.Distance
+            if (math.abs(step) > STEPHEIGHT) then
+                Velocity *= Velocity.Magnitude/CharacterData.WalkSpeed -2
+                step=0
+                --Velocity -= MoveDirection / Velocity.Magnitude * 10
+            end
+        end
+
         MovementData.Velocity = Velocity
 
-        Character:PivotTo(CFrame.new(Primary.Position + MovementData.Velocity * DeltaTime))
+        local newPosition = Primary.Position + Vector3.yAxis*step + MovementData.Velocity*DeltaTime
+        local lookDirection = (Velocity.Unit*0.85 + MovementData.travel.Unit*0.15).Unit
+        --if (lookDirection == Vector3.zero or lookDirection == nil) then
+        --    lookDirection = Vector3.zAxis
+        --end
+
+        local newCFrame : CFrame= CFrame.identity
+        newCFrame += newPosition
+        --print(MovementData.travel)
+        if (MovementData.travel ~= nil) then
+        --    newCFrame *= CFrame.fromAxisAngle(-Vector3.yAxis, math.rad(90) + math.atan2(lookDirection.Z, lookDirection.X) or 0)
+        end
+        --newCFrame = CFrame.lookAt(newPosition, newCFrame:PointToWorldSpace(lookDirection))
+        
+        
+        
+        --[[if (newCFrame.Position.Y <= -1000) then
+            newCFrame = CFrame.identity
+            Velocity = 0
+        end
+        newCFrame += newPosition]]
+        --[[
+        if (newCFrame.Position.Magnitude >= 10000) then
+            newCFrame = CFrame.new(newPosition)
+        end
+        ]]
+
+        Character:PivotTo(
+            newCFrame
+        )
+        --Character.Model:PivotTo(CFrame:new(Vector3.zero, lookDirection))
 
         --Mover.Enabled = true
 

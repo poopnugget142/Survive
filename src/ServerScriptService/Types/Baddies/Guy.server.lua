@@ -30,7 +30,7 @@ CharacterStates[Enums.Baddies.Guy] = CharacterStates.World.factory(Enums.Baddies
         CharacterStates.Baddie.add(Entity)
 
         CharacterStates.MovementData.add(Entity)
-        CharacterStates.WalkSpeed.add(Entity, 20)
+        CharacterStates.WalkSpeed.add(Entity, 14)
         CharacterStates.AutoRotate.add(Entity)
         CharacterStates.Moving.add(Entity)
         
@@ -72,9 +72,13 @@ RunService.Heartbeat:Connect(function(deltaTime)
         else 
             travel = pathfinding.boxSolve(root.Position * Vector3.new(1,0,1))
         end
+        --[[NOTE
+            if the travel's angle is within THETA of the player, snap the move direction towards the player
+        ]]
+
 
         --Get nearby parts that belong to baddies
-        local NearbyBaddieDistance = 3
+        local NearbyBaddieDistance = 4
         local NearbyBaddieParts = workspace:GetPartBoundsInRadius(root.Position, NearbyBaddieDistance, NearbyParams)
 
         local NearbyBaddies = {}
@@ -91,24 +95,25 @@ RunService.Heartbeat:Connect(function(deltaTime)
         end
 
         --Calculate the average position
-        local BaddieAveragePosition = Vector3.zero
+        local BaddieCumulativePosition = Vector3.zero
         for i, OtherCharacter : Model in NearbyBaddies do
             local Difference = (OtherCharacter.PrimaryPart.Position-root.Position)
-            BaddieAveragePosition += Difference*(math.max(0.1, 1-Difference.Magnitude/NearbyBaddieDistance))^0.5
+            BaddieCumulativePosition += Difference*(math.max(0.001, 1-Difference.Magnitude/NearbyBaddieDistance))^0.5
         end
-        BaddieAveragePosition = BaddieAveragePosition--/(math.max(#NearbyBaddies, 1))
+        BaddieCumulativePosition = BaddieCumulativePosition--/(math.max(#NearbyBaddies, 1))
 
         --Reverse the vector
         local MoveAwayVector
-        if BaddieAveragePosition.Magnitude == 0 then
+        if BaddieCumulativePosition.Magnitude == 0 then
             MoveAwayVector = Vector3.zero
         else
-            MoveAwayVector = -(BaddieAveragePosition)
+            MoveAwayVector = -(BaddieCumulativePosition)
         end
 
         if (travel ~= Vector3.zero and travel ~= nil) then
             local MovementData = CharacterStates.World.get(Character).MovementData
-            MovementData.MoveDirection = ((travel*3)+(MoveAwayVector*1)).Unit
+            MovementData.MoveDirection = ((travel*1)+(MoveAwayVector*3)).Unit
+            MovementData.travel = travel
         end
 	    --return travel
     end

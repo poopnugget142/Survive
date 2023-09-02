@@ -125,7 +125,7 @@ Module.ServerGotItemID = function(Entity, ItemID)
     local EquipmentData = EquipmentStates.World.get(Entity)
 
     local Model = EquipmentData.Model
-
+    
     KeyBindings.BindAction("Attack", Enum.UserInputState.Begin, function()
         shooting = true
         local deviation = Vector3.zero

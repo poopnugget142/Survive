@@ -1,10 +1,19 @@
 local InputActions = {
-    ["Move Forward"] = {Enum.KeyCode.W};
-    ["Move Backward"] = {Enum.KeyCode.S};
-    ["Move Left"] = {Enum.KeyCode.A};
-    ["Move Right"] = {Enum.KeyCode.D};
-    ["Attack"] = {Enum.UserInputType.MouseButton1};
-    ["Sprint"] = {Enum.KeyCode.LeftShift};
+    ["Move Forward"] =          {Enum.KeyCode.W}
+    ;["Move Backward"] =        {Enum.KeyCode.S}
+    ;["Move Left"] =            {Enum.KeyCode.A}
+    ;["Move Right"] =           {Enum.KeyCode.D}
+    ;["Attack"] =               {Enum.UserInputType.MouseButton1}
+    ;["Sprint"] =               {Enum.KeyCode.LeftShift}
+    ;["Reload"] =               {Enum.KeyCode.R}
+
+    --inventory controls
+    ;["Inventory_Open"] =       {Enum.KeyCode.Tab}
+    ;["Inventory_Interact1"] =  {Enum.UserInputType.MouseButton1} --mouse1, typically item pick
+    ;["Inventory_Interact2"] =  {Enum.UserInputType.MouseButton2} --mouse2, typically item place
+    ;["Inventory_RotateLeft"] =     {Enum.KeyCode.Q}
+    ;["Inventory_RotateRight"] =     {Enum.KeyCode.E}
+    ;
 }
 
 local InputFunctions = {}

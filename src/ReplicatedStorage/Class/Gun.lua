@@ -64,11 +64,11 @@ Module.BulletShoot = function(Origin : Vector3)
     Debris:AddItem(Part, 1)
     
 
-    local CharacterDirection = CFrame.new(TerrainResult.Position, Origin).LookVector
+    local CharacterDirection = CFrame.new(Origin, TerrainResult.Position).LookVector
     local DistanceToTerrain = (TerrainResult.Position - Origin).Magnitude
     
     --We set the ray length to the distance to character so you don't shoot people behind you
-    local CharacterResult = workspace:Spherecast(TerrainResult.Position, 0.5, CharacterDirection*3--[[*DistanceToTerrain]], CharacterParams)
+    local CharacterResult = workspace:Spherecast(TerrainResult.Position-CharacterDirection, 1, CharacterDirection*3--[[*DistanceToTerrain]], CharacterParams)
 
     if not CharacterResult then return ShootData end
 

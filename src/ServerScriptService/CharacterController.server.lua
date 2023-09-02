@@ -136,8 +136,15 @@ RunService.Heartbeat:Connect(function(DeltaTime)
         --    lookDirection = Vector3.zAxis
         --end
 
-        local newCFrame : CFrame= CFrame.identity
-        newCFrame += newPosition
+        local LookDirection = Vector3.new(-MovementData.LookDirection.X, 0, MovementData.LookDirection.Z)
+
+        local Angle = CFrame.identity
+        if Velocity.Magnitude > 0 then
+            Angle = CFrame.lookAt(Vector3.zero, Velocity.Unit)
+        end
+
+        local newCFrame : CFrame = CFrame.new(newPosition)*Angle
+        --newCFrame += newPosition
         --print(MovementData.travel)
         if (MovementData.travel ~= nil) then
         --    newCFrame *= CFrame.fromAxisAngle(-Vector3.yAxis, math.rad(90) + math.atan2(lookDirection.Z, lookDirection.X) or 0)

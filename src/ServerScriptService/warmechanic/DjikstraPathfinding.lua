@@ -281,4 +281,14 @@ module.boxSolve = function(position : Vector3)
     return finalVector
 end
 
+module.getTile = function(position : Vector3)
+    position = Vector3.new(
+        math.round(position.X/TileSize.X),
+        math.round(position.Y/TileSize.Y),
+        math.round(position.Z/TileSize.Z)
+    )
+    local path = world.get(position).NavData
+    return path
+end
+
 return module

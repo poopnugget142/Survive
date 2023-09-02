@@ -48,10 +48,10 @@ RunService.Heartbeat:Connect(function(deltaTime)
     
     for Character in CharacterStates.World.query{CharacterStates[Enums.Baddies.Guy]} do
         local targets = pathfinding.targets
-	    local distanceThreshold = 10
+	    local distanceThreshold = math.huge
 
         local finalTarget
-        local finalDistance = distanceThreshold + 1
+        local finalDistance = distanceThreshold
 
         local root : BasePart = Character.PrimaryPart
 
@@ -67,11 +67,27 @@ RunService.Heartbeat:Connect(function(deltaTime)
         --print(finalDistance)
 
         local travel = Vector3.zero
-        if (finalDistance <= distanceThreshold) then
-            travel = (finalTarget - root.Position).Unit
-        else 
-            travel = pathfinding.boxSolve(root.Position * Vector3.new(1,0,1))
+        local displacement : Vector3
+        if (finalTarget) then
+            displacement = (finalTarget - root.Position) * Vector3.new(1,0,1)
         end
+        --if (finalDistance <= distanceThreshold) then
+        --    travel = (finalTarget - root.Position).Unit
+        --else
+        if (pathfinding.getTile(root.Position * Vector3.new(1,0,1) )) then
+            travel = pathfinding.boxSolve(root.Position * Vector3.new(1,0,1))
+            if (displacement) then
+                local theta = math.acos(travel:Dot(displacement.Unit))
+                --print(math.deg(theta))
+                if (theta <= math.rad(45)) then
+                    travel = displacement.Unit
+                end
+            end
+        else
+            travel = -root.Position.Unit
+        end
+        --end
+
         --[[NOTE
             if the travel's angle is within THETA of the player, snap the move direction towards the player
         ]]

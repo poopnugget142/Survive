@@ -151,7 +151,7 @@ Module.Burning = World.factory("Burning", {
                     (EntityData.Burning+0.5) * deltaTime --Burn falloff is a derivation of x(x+1)/2 --> x+1/2
                     ,0
                 )
-                fire.Size = EntityData.Burning*0.1
+                fire.Size = (EntityData.Burning)^0.5
                 print(EntityData.Health.Current)
                 print(EntityData.Burning)
 

@@ -1,11 +1,6 @@
 --[[
     notetaking
 
-    store item indices in stew components at positions, makes it easy to check item overlap
-
-    rehash modulo math later to be in terms of inventory frame size rather than screen size,
-        so conversions dont need to be done between them
-
     add support for multiple inventories / subinventories in inventories (ammo case in player backpack)
 ]]
 --initialise dependencies
@@ -33,7 +28,7 @@ type InventoryCell = {
     ;
 }
 type InventoryItem = {
-    Dummy : GuiObject --frame\
+    Dummy : GuiObject --frame
     ;ItemIndex : number
     ;ItemShape : table --table of vector2 offsets that define shape
     ;ItemPosition : Vector2 --position relative to inventory origin (0,0 = top left)
@@ -94,15 +89,19 @@ for i = 0, inventorySize.X-1 do
         NewCell.CellItemIndex = nil
 
         instance.MouseLeave:Connect(function() 
+            if ItemHovering  then
+                instance.BackgroundColor3 = Color3.fromHSV(0.5,.25,1)
+            else 
+                instance.BackgroundColor3 = Color3.fromHSV(0,0,1)
+            end
             CellHovering = nil
             ItemHovering = nil
-            instance.BackgroundColor3 = Color3.fromHSV(0,0,1)
         end)
         instance.MouseEnter:Connect(function() 
             --print(NewCell) 
             task.wait()
             CellHovering = NewCell
-            print(CellHovering)
+            --print(CellHovering)
             if (NewCell.CellItemIndex ~= nil) then --check to see if cell has item
                 ItemHovering = itemItems[NewCell.CellItemIndex]
                 print(ItemHovering)
@@ -162,6 +161,7 @@ local ItemPick = function()
                 [ItemPicking.ItemPosition.X + (ItemOffset.X*math.cos(ItemPicking.ItemRotation*math.pi*0.5) - (ItemOffset.Y*math.sin(ItemPicking.ItemRotation*math.pi*0.5))) ]
                 [ItemPicking.ItemPosition.Y + (ItemOffset.X*math.sin(ItemPicking.ItemRotation*math.pi*0.5) + (ItemOffset.Y*math.cos(ItemPicking.ItemRotation*math.pi*0.5))) ]
 
+            print(newCell)
             newCell.CellItemIndex = nil
         end
         print(ItemPickOffset)
@@ -211,7 +211,7 @@ local ItemPick = function()
             --print("Bing Chilling!")
             ItemHovering = ItemPicking --allows the player to pick up the item directly after placing it
             ItemPicking = nil
-            if (detectedItems[1]) then
+            if (#detectedItems == 1) then
                 ItemPicking = detectedItems[1]
             end
         end

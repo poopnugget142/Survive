@@ -6,9 +6,12 @@ local function NextId()
 end
 
 return {
-    Baddies = {
+    NPC = {
         Guy = NextId();
     },
+    Action = {
+        Die = NextId();
+    };
     Gun = {
         M1911 = NextId();
         Shotgun = NextId();

@@ -144,7 +144,12 @@ Module.ServerGotItemID = function(Entity, ItemID)
 
             GunModule.CreateTracer(Origin, BulletResult.TerrainResult.Position*Vector3.new(1,0,1) + Origin*Vector3.yAxis, GunEnum, Enums.Bullet["9mmTracer"])
 
-            Attack:FireServer(ItemID, BulletResult.TerrainResult.Position, BulletResult.HitCharacter)
+            local NpcId
+            if BulletResult.HitCharacter then
+                NpcId = tonumber(BulletResult.HitCharacter.Name)
+            end
+
+            Attack:FireServer(ItemID, BulletResult.TerrainResult.Position, NpcId)
             task.wait(60/600)
         end
     end)

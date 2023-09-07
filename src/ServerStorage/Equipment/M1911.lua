@@ -23,7 +23,7 @@ Module.LoadModel = function(Entity)
 end
 
 --In the future we can check if this really hit but for now we trust it
-Module.Attack = function(Entity, HitPosition, HitCharacter)
+Module.Attack = function(Entity, HitPosition, NpcId)
     local GunOwner = EquipmentStates.World.get(Entity).Owner
 
     local Character = GunOwner.Character
@@ -36,15 +36,17 @@ Module.Attack = function(Entity, HitPosition, HitCharacter)
         CreateTracerRemote:FireClient(Player, Origin, HitPosition, GunEnum, Enums.Bullet["9mmTracer"])
     end
 
-    if not HitCharacter then return end
+    if not NpcId then return end
 
-    local HitData = CharacterStates.World.get(HitCharacter)
+    local HitEntity = CharacterModule.GetEntityFromNpcId(NpcId)
 
-    if not HitData.Character then return end
+    if not HitEntity then return end
+
+    local HitData = CharacterStates.World.get(HitEntity)
 
     local CurrentHealth = HitData.Health.Current
 
-    CharacterModule.UpdateHealth(HitCharacter, CurrentHealth-100)
+    CharacterModule.UpdateHealth(HitEntity, CurrentHealth-100)
 end
 
 return Module

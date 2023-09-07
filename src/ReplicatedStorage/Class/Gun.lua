@@ -18,7 +18,7 @@ TerrainParams.FilterDescendantsInstances = {JunkFolder, CharactersFolder}
 local CharacterParams = RaycastParams.new()
 CharacterParams.IgnoreWater = true
 CharacterParams.FilterType = Enum.RaycastFilterType.Include
-CharacterParams.FilterDescendantsInstances = {CharactersFolder.Baddies}
+CharacterParams.FilterDescendantsInstances = {CharactersFolder.NPCs}
 
 local Module = {}
 

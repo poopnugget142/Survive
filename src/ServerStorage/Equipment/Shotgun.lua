@@ -44,11 +44,18 @@ Module.Attack = function(Entity, HitPosition, HitCharacter)
 
     local CurrentHealth = HitData.Health.Current
 
-    CharacterModule.UpdateHealth(HitCharacter, -40)
-    if (CharacterStates.World.get(HitCharacter).Crippled) then
-        CharacterStates.World.get(HitCharacter).Crippled = 0.9
+    --CharacterModule.UpdateHealth(HitCharacter, -40)
+    
+    if (HitData.Crippled) then
+        HitData.Crippled = math.max(HitData.Crippled, 0.9)
     else
         CharacterStates.Crippled.add(HitCharacter, 0.9)
+    end
+    
+    if (HitData.Burning) then
+        HitData.Burning += 100
+    else
+        CharacterStates.Burning.add(HitCharacter, 100)
     end
 end
 

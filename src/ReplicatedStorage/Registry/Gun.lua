@@ -18,7 +18,7 @@ BulletBehavior.CosmeticBulletTemplate = bullet
 BulletBehavior.Container = JunkFolder
 BulletBehavior.MoveFunction = function(origin : Vector3, target : Vector3, alpha : number)
     local alphaMax = math.min(alpha, 1)
-    local position : Vector3 = origin:Lerp(target, alpha) --+ Vector3.yAxis*math.sin(alphaMax*math.pi)*(target-origin).Magnitude*0.5
+    local position : Vector3 = origin:Lerp(target, alpha)-- + Vector3.yAxis*math.sin(alphaMax*math.pi)*(target-origin).Magnitude*0.5
     return position
 end
 
@@ -30,7 +30,13 @@ local TracerData : {[number] : {[number] : {} }} = {
             Speed = 200;
             Behavior = BulletBehavior;
         };
-    }
+    };
+    [Enums.Gun.Shotgun] = {
+        [Enums.Bullet["9mmTracer"]] = {
+            --Speed = 100;
+            Behavior = BulletBehavior;
+        };
+    };
 }
 
 Module.GetTracerData = function(GunEnum : number, BulletEnum : number)

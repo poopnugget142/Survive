@@ -8,7 +8,7 @@ local Player = Players.LocalPlayer
 
 Player.CharacterAdded:Connect(function(Character)
     --temp
-    local Entity = Equipment.CreateEntity("M1911")
+    local Entity = Equipment.CreateEntity("Shotgun")
     CharacterStates.LookAtMouse.add(Character)
     CharacterStates.Stamina.add(Character, 5)
 end)

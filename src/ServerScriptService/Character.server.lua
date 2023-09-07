@@ -7,7 +7,7 @@ local Assets = ReplicatedStorage.Assets
 local Equipment = require(ServerStorage.Scripts.Equipment)
 
 Players.PlayerAdded:Connect(function(Player)
-    Equipment.AddEquipment(Player, "M1911")
+    Equipment.AddEquipment(Player, "Shotgun")
     Player.CharacterAdded:Connect(function(Character)
         task.wait()
         Character.Parent = workspace.Characters.Players

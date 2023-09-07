@@ -23,27 +23,27 @@ CharacterParams.FilterDescendantsInstances = {CharactersFolder.Baddies}
 local Module = {}
 
 --In future pass gun id and bullet id
-Module.BulletShoot = function(Origin : Vector3)
+Module.BulletShoot = function(Origin : Vector3, Target : Vector3?)
     local ShootData = {}
 
-    local MouseCast = PlayerModule.MouseCast(TerrainParams, 10000)
-    if not MouseCast then return ShootData end
-
-    local AimPosition = MouseCast.Position
+    local AimPosition = Target or PlayerModule.MouseCast(TerrainParams, 10000).Position
     
+    if not AimPosition then return ShootData end
+
     local DistanceToAim = (AimPosition-Origin).Magnitude
 
-    local spreadPermutations = 10^5 --number of subdivisions of 1 that can occur due to math.random
+    local spreadPermutations = 10^2 --number of subdivisions of 1 that can occur due to math.random
 
     --deviation += Vector3.xAxis--(AimPosition-Origin)
     
-    local Circularity = math.sin(math.rad( math.random(0, 180))) --defines the hit position of a bullet in a circular spread
+    --local Circularity = math.sin(math.rad( math.random(0, 180))) --defines the hit position of a bullet in a circular spread
     local AimTarget = AimPosition + (
         Vector3.new(
-            math.random(-spreadPermutations, spreadPermutations)/spreadPermutations * Circularity
+            math.random(-spreadPermutations, spreadPermutations)/spreadPermutations-- * Circularity
             , 0
-            , math.random(-spreadPermutations, spreadPermutations)/spreadPermutations * (1-Circularity)
-        ).Unit * (DistanceToAim*math.tan(math.rad(5)/2)) --offset 
+            , math.random(-spreadPermutations, spreadPermutations)/spreadPermutations-- * (Circularity)
+        ).Unit 
+        * (DistanceToAim*math.tan(math.rad(45)/2)) --offset 
         * math.random(-spreadPermutations, spreadPermutations)/spreadPermutations
     ) --+ deviation
     --print(deviation)
@@ -68,7 +68,7 @@ Module.BulletShoot = function(Origin : Vector3)
     local DistanceToTerrain = (TerrainResult.Position - Origin).Magnitude
     
     --We set the ray length to the distance to character so you don't shoot people behind you
-    local CharacterResult = workspace:Spherecast(TerrainResult.Position-CharacterDirection, 1, CharacterDirection*3--[[*DistanceToTerrain]], CharacterParams)
+    local CharacterResult = workspace:Spherecast(TerrainResult.Position-CharacterDirection*3, 3, CharacterDirection*6--[[*DistanceToTerrain]], CharacterParams)
 
     if not CharacterResult then return ShootData end
 
@@ -95,10 +95,10 @@ Module.BulletShoot = function(Origin : Vector3)
     return ShootData
 end
 
-Module.CreateTracer = function(Origin : Vector3, Target : Vector3, GunEnum : number, BulletEnum : number)
+Module.CreateTracer = function(Origin : Vector3, Target : Vector3, GunEnum : number, BulletEnum : number, Speed : number?)
     local TracerData = GunRegistry.GetTracerData(GunEnum, BulletEnum)
 
-    AlphaPart.Spawn(TracerData.Behavior, Origin, Target, TracerData.Speed)
+    AlphaPart.Spawn(TracerData.Behavior, Origin, Target, Speed or TracerData.Speed)
 end
 
 return Module

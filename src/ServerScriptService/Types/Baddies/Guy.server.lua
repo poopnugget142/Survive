@@ -10,7 +10,7 @@ local pathfinding = require(serverScriptService.warmechanic.DjikstraPathfinding)
 local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
 
 local function OnHit(Entity : Model)
-    local HealthData = CharacterStates.Health.add(Entity, 100)
+    local HealthData = CharacterStates.Health.add(Entity, 1)
 
     --I'VE DIED NOOOOOOOOOOO
     if HealthData.Current <= 0 then
@@ -30,7 +30,7 @@ CharacterStates[Enums.Baddies.Guy] = CharacterStates.World.factory(Enums.Baddies
         CharacterStates.Baddie.add(Entity)
 
         CharacterStates.MovementData.add(Entity)
-        CharacterStates.WalkSpeed.add(Entity, 14)
+        CharacterStates.WalkSpeed.add(Entity, 10)
         CharacterStates.AutoRotate.add(Entity)
         CharacterStates.Moving.add(Entity)
         
@@ -45,8 +45,18 @@ NearbyParams.RespectCanCollide = false
 
 
 RunService.Heartbeat:Connect(function(deltaTime)
-    
     for Character in CharacterStates.World.query{CharacterStates[Enums.Baddies.Guy]} do
+        --[[local crippled = CharacterStates.World.get(Character).Crippled
+        if (crippled ~= nil) then
+            crippled -= deltaTime
+            if (crippled <= 0) then
+                CharacterStates.Crippled.remove(Character, "Crippled")
+            end
+        end]]
+
+
+
+
         local targets = pathfinding.targets
 	    local distanceThreshold = math.huge
 
@@ -94,7 +104,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
 
 
         --Get nearby parts that belong to baddies
-        local NearbyBaddieDistance = 4
+        local NearbyBaddieDistance = 2
         local NearbyBaddieParts = workspace:GetPartBoundsInRadius(root.Position, NearbyBaddieDistance, NearbyParams)
 
         local NearbyBaddies = {}

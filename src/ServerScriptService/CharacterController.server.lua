@@ -64,7 +64,7 @@ RunService.Heartbeat:Connect(function(DeltaTime)
 
         if MoveDirection.Magnitude > 0 then
             --If MoveDirection magnititude is 0 then we get nan
-            TargetVelocity = (MoveDirection*Vector3.new(1,0,1)).Unit * CharacterData.WalkSpeed
+            TargetVelocity = (MoveDirection*Vector3.new(1,0,1)).Unit * CharacterData.WalkSpeed.Current
 
             --If autorotate is on and were moving then make character face towards move direction
             if AutoRotate then
@@ -122,7 +122,7 @@ RunService.Heartbeat:Connect(function(DeltaTime)
         if (wallCheck) then
             step = 100-wallCheck.Distance
             if (math.abs(step) > STEPHEIGHT) then
-                Velocity *= Velocity.Magnitude/CharacterData.WalkSpeed -2
+                Velocity *= Velocity.Magnitude/CharacterData.WalkSpeed.Current -2
                 step=0
                 --Velocity -= MoveDirection / Velocity.Magnitude * 10
             end

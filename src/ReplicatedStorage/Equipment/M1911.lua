@@ -131,7 +131,6 @@ Module.ServerGotItemID = function(Entity, ItemID)
         local deviation = Vector3.zero
 
         while shooting do
-            task.wait(60/600)
             local Character = Player.Character
             --local HumanoidRootPart = Character.Model.PrimaryPart
             local HumanoidRootPart = Character.PrimaryPart
@@ -146,6 +145,7 @@ Module.ServerGotItemID = function(Entity, ItemID)
             GunModule.CreateTracer(Origin, BulletResult.TerrainResult.Position*Vector3.new(1,0,1) + Origin*Vector3.yAxis, GunEnum, Enums.Bullet["9mmTracer"])
 
             Attack:FireServer(ItemID, BulletResult.TerrainResult.Position, BulletResult.HitCharacter)
+            task.wait(60/600)
         end
     end)
 
@@ -155,7 +155,7 @@ Module.ServerGotItemID = function(Entity, ItemID)
 end
 
 Module.Equip = function(Entity)
-    print("Equiped Pistol")
+    print("Equipped Pistol")
     --SetEquipmentModel:FireServer(ItemID)
 end
 

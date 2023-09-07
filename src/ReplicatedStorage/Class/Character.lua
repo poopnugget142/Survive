@@ -18,7 +18,8 @@ end
 Module.UpdateHealth = function(Character : Model, NewHealth : number)
     local HealthData = CharacterStates.World.get(Character).Health
 
-    HealthData.Current = NewHealth
+    --HealthData.Current = NewHealth
+    HealthData.Current += NewHealth/HealthData.Max --damage
     HealthData.Update:Fire()
 end
 

@@ -11,6 +11,7 @@ return {
     },
     Gun = {
         M1911 = NextId();
+        Shotgun = NextId();
     },
     Bullet = {
         ["9mmTracer"] = NextId()

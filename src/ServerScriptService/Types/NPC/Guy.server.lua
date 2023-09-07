@@ -1,52 +1,74 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local serverScriptService = game:GetService("ServerScriptService")
+local ServerScriptService = game:GetService("ServerScriptService")
 
 local CharactersFolder = workspace:WaitForChild("Characters")
 
 local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 local Enums = require(ReplicatedStorage.Scripts.Enums)
-local pathfinding = require(serverScriptService.warmechanic.DjikstraPathfinding)
+local pathfinding = require(ServerScriptService.warmechanic.DjikstraPathfinding)
 local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
+local BaddieRegistry = require(ReplicatedStorage.Scripts.Registry.NPC)
 
-local function OnHit(Entity : Model)
+local CharacterController = ServerScriptService.CharacterController
+
+local NpcEnum = Enums.NPC.Guy
+
+local Nasty : Model = BaddieRegistry.GetBaddieModel(NpcEnum):Clone()
+Nasty.Model:Destroy()
+
+local function OnHit(Entity : any)
     local HealthData = CharacterStates.Health.add(Entity, 100)
 
     --I'VE DIED NOOOOOOOOOOO
     if HealthData.Current <= 0 then
         print("Killed a dude")
         CharacterStates.World.kill(Entity)
-        Entity:Destroy()
     end
 end
 
-CharacterStates[Enums.Baddies.Guy] = CharacterStates.World.factory(Enums.Baddies.Guy, {
-    add = function(Factory, Entity : Model)
+CharacterStates[NpcEnum] = CharacterStates.World.factory(NpcEnum, {
+    add = function(Factory, Entity : any, SpawnPosition : CFrame?)
+        local NastyModel = Nasty:Clone()
+        NastyModel.Parent = workspace.Characters.NPCs
+
+        if SpawnPosition then
+            NastyModel:PivotTo(SpawnPosition)
+        else
+            SpawnPosition = NastyModel.WorldPivot
+        end
+
+        CharacterModule.RegisterCharacter(Entity, NastyModel)
+        local NpcId = CharacterModule.RegisterNPC(Entity)
+
         local HealthData = CharacterStates.Health.add(Entity, 100)
 
         HealthData.Update:Connect(function() OnHit(Entity) end)
 
-        CharacterStates.Character.add(Entity)
-        CharacterStates.Baddie.add(Entity)
-
-        CharacterStates.MovementData.add(Entity)
-        CharacterStates.WalkSpeed.add(Entity, 14)
         CharacterStates.AutoRotate.add(Entity)
         CharacterStates.Moving.add(Entity)
+
+        CharacterController:SendMessage("CreateMovementData", NpcId, NastyModel, SpawnPosition.Position, 14)
         
         return true
-    end
+    end;
+    remove = function(Factory, Entity : any)
+        CharacterModule.Action(Entity, Enums.Action.Die)
+    end;
 })
 
 local NearbyParams = OverlapParams.new()
-NearbyParams.FilterDescendantsInstances = {CharactersFolder.Baddies}
+NearbyParams.FilterDescendantsInstances = {CharactersFolder.NPCs}
 NearbyParams.FilterType = Enum.RaycastFilterType.Include
 NearbyParams.RespectCanCollide = false
 
 
 RunService.Heartbeat:Connect(function(deltaTime)
     
-    for Character in CharacterStates.World.query{CharacterStates[Enums.Baddies.Guy]} do
+    for Entity in CharacterStates.World.query{CharacterStates[NpcEnum]} do
+        local EntityData = CharacterStates.World.get(Entity)
+        local Character = EntityData.Model
+
         local targets = pathfinding.targets
 	    local distanceThreshold = math.huge
 
@@ -127,9 +149,9 @@ RunService.Heartbeat:Connect(function(deltaTime)
         end
 
         if (travel ~= Vector3.zero and travel ~= nil) then
-            local MovementData = CharacterStates.World.get(Character).MovementData
-            MovementData.MoveDirection = ((travel*1)+(MoveAwayVector*3)).Unit
-            MovementData.travel = travel
+            local MoveDirection = ((travel*1)+(MoveAwayVector*3)).Unit
+            CharacterController:SendMessage("UpdateMoveDirection", EntityData.NPC, MoveDirection)
+            --MovementData.travel = travel
         end
 	    --return travel
     end

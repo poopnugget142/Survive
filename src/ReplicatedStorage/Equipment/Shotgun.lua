@@ -234,20 +234,24 @@ Module.ServerGotItemID = function(Entity, ItemID)
                 local TracerTargets = {}
                 for i = 1, 10, 1 do
                     local BulletResult = GunModule.BulletShoot(Origin, DeviatedAim)
+
+                    if not BulletResult.TerrainResult then continue end
+
                     local Distance = BulletResult.TerrainResult.Distance
                     if (Distance < MinDist) then
                         MinDist = Distance
                     elseif (Distance > MaxDist) then
                         MaxDist = Distance
                     end
-                    
+
                     table.insert(TracerTargets, BulletResult.TerrainResult)
 
-                    --AlphaPart.Spawn(CastBehaviour, Origin, TerrainResult.Position * Vector3.new(1,0,1) + Origin * Vector3.yAxis, 200)
+                    local NpcId
+                    if BulletResult.HitCharacter then
+                        NpcId = tonumber(BulletResult.HitCharacter.Name)
+                    end
 
-                    if not BulletResult.TerrainResult then continue end
-
-                    Attack:FireServer(ItemID, BulletResult.TerrainResult.Position, BulletResult.HitCharacter)
+                    Attack:FireServer(ItemID, BulletResult.TerrainResult.Position, NpcId)
                 end
                 for _, Target in TracerTargets do
                     GunModule.CreateTracer(Origin, Target.Position*Vector3.new(1,0,1) + Origin*Vector3.yAxis, GunEnum, Enums.Bullet["9mmTracer"], Target.Distance/((MaxDist+MinDist)/2)*100+math.random(-100,100)/10 or 100)

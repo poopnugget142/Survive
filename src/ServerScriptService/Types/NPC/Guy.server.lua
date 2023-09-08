@@ -50,8 +50,8 @@ CharacterStates[NpcEnum] = CharacterStates.World.factory(NpcEnum, {
         CharacterStates.Baddie.add(Entity)
 
         CharacterStates.MovementData.add(Entity)
-        CharacterStates.WalkSpeed.add(Entity, 10)
         ]]
+        CharacterStates.WalkSpeed.add(Entity, 10)
         CharacterStates.AutoRotate.add(Entity)
         CharacterStates.Moving.add(Entity)
 

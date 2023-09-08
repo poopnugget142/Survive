@@ -1,5 +1,6 @@
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 
 local Remotes = ReplicatedStorage.Remotes
 
@@ -34,6 +35,17 @@ Module.UpdateHealth = function(Entity : any, NewHealth : number)
     --HealthData.Current = NewHealth
     HealthData.Current += NewHealth/HealthData.Max --damage
     HealthData.Update:Fire()
+end
+
+--Easy way to update health and update the event
+Module.UpdateSpeed = function(Entity : any, NewSpeed : number)
+    local CharacterController : Actor = ServerScriptService.CharacterController
+
+    local EntityData = CharacterStates.World.get(Entity)
+    local SpeedData = EntityData.WalkSpeed
+
+    SpeedData.Current = NewSpeed
+    CharacterController:SendMessage("UpdateWalkSpeed", EntityData.NPC, NewSpeed)
 end
 
 --Adds all proper tags to the character and registers it's entity to it's model

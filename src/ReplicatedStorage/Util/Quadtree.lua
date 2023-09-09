@@ -50,12 +50,14 @@ function Quadtree:Subdivide()
     table.insert(self.Children, Module.newQuadtree(Box.X - Box.w/2, Box.Y - Box.h/2, Box.w/2, Box.h/2))
     table.insert(self.Children, Module.newQuadtree(Box.X + Box.w/2, Box.Y - Box.h/2, Box.w/2, Box.h/2))
 
+    --[[
     for _, Point in self.Points do --transcribe points on this quad tree to child quadtrees
         for _, Child in self.Children do
             if Child:Insert(Point) then break end
         end
     end
     self.Points = {}
+    ]]
 end
 
 function Quadtree:QueryRange(range : Box)
@@ -111,7 +113,7 @@ Module.PointCheck = function(Box : Box, Point : Point)
     )
 end
 
-Module.newQuadtree = function(QuadName : string, X,Y,w,h)
+Module.newQuadtree = function(X,Y,w,h, QuadName : string?)
     local NewQuadtree = setmetatable({}, Quadtree)
     NewQuadtree.Capacity = 4
     NewQuadtree.Box = Module.BuildBox(X,Y,w,h)
@@ -119,8 +121,10 @@ Module.newQuadtree = function(QuadName : string, X,Y,w,h)
     NewQuadtree.Points = {} --contains points, will be nil'd when subdivided
     NewQuadtree.Children = {} --leave blank for leaf nodes
 
-    AllQuadTrees[QuadName] = NewQuadtree
-
+    if (QuadName) then
+        AllQuadTrees[QuadName] = NewQuadtree
+    end
+    
     return NewQuadtree
 end
 

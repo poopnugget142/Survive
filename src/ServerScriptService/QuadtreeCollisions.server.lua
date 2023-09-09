@@ -1,12 +1,16 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-
+local ServerScriptService = game:GetService("ServerScriptService")
+local SharedTableRegistry = game:GetService("SharedTableRegistry")
 
 local Quadtree = require(ReplicatedStorage.Scripts.Util.Quadtree)
 local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 
 
-local Quad = Quadtree.newQuadtree(50,50,50,50)
+local AllMovementData = SharedTableRegistry:GetSharedTable("AllMovementData")
+
+
+
 
 --[[
 for i = 1, 8, 1 do
@@ -20,21 +24,14 @@ print(Quad)
 print(Quad:QueryRange(Quadtree.BuildBox(50,50,50,50)))
 ]]
 
---[[
 RunService.Heartbeat:Connect(function(deltaTime)
-    Quad = Quadtree.newQuadtree(175,175,175,175)
-    --[[
+    local Quad = Quadtree.newQuadtree(175,175,175,175, "GroundUnits")
+    
     for NpcId, MovementData in AllMovementData do
-        local NewPoint = Quadtree.newPoint(MovementData.Position.X, MovementData.Position.Y)
+        local NewPoint = Quadtree.newPoint(MovementData.Position.X, MovementData.Position.Z)
         NewPoint.Data.NpcId = NpcId
-        Module.Quad:Insert(NewPoint)
+        Quad:Insert(NewPoint)
     end
-    ]
-    local Characters = CharacterStates.World.query(CharacterStates.Character)
-    for Entity in Characters do
-        local EntityData = CharacterStates.World.get(Entity)
-
-        CharacterStates.
-    end
+    
+    --print(Quad)
 end)
-]]

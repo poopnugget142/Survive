@@ -10,6 +10,8 @@ local pathfinding = require(ServerScriptService.warmechanic.DjikstraPathfinding)
 local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
 local NpcRegistry = require(ReplicatedStorage.Scripts.Registry.NPC)
 
+local QuadtreeModule = require(ReplicatedStorage.Scripts.Util.Quadtree)
+
 local CharacterController = ServerScriptService.CharacterController
 
 local NpcEnum = Enums.NPC.Guy
@@ -69,14 +71,7 @@ CharacterStates[NpcEnum] = CharacterStates.World.factory(NpcEnum, {
 
 local AttackRange = 4
 
-local NearbyParams = OverlapParams.new()
-NearbyParams.FilterDescendantsInstances = {CharactersFolder.NPCs}
-NearbyParams.FilterType = Enum.RaycastFilterType.Include
-NearbyParams.RespectCanCollide = false
-
-
-RunService.Heartbeat:Connect(function(deltaTime)
-    
+RunService.Heartbeat:Connect(function(deltaTime) 
     for Entity in CharacterStates.World.query{CharacterStates[NpcEnum]} do
         local EntityData = CharacterStates.World.get(Entity)
         local Character = EntityData.Model
@@ -88,22 +83,6 @@ RunService.Heartbeat:Connect(function(deltaTime)
         local finalDistance = distanceThreshold
 
         local root : BasePart = Character.PrimaryPart
-
-        --Get nearby parts that belong to baddies
-        local NearbyBaddieParts = workspace:GetPartBoundsInRadius(root.Position, AttackRange, NearbyParams)
-
-        local NearbyBaddies = {}
-
-        --Put all the characters into a list don't include repeating characters
-        for i, Part : BasePart in NearbyBaddieParts do
-            local OtherCharacter = CharacterModule.FindFirstCharacter(Part)
-
-            if OtherCharacter == Character then continue end
-
-            if table.find(NearbyBaddies, OtherCharacter) then continue end
-
-            table.insert(NearbyBaddies, OtherCharacter)
-        end
 
         for _, target in targets do
             if (type(target) == "userdata") then target = target.Position end
@@ -142,13 +121,16 @@ RunService.Heartbeat:Connect(function(deltaTime)
             if the travel's angle is within THETA of the player, snap the move direction towards the player
         ]]
 
-        --Calculate the average position
+        local Quad = QuadtreeModule.GetQuadtree("GroundUnits")
+        local NearbyPoints = Quad:QueryRange(QuadtreeModule.BuildBox(root.Position.X, root.Position.Z, NearbyBaddieDistance, NearbyBaddieDistance))
+        --print(NearbyPoints)
+
         local BaddieCumulativePosition = Vector3.zero
-        for i, OtherCharacter : Model in NearbyBaddies do
-            local Difference = (OtherCharacter.PrimaryPart.Position-root.Position)
-            BaddieCumulativePosition += Difference*(math.max(0.001, 1-Difference.Magnitude/NearbyBaddieDistance))^0.5
+        for _, Point in NearbyPoints do
+            local Difference = (Vector3.new(Point.X, 0, Point.Y) - root.Position) * Vector3.new(1,0,1)
+            BaddieCumulativePosition += Difference*(math.max(0.001, 1-Difference.Magnitude/NearbyBaddieDistance))^0.5 
         end
-        BaddieCumulativePosition = BaddieCumulativePosition--/(math.max(#NearbyBaddies, 1))
+        --print(BaddieCumulativePosition)
 
         --Reverse the vector
         local MoveAwayVector

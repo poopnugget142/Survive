@@ -1,4 +1,5 @@
 local Queue = {}
+Queue.__index = Queue
 
 function Queue:Comparator(a, b)
     local _a = self.ComparatorGetFunction(a)
@@ -116,11 +117,10 @@ end
 local Module = {}
 
 Module.Create = function(ComparatorGetFunction : any)
-    local NewQueue = setmetatable(Queue, {})
+    local NewQueue = setmetatable({}, Queue)
     NewQueue.Length = 0
     NewQueue.Length2 = 0
-    NewQueue.ComparatorGetFunction = ComparatorGetFunction or function (Value) return Value
-    end
+    NewQueue.ComparatorGetFunction = ComparatorGetFunction or function (Value) return Value end
     NewQueue.Values = {}
 
     return NewQueue

@@ -1,6 +1,7 @@
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local SharedTableRegistry = game:GetService("SharedTableRegistry")
 
 local Remotes = ReplicatedStorage.Remotes
 
@@ -8,6 +9,9 @@ local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 local Squash = require(ReplicatedStorage.Packages.Squash)
 
 local NpcAction : RemoteEvent = Remotes.NpcAction
+
+local AllMovementData = SharedTable.new()
+SharedTableRegistry:SetSharedTable("AllMovementData", AllMovementData)
 
 local CharacterToEntity = {}
 local IdToNpc = {}
@@ -97,6 +101,29 @@ Module.Action = function(Entity : any, Action : number)
     local CompressedAction = Squash.uint.ser(Action, 2)
 
     NpcAction:FireAllClients(CompressedId, CompressedAction)
+end
+
+Module.CreatedMovementData = function(Entity : any, SpawnPosition : Vector3?)
+    local CharacterData = CharacterStates.World.get(Entity)
+
+    local WalkSpeed = CharacterData.WalkSpeed.Current
+    local EntityNpcId = CharacterData.NPC
+
+    AllMovementData[EntityNpcId] = {
+        MoveDirection =  Vector3.new()
+        ;LookDirection = Vector3.new()
+        ;Velocity = Vector3.new()
+        ;AccumulatedTime = 0
+        ;Position = SpawnPosition or Vector3.zero
+        ;WalkSpeed = WalkSpeed or 16
+    }
+end
+
+Module.RemoveMovementData = function(Entity : any)
+    local CharacterData = CharacterStates.World.get(Entity)
+    local EntityNpcId = CharacterData.NPC
+
+    AllMovementData[EntityNpcId] = nil
 end
 
 return Module

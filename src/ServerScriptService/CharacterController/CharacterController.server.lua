@@ -1,5 +1,6 @@
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SharedTableRegistry = game:GetService("SharedTableRegistry")
 
 local Squash = require(ReplicatedStorage.Packages.Squash)
 
@@ -17,19 +18,7 @@ local DAMPING = 30
 local PRECISION = 0.001
 local STEPHEIGHT = 1
 
-local AllMovementData = {}
-
-Actor:BindToMessage("CreateMovementData", function(NpcId : number, Character : Model, StartingPosition : Vector3, WalkSpeed : number)
-    AllMovementData[NpcId] = {
-        MoveDirection =  Vector3.new()
-        ;LookDirection = Vector3.new()
-        ;Velocity = Vector3.new()
-        ;AccumulatedTime = 0
-        ;Position = StartingPosition or Vector3.zero
-        ;WalkSpeed = WalkSpeed or 16
-        ;Character = Character
-    }
-end)
+local AllMovementData = SharedTableRegistry:GetSharedTable("AllMovementData")
 
 Actor:BindToMessage("UpdateMoveDirection", function(NpcId : number, MoveDirection : Vector3)
     assert(AllMovementData[NpcId], "Movement data hasn't been created yet")
@@ -148,7 +137,9 @@ RunService.Heartbeat:ConnectParallel(function(DeltaTime)
     local PositionDataArray = {}
     for NpcId, MovementData in AllMovementData do
         local Position = MovementData.Position
-        MovementData.Character:MoveTo(Position)
+        local Character = workspace.Characters.NPCs:FindFirstChild(tostring(NpcId))
+        if not Character then warn("No Character") continue end
+        Character:MoveTo(Position)
         table.insert(PositionDataArray, Squash.uint.ser(NpcId, 2))
         table.insert(PositionDataArray, Squash.Vector3.ser(Position))
     end

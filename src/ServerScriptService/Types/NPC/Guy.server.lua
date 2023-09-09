@@ -8,13 +8,14 @@ local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 local Enums = require(ReplicatedStorage.Scripts.Enums)
 local pathfinding = require(ServerScriptService.warmechanic.DjikstraPathfinding)
 local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
-local BaddieRegistry = require(ReplicatedStorage.Scripts.Registry.NPC)
+local NpcRegistry = require(ReplicatedStorage.Scripts.Registry.NPC)
 
 local CharacterController = ServerScriptService.CharacterController
 
 local NpcEnum = Enums.NPC.Guy
-
-local Nasty : Model = BaddieRegistry.GetBaddieModel(NpcEnum):Clone()
+local NearbyBaddieDistance = NpcRegistry.GetNearbyNpcDistance(NpcEnum)
+local AttackRange = NpcRegistry.GetAttackRange(NpcEnum)
+local Nasty : Model = NpcRegistry.GetBaddieModel(NpcEnum):Clone()
 Nasty.Model:Destroy()
 
 local function OnHit(Entity : any)
@@ -23,6 +24,7 @@ local function OnHit(Entity : any)
     --I'VE DIED NOOOOOOOOOOO
     if HealthData.Current <= 0 then
         print("Killed a dude")
+        CharacterModule.RemoveMovementData(Entity)
         CharacterStates.World.kill(Entity)
     end
 end
@@ -38,11 +40,12 @@ CharacterStates[NpcEnum] = CharacterStates.World.factory(NpcEnum, {
             SpawnPosition = NastyModel.WorldPivot
         end
 
-        CharacterModule.RegisterCharacter(Entity, NastyModel)
         local NpcId = CharacterModule.RegisterNPC(Entity)
+        NastyModel.Name = NpcId
+
+        CharacterModule.RegisterCharacter(Entity, NastyModel)
 
         local HealthData = CharacterStates.Health.add(Entity, 100)
-
         HealthData.Update:Connect(function() OnHit(Entity) end)
 
         --[[
@@ -55,7 +58,7 @@ CharacterStates[NpcEnum] = CharacterStates.World.factory(NpcEnum, {
         CharacterStates.AutoRotate.add(Entity)
         CharacterStates.Moving.add(Entity)
 
-        CharacterController:SendMessage("CreateMovementData", NpcId, NastyModel, SpawnPosition.Position, 14)
+        CharacterModule.CreatedMovementData(Entity, SpawnPosition.Position)
         
         return true
     end;
@@ -63,6 +66,8 @@ CharacterStates[NpcEnum] = CharacterStates.World.factory(NpcEnum, {
         CharacterModule.Action(Entity, Enums.Action.Die)
     end;
 })
+
+local AttackRange = 4
 
 local NearbyParams = OverlapParams.new()
 NearbyParams.FilterDescendantsInstances = {CharactersFolder.NPCs}
@@ -83,6 +88,22 @@ RunService.Heartbeat:Connect(function(deltaTime)
         local finalDistance = distanceThreshold
 
         local root : BasePart = Character.PrimaryPart
+
+        --Get nearby parts that belong to baddies
+        local NearbyBaddieParts = workspace:GetPartBoundsInRadius(root.Position, AttackRange, NearbyParams)
+
+        local NearbyBaddies = {}
+
+        --Put all the characters into a list don't include repeating characters
+        for i, Part : BasePart in NearbyBaddieParts do
+            local OtherCharacter = CharacterModule.FindFirstCharacter(Part)
+
+            if OtherCharacter == Character then continue end
+
+            if table.find(NearbyBaddies, OtherCharacter) then continue end
+
+            table.insert(NearbyBaddies, OtherCharacter)
+        end
 
         for _, target in targets do
             if (type(target) == "userdata") then target = target.Position end
@@ -120,24 +141,6 @@ RunService.Heartbeat:Connect(function(deltaTime)
         --[[NOTE
             if the travel's angle is within THETA of the player, snap the move direction towards the player
         ]]
-
-
-        --Get nearby parts that belong to baddies
-        local NearbyBaddieDistance = 2
-        local NearbyBaddieParts = workspace:GetPartBoundsInRadius(root.Position, NearbyBaddieDistance, NearbyParams)
-
-        local NearbyBaddies = {}
-
-        --Put all the characters into a list don't include repeating characters
-        for i, Part : BasePart in NearbyBaddieParts do
-            local OtherCharacter = CharacterModule.FindFirstCharacter(Part)
-
-            if OtherCharacter == Character then continue end
-
-            if table.find(NearbyBaddies, OtherCharacter) then continue end
-
-            table.insert(NearbyBaddies, OtherCharacter)
-        end
 
         --Calculate the average position
         local BaddieCumulativePosition = Vector3.zero

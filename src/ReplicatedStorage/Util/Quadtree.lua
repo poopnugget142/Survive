@@ -2,6 +2,7 @@ local Quadtree = {}
 Quadtree.__index = Quadtree
 
 local Module = {}
+local AllQuadTrees = {}
 
 export type Box = {
     X : number, -- X and y define a center point, not a corner point
@@ -110,7 +111,7 @@ Module.PointCheck = function(Box : Box, Point : Point)
     )
 end
 
-Module.newQuadtree = function(X,Y,w,h)
+Module.newQuadtree = function(QuadName : string, X,Y,w,h)
     local NewQuadtree = setmetatable({}, Quadtree)
     NewQuadtree.Capacity = 4
     NewQuadtree.Box = Module.BuildBox(X,Y,w,h)
@@ -118,7 +119,13 @@ Module.newQuadtree = function(X,Y,w,h)
     NewQuadtree.Points = {} --contains points, will be nil'd when subdivided
     NewQuadtree.Children = {} --leave blank for leaf nodes
 
+    AllQuadTrees[QuadName] = NewQuadtree
+
     return NewQuadtree
+end
+
+Module.GetQuadtree = function(QuadName : string)
+    return AllQuadTrees[QuadName]
 end
 
 Module.newPoint = function(X,Y)

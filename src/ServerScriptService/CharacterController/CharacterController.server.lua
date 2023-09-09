@@ -1,5 +1,6 @@
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Quadtree = require(ReplicatedStorage.Scripts.Util.Quadtree)
 local SharedTableRegistry = game:GetService("SharedTableRegistry")
 
 local Squash = require(ReplicatedStorage.Packages.Squash)
@@ -55,7 +56,9 @@ TerrainParams.IgnoreWater = true
 TerrainParams.FilterType = Enum.RaycastFilterType.Exclude
 TerrainParams.FilterDescendantsInstances = {JunkFolder, CharactersFolder}
 
-RunService.Heartbeat:ConnectParallel(function(DeltaTime)
+
+
+RunService.Heartbeat:ConnectParallel(function(deltaTime)
     for NpcId, MovementData in AllMovementData do
         local Position = MovementData.Position
 
@@ -81,7 +84,7 @@ RunService.Heartbeat:ConnectParallel(function(DeltaTime)
         end
 
         --Incremeants time
-        MovementData.AccumulatedTime = (MovementData.AccumulatedTime or 0) + DeltaTime
+        MovementData.AccumulatedTime = (MovementData.AccumulatedTime or 0) + deltaTime
 
         while MovementData.AccumulatedTime >= FRAMERATE do
             MovementData.AccumulatedTime -= FRAMERATE
@@ -111,7 +114,7 @@ RunService.Heartbeat:ConnectParallel(function(DeltaTime)
         Velocity = Vector3.new(CurrentVelocityX, 0, CurrentVelocityZ)
 
         local wallCheck : RaycastResult = workspace:Raycast(
-            Position+Velocity*DeltaTime+Vector3.yAxis*100
+            Position+Velocity*deltaTime+Vector3.yAxis*100
             ,-Vector3.yAxis*(100+STEPHEIGHT+0.001)
             ,TerrainParams
         )
@@ -128,7 +131,7 @@ RunService.Heartbeat:ConnectParallel(function(DeltaTime)
 
         MovementData.Velocity = Velocity
 
-        local newPosition = Position + Vector3.yAxis*step + MovementData.Velocity*DeltaTime
+        local newPosition = Position + Vector3.yAxis*step + MovementData.Velocity*deltaTime
         MovementData.Position = newPosition
     end
 

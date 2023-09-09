@@ -44,6 +44,12 @@ Module.Give = function(Entity)
     Grip.Part1 = Character.RightHand
 
     --IK WILL MOVE SOMEWEHRE ELSE LATER TRUST ME THIS IS TOO LONG
+
+    local Waist : Motor6D = Character.UpperTorso.Waist
+    Waist.C0 *= CFrame.fromOrientation(0,math.rad(-10),math.rad(3))
+    local Neck : Motor6D = Character.Head.Neck
+    Neck.C0 *= CFrame.fromOrientation(0,math.rad(10),0)
+
     --IK Attachments
     local IKGoalR = Instance.new("Attachment")
     IKGoalR.Name = "IKGoalR"
@@ -170,7 +176,7 @@ Module.Give = function(Entity)
     --IK Control Set up
     local IKControlR = Instance.new("IKControl")
     IKControlR.Name = "RightArmControl"
-    IKControlR.SmoothTime = 0.2
+    IKControlR.SmoothTime = 0.05
     IKControlR.Pole = PoleR
 
     IKControlR.ChainRoot = Character.RightUpperArm
@@ -183,7 +189,7 @@ Module.Give = function(Entity)
 
     local IKControlL = Instance.new("IKControl")
     IKControlL.Name = "LeftArmControl"
-    IKControlL.SmoothTime = 0.01
+    IKControlL.SmoothTime = 0.001
     IKControlL.Pole = PoleL
 
     IKControlL.ChainRoot = Character.LeftUpperArm

@@ -50,14 +50,15 @@ function Quadtree:Subdivide()
     table.insert(self.Children, Module.newQuadtree(Box.X - Box.w/2, Box.Y - Box.h/2, Box.w/2, Box.h/2))
     table.insert(self.Children, Module.newQuadtree(Box.X + Box.w/2, Box.Y - Box.h/2, Box.w/2, Box.h/2))
 
-    --[[
+    for _, Child in self.Children do
+        Child.Capacity = self.Capacity * 2
+    end
     for _, Point in self.Points do --transcribe points on this quad tree to child quadtrees
         for _, Child in self.Children do
             if Child:Insert(Point) then break end
         end
     end
     self.Points = {}
-    ]]
 end
 
 function Quadtree:QueryRange(range : Box)

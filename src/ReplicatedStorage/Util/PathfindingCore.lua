@@ -1,13 +1,11 @@
 --[[
     Tilegrid Notetaking
 
-    Port Djikstra UCS
-
-    Implement A* Pathfinding
-
-    Use A* Pathfinding to implement Hierarchial Abstraction
-
-    Experiment with Cumulative A* ???
+    Hierarchial Abstraction
+        Whenever a max detail point is added to a navgrid search, add the tile and all abstraction layers to closed fronts
+            Regardless of what abstraction layer is being searched in the pathfinding query - it wont backtrack
+        Tiles are localised to an abstracted child, if the adjacent check cannot find another tile - step up to an abstracted layer
+        
 ]]
 
 local function mathsummation(... : number)
@@ -44,6 +42,7 @@ export type Front = { --Frontier tile
     Tile : Tile
     ,InterpolantWeightings : table
     ,CumulativeCost : number
+    ,ClosedFronts : table --used only for A*, can be shorthanded in UCS
 }
 
 --[[export type Adjacent = {
@@ -58,12 +57,15 @@ export type Target = {
     ,InterpolantWeightings : table
 }
 
-
 --[[export type Point = {
     X : number
     ,Y : number
     ,Data : any
 }]]
+
+
+
+
 
 
 function Tilegrid:GetTile(TileX:number,TileY:number)
@@ -101,7 +103,7 @@ end
 function Tilegrid:Abstract()
     --create children Tilegrids with a set size
 
-    self.Children = {}
+    self.Abstraction.Children = {}
 end
 
 function Tilegrid:UniformCostSearch(
@@ -141,7 +143,7 @@ function Tilegrid:UniformCostSearch(
     local generationTime = 0
     while #Frontier.Values > 0 do
         for i = 1, desiredTileRate, 1 do
-            debug.profilebegin("pathfind_tile2")
+            debug.profilebegin("fastpath_ucs")
             local current = Frontier:Dequeue()
             local currentTile = current.Tile
             local currentHeat = current.CumulativeCost
@@ -215,6 +217,7 @@ Module.BuildTileSizeXY = function(X:number,Y:number)
         ;
     } :: Tile
 end
+
 local StandardAdjacents = {
     Vector2.new(0,1),   -- 12 o'clock
     Vector2.new(1,1),   --
@@ -225,8 +228,6 @@ local StandardAdjacents = {
     Vector2.new(-1,0),  -- 9  o'clock
     Vector2.new(-1,1)   --
 }
-
-
 Module.BuildTilegrid = function(
     Name : string,
     X1 : number, Y1 : number, --origin corner
@@ -284,7 +285,10 @@ Module.BuildTilegrid = function(
         ,TileSize = Vector2.new(TileSizeX,TileSizeY)
     }
     NewTilegrid.Adjacents = {} --contains adjacent Tilegrid on the same abstraction layer
-    NewTilegrid.Children = {} --leave blank for child abstraction navlayers
+    NewTilegrid.Abstraction = {
+        AbstractSize = nil
+        ,AbstractChildren = nil
+    } --leave blank for child abstraction navlayers
 
     
     if (Name) then
@@ -352,7 +356,7 @@ local box = { --5x5 box solve
     Vector2.new(-2,2),
     Vector2.new(-1,2) --330
 }
-Module.KernalConvolute = function(Name, Position)
+Module.KernalConvolute = function(Name : string, Position : Vector3)
         --[[
     DO SOMETHING
     Pick a tile, and cycle through all of its adjacents to find the lowest heat
@@ -400,5 +404,39 @@ Module.KernalConvolute = function(Name, Position)
 
     return finalVector
 end
+
+--[[
+Module.AStarSearch = function(Name : string, Origin : Vector3, Target : Target, InterpolantWeightings : table?)
+    local Tilegrid = Module.GetTilegrid(Name)
+    
+    local Frontier = PriorityQueue.Create()
+    Frontier.ComparatorGetFunction = function(Value : any)
+        return Frontier.Values[Value].CumulativeCost -- tiles
+    end
+    if true then
+        local _target = Vector2.new(
+            math.round(math.clamp((Target.Position.X+Target.Velocity.X)/(Tilegrid.MapParams.TileSize.X or 1), Tilegrid.MapParams.OriginCorner.X, Tilegrid.MapParams.LeadingCorner.X))*(Tilegrid.MapParams.TileSize.X or 1)
+            ,math.round(math.clamp((Target.Position.Y+Target.Velocity.Y)/(Tilegrid.MapParams.TileSize.Y or 1), Tilegrid.MapParams.OriginCorner.Y, Tilegrid.MapParams.LeadingCorner.Y))*(Tilegrid.MapParams.TileSize.Y or 1)
+        )
+        --print(_target)
+        local Tile = Tilegrid:GetTile(_target.X, _target.Y)
+        if (Tile ~= nil) then
+            local newFront = {
+                Tile = Tile
+                ,InterpolantWeightings = InterpolantWeightings -- does not account for cost weightings from a target
+                ,CumulativeCost = 0
+                ,ClosedFronts = {}
+            } :: Front
+            Frontier:Enqueue(newFront)
+        end
+    end
+
+    while #Frontier > 0 do
+        local current = Frontier:Dequeue()
+        local currentTile = current.Tile
+        local currentHeat = current.CumulativeCost
+    end
+end
+]]
 
 return Module

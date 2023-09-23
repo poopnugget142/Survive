@@ -26,7 +26,6 @@ local frontier = PriorityQueue.Create()
 frontier.ComparatorGetFunction = function(Value : any)
     return world.get(frontier.Values[Value]).FrontierOpen.Heat
 end
-print(frontier)
 
 local printTally = 0
 

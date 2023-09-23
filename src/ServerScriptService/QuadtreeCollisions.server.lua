@@ -25,7 +25,7 @@ print(Quad:QueryRange(Quadtree.BuildBox(50,50,50,50)))
 ]]
 
 RunService.Heartbeat:Connect(function(deltaTime)
-    local Quad = Quadtree.newQuadtree(175,175,190,190, "GroundUnits")
+    local Quad = Quadtree.newQuadtree(175,175,175,175, "GroundUnits")
     
     for NpcId, MovementData in AllMovementData do
         local NewPoint = Quadtree.newPoint(MovementData.Position.X, MovementData.Position.Z)

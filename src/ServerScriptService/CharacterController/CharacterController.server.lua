@@ -59,6 +59,7 @@ TerrainParams.FilterDescendantsInstances = {JunkFolder, CharactersFolder}
 
 
 RunService.Heartbeat:ConnectParallel(function(deltaTime)
+    debug.profilebegin("Enemy Step")
     for NpcId, MovementData in AllMovementData do
         local Position = MovementData.Position
 
@@ -154,6 +155,10 @@ RunService.Heartbeat:ConnectParallel(function(deltaTime)
         local newPosition = Position + Vector3.yAxis*step + MovementData.Velocity*deltaTime
         MovementData.Position = newPosition
     end
+    debug.profileend()
+
+    task.synchronize()
+    
     
     local PositionDataArray = {}
     for NpcId, MovementData in AllMovementData do

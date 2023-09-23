@@ -154,20 +154,16 @@ RunService.Heartbeat:ConnectParallel(function(deltaTime)
         local newPosition = Position + Vector3.yAxis*step + MovementData.Velocity*deltaTime
         MovementData.Position = newPosition
     end
-
-    task.synchronize()
     
     local PositionDataArray = {}
     for NpcId, MovementData in AllMovementData do
         local Position = MovementData.Position
-        local Character = workspace.Characters.NPCs:FindFirstChild(tostring(NpcId))
-        if not Character then warn("No Character") continue end
-        Character:MoveTo(Position)
         table.insert(PositionDataArray, Squash.uint.ser(NpcId, 2))
         table.insert(PositionDataArray, Squash.Vector3.ser(Position))
     end
 
     if #PositionDataArray == 0 then return end
+    task.synchronize()
     UpdateNPCPosition:FireAllClients(PositionDataArray)
 end)
 

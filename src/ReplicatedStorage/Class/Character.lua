@@ -126,4 +126,11 @@ Module.RemoveMovementData = function(Entity : any)
     AllMovementData[EntityNpcId] = nil
 end
 
+Module.GetPosition = function(Entity : any)
+    local CharacterData = CharacterStates.World.get(Entity)
+    local EntityNpcId = CharacterData.NPC
+
+    return AllMovementData[EntityNpcId].Position
+end
+
 return Module

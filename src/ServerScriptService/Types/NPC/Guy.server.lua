@@ -1,3 +1,4 @@
+local PathfindingService = game:GetService("PathfindingService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
@@ -7,6 +8,7 @@ local CharactersFolder = workspace:WaitForChild("Characters")
 local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 local Enums = require(ReplicatedStorage.Scripts.Enums)
 local pathfinding = require(ServerScriptService.warmechanic.DjikstraPathfinding)
+local Pathfinding = require(ReplicatedStorage.Scripts.Util.PathfindingCore)
 local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
 local NpcRegistry = require(ReplicatedStorage.Scripts.Registry.NPC)
 
@@ -85,9 +87,17 @@ RunService.Heartbeat:Connect(function(deltaTime)
         local root : BasePart = Character.PrimaryPart
 
         for _, target in targets do
+            --[[
             if (type(target) == "userdata") then target = target.Position end
             local distance = (target - root.Position).Magnitude
             if distance < finalDistance then
+                finalDistance = distance
+                finalTarget = target
+            end
+            ]]
+            target = Pathfinding.BuildTarget(target)
+            local distance = (target.Position + target.Velocity - root.Position).Magnitude
+            if (distance < finalDistance) then
                 finalDistance = distance
                 finalTarget = target
             end
@@ -98,23 +108,26 @@ RunService.Heartbeat:Connect(function(deltaTime)
         local travel = Vector3.zero
         local displacement : Vector3
         if (finalTarget) then
-            displacement = (finalTarget - root.Position) * Vector3.new(1,0,1)
+            displacement = (finalTarget.Position + finalTarget.Velocity - root.Position) * Vector3.new(1,0,1)
         end
         --if (finalDistance <= distanceThreshold) then
         --    travel = (finalTarget - root.Position).Unit
         --else
-        if (pathfinding.getTile(root.Position * Vector3.new(1,0,1) )) then
-            travel = pathfinding.boxSolve(root.Position * Vector3.new(1,0,1))
-            if (displacement) then
-                local theta = math.acos(travel:Dot(displacement.Unit))
-                --print(math.deg(theta))
-                if (theta <= math.rad(45)) then
-                    travel = displacement.Unit
+        --if (Pathfinding.GetTilegrid("ZombieGeneric"):GetTile(Vector2.new(math.round(root.Position.X), math.round(root.Position.Z)))) then
+            --travel = pathfinding.boxSolve(root.Position * Vector3.new(1,0,1))
+            travel = Pathfinding.KernalConvolute("ZombieGeneric", root.Position)
+            if (finalTarget) then
+                if (finalTarget.Part) then
+                    local theta = math.acos(travel:Dot(finalTarget.Position - root.Position))
+                    --print(math.deg(theta))
+                    if (theta <= math.rad(15)) then
+                        travel = (finalTarget.Position - root.Position).Unit
+                    end
                 end
             end
-        else
-            travel = -root.Position.Unit
-        end
+        --else
+        --    travel = -root.Position.Unit
+        --end
         --end
 
         --[[NOTE

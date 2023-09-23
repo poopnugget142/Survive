@@ -113,19 +113,39 @@ RunService.Heartbeat:ConnectParallel(function(deltaTime)
         --raycasting
         Velocity = Vector3.new(CurrentVelocityX, 0, CurrentVelocityZ)
 
-        local wallCheck : RaycastResult = workspace:Raycast(
+        local stepCheck : RaycastResult = workspace:Raycast(
             Position+Velocity*deltaTime+Vector3.yAxis*100
             ,-Vector3.yAxis*(100+STEPHEIGHT+0.001)
             ,TerrainParams
         )
         local step = 0
-        if (wallCheck) then
-            step = 100-wallCheck.Distance
+        if (stepCheck) then
+            step = 100-stepCheck.Distance
             if (math.abs(step) > STEPHEIGHT) then
-                --Velocity *= Velocity.Magnitude/CharacterData.WalkSpeed.Current -2
-                Velocity *= Velocity.Magnitude/MovementData.WalkSpeed -2
-                step=0
+                --Velocity *= Velocity.Magnitude/MovementData.WalkSpeed -2
+                --[[
+                
+                Velocity = Velocity * SpeedAlpha + MoveRight * math.sign(Velocity:Dot(MoveRight)) * MovementData.WalkSpeed * (1-SpeedAlpha)]]
+                
                 --Velocity -= MoveDirection / Velocity.Magnitude * 10
+
+                local SpeedAlpha = (Velocity.Magnitude/MovementData.WalkSpeed -1)
+                local MoveRight = Vector3.new(-MoveDirection.Z, 0, MoveDirection.X)
+                local wallCheck : RaycastResult = workspace:Raycast(
+                    Position
+                    ,Velocity*deltaTime
+                    ,TerrainParams
+                )
+                if wallCheck then
+                    Velocity = (
+                        Velocity * SpeedAlpha 
+                        + wallCheck.Normal * MovementData.WalkSpeed * (1-SpeedAlpha) * (2/3)
+                        + MoveRight * math.sign(MoveRight:Dot(wallCheck.Normal)) * MovementData.WalkSpeed * (1-SpeedAlpha) * (1/3)
+                    )
+                else
+                    Velocity = Velocity * SpeedAlpha
+                end
+                step=0
             end
         end
 

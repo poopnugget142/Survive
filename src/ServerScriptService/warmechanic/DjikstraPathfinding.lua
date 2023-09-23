@@ -26,6 +26,7 @@ local frontier = PriorityQueue.Create()
 frontier.ComparatorGetFunction = function(Value : any)
     return world.get(frontier.Values[Value]).FrontierOpen.Heat
 end
+print(frontier)
 
 local printTally = 0
 
@@ -103,7 +104,7 @@ module.targets = targets
 
 module.pathfind = function(...)
     targets = { ... }
-    module.targets = targets
+    module.targets = targets --????? what was i doing here?
 
     --[[if (layer == nil) then
         layer = 1

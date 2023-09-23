@@ -37,8 +37,12 @@ Module.UpdateHealth = function(Entity : any, NewHealth : number)
     local HealthData = CharacterStates.World.get(Entity).Health
 
     --HealthData.Current = NewHealth
-    HealthData.Current += NewHealth/HealthData.Max --damage
-    HealthData.Update:Fire()
+    if (HealthData) then
+        HealthData.Current += NewHealth/HealthData.Max --damage
+        HealthData.Update:Fire()
+    else
+        warn("Attempted to damage an entity with no health!")
+    end
 end
 
 --Easy way to update health and update the event

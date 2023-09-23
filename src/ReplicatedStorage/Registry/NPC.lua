@@ -19,7 +19,7 @@ end
 
 --Defines the distance for a npc to be considered close to another one and move away
 local NearbyNpcDistance = {
-    [Enums.NPC.Guy] = 2;
+    [Enums.NPC.Guy] = 3;
 }
 
 Module.GetNearbyNpcDistance = function(BaddieEnum : number)

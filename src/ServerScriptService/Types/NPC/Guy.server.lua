@@ -91,25 +91,17 @@ RunService.Heartbeat:Connect(function(deltaTime)
         if (finalTarget) then
             displacement = (finalTarget.Position + finalTarget.Velocity - Position) * Vector3.new(1,0,1)
         end
-        --if (finalDistance <= distanceThreshold) then
-        --    travel = (finalTarget - root.Position).Unit
-        --else
-        --if (Pathfinding.GetTilegrid("ZombieGeneric"):GetTile(Vector2.new(math.round(root.Position.X), math.round(root.Position.Z)))) then
-            --travel = pathfinding.boxSolve(root.Position * Vector3.new(1,0,1))
-            travel = Pathfinding.KernalConvolute("ZombieGeneric", Position)
-            if (finalTarget) then
-                if (finalTarget.Part) then
-                    local theta = math.acos(travel:Dot(finalTarget.Position - Position))
-                    --print(math.deg(theta))
-                    if (theta <= math.rad(15)) then
-                        travel = (finalTarget.Position - Position).Unit
-                    end
+        travel = Pathfinding.KernalConvolute("ZombieGeneric", Position)
+        if (finalTarget) then
+            if (finalTarget.Part) then
+                local theta = math.acos(travel:Dot(finalTarget.Position - Position))
+                --print(math.deg(theta))
+                if (theta <= math.rad(15)) then
+                    travel = (finalTarget.Position - Position).Unit
                 end
             end
-        --else
-        --    travel = -root.Position.Unit
-        --end
-        --end
+        end
+
 
         --[[NOTE
             if the travel's angle is within THETA of the player, snap the move direction towards the player
@@ -121,7 +113,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
 
         local BaddieCumulativePosition = Vector3.zero
         for _, Point in NearbyPoints do
-            print(Point)
+            --print(Point)
             local Difference = (Vector3.new(Point.X, 0, Point.Y) - Position) * Vector3.new(1,0,1)
             BaddieCumulativePosition += Difference*(math.max(0.001, 1-Difference.Magnitude/NearbyBaddieDistance))^0.5 
         end

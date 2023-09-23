@@ -11,7 +11,7 @@
 local function mathsummation(... : number)
     local values = {...}
     local out = 0
-    for value : number in values do
+    for _, value : number in values do
         out += value
     end
     return out
@@ -47,7 +47,7 @@ export type Front = { --Frontier tile
 
 --[[export type Adjacent = {
     Offset : Vector2
-    ,Cost : number
+    ,Costs : number
 }]]
 
 export type Target = {
@@ -66,27 +66,55 @@ export type Target = {
 
 
 
+function Tilegrid:IntersectCheck(Point : Vector2)
+    return not (
+        self.MapParams.OriginCorner.X >= Point.X or
+        self.MapParams.LeadingCorner.X < Point.X or
+        self.MapParams.OriginCorner.Y >= Point.Y or
+        self.MapParams.LeadingCorner.Y < Point.Y
+    )
+end
 
+function Tilegrid:QueryPoint(X:number,Y:number)
+    local out = {
+        Tile = nil
+        ,AbstractChild = nil
+    }
+    --abort if requested point is outside tilegrid bounds
+    if not self:IntersectCheck(Vector2.new(X,Y)) then return out end
 
-function Tilegrid:GetTile(TileX:number,TileY:number)
-    local Tile 
-    if (self.Tiles[TileX]) then
-        Tile = self.Tiles[TileX][TileY]     
+    --first, attempt to find a tile
+    if (self.Tiles[X]) then
+        local Tile = self.Tiles[X][Y]   
         if (Tile) then
-            --warn( "A Tile was found at ("..tostring(TileX)..", "..tostring(TileY)..")" )
+            --warn( "A Tile was found at ("..tostring(X)..", "..tostring(Y)..")" )
             --print(Tile)
-            return Tile :: Tile
+            out.Tile = Tile
+            return out
         end
     end
-    
 
-    --get tile within a child Tilegrid
+    --if we cannot find a tile, check abstraction layers for a tile
+    --do we have abstraction layers?
+    if (self.Abstraction.Size == nil or self.Abstraction.Children == nil or #self.Abstraction.Children == 0) then return out end
 
+    --check every abstract child for point
+    for _, Child in self.Abstraction.Children do
+        --print("Searching Children")
+        local Query = Child:QueryPoint(X, Y)
 
+        if (Query) then
+            out.AbstractChild = Query
+            if (Query.Tile) then
+                out.Tile = Query.Tile
+            end
+            return out
+        end
+    end
 
     --if all else, return nothing
-    --warn( "No Tile was found at ("..tostring(TileX)..", "..tostring(TileY)..")" )
-    return nil
+    --warn( "No Tile was found at ("..tostring(X)..", "..tostring(Y)..")" )
+    return out
 end
 
 function Tilegrid:BakeTileCount()
@@ -125,7 +153,9 @@ function Tilegrid:UniformCostSearch(
             ,math.round(math.clamp((target.Position.Y+target.Velocity.Y)/(self.MapParams.TileSize.Y or 1), self.MapParams.OriginCorner.Y, self.MapParams.LeadingCorner.Y))*(self.MapParams.TileSize.Y or 1)
         )
         --print(_target)
-        local Tile = self:GetTile(_target.X, _target.Y)
+        local query = self:QueryPoint(_target.X, _target.Y)
+        if (not query) then continue end
+        local Tile = query.Tile
         if (Tile ~= nil) then
             local newFront = {
                 Tile = Tile
@@ -148,18 +178,20 @@ function Tilegrid:UniformCostSearch(
             local currentTile = current.Tile
             local currentHeat = current.CumulativeCost
             if ClosedFronts[currentTile.Position.X] == nil then ClosedFronts[currentTile.Position.X] = {} end
-            ClosedFronts[currentTile.Position.X][currentTile.Position.Y] = current
+                ClosedFronts[currentTile.Position.X][currentTile.Position.Y] = current
 
             --[[if i == 1 then
                 print(ClosedFronts)
             end]]
 
             for a, adjacent in currentTile.Adjacents do --check each adjacent tile (8 directional)
-                local adjacentTile = self:GetTile(adjacent.Position.X,adjacent.Position.Y)
+                local query = self:QueryPoint(adjacent.Position.X,adjacent.Position.Y)
+                if (not query.Tile) then continue end
+                local adjacentTile = query.Tile
                 if (not adjacentTile) then
                     continue
                 end
-                local adjacentCost : number = mathsummation(adjacent.Costs) --[layer] --assign heat values to tiles
+                local adjacentCost : number = adjacent.Costs["Terrain"]--mathsummation(table.unpack(adjacent.Costs)) --[layer] --assign heat values to tiles
                 local newHeat = currentHeat + adjacentCost * (adjacent.Position-currentTile.Position).magnitude --magnitude for euclidean distance
 
                 --do not re-add already witnessed tiles to the frontier
@@ -181,8 +213,9 @@ function Tilegrid:UniformCostSearch(
                         ,CumulativeCost = newHeat
                     }::Front
 
-                    if (ClosedFronts[adjacent.Position.X] == nil ) then ClosedFronts[adjacent.Position.X] = {} end
+                    if ClosedFronts[adjacent.Position.X] == nil then ClosedFronts[adjacent.Position.X] = {} end
                     ClosedFronts[adjacent.Position.X][adjacent.Position.Y] = newFront
+
                     Frontier:Enqueue(newFront)
                 end
             end
@@ -286,8 +319,8 @@ Module.BuildTilegrid = function(
     }
     NewTilegrid.Adjacents = {} --contains adjacent Tilegrid on the same abstraction layer
     NewTilegrid.Abstraction = {
-        AbstractSize = nil
-        ,AbstractChildren = nil
+        Size = nil
+        ,Children = nil
     } --leave blank for child abstraction navlayers
 
     
@@ -389,7 +422,7 @@ Module.KernalConvolute = function(Name : string, Position : Vector3)
 		--print(path.heat)
 		vectors[v] = vertex--*100
 		if (path) then
-			vectors[v] = vertex.Unit * path.CumulativeCost
+			vectors[v] = vertex * path.CumulativeCost
 		end
 	end
     local finalVector = Vector3.zero
@@ -419,7 +452,7 @@ Module.AStarSearch = function(Name : string, Origin : Vector3, Target : Target, 
             ,math.round(math.clamp((Target.Position.Y+Target.Velocity.Y)/(Tilegrid.MapParams.TileSize.Y or 1), Tilegrid.MapParams.OriginCorner.Y, Tilegrid.MapParams.LeadingCorner.Y))*(Tilegrid.MapParams.TileSize.Y or 1)
         )
         --print(_target)
-        local Tile = Tilegrid:GetTile(_target.X, _target.Y)
+        local Tile = Tilegrid:QueryPoint(_target.X, _target.Y)
         if (Tile ~= nil) then
             local newFront = {
                 Tile = Tile

@@ -159,7 +159,6 @@ RunService.Heartbeat:ConnectParallel(function(deltaTime)
 
     task.synchronize()
     
-    
     local PositionDataArray = {}
     for NpcId, MovementData in AllMovementData do
         local Position = MovementData.Position

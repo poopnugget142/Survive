@@ -79,9 +79,49 @@ RunService.RenderStepped:ConnectParallel(function(DeltaTime)
         local CurrentPosition = Model.PrimaryPart.Position
 
         --Calculates a alpha between 0 and 1 that represents the position between the last and new position
-        local Alpha = math.clamp((tick()-NpcData.LastTick)/(NpcData.NewTick-NpcData.LastTick), 0, 1)
+        local NpcDeltaTime = (tick()-NpcData.LastTick)
 
-        local Position : Vector3 = LastPosition:Lerp(NewPosition, Alpha)
+        --[[local blend = Vector3.new(
+            (NewPosition.X - LastPosition.X)  / (NewPosition.X - CurrentPosition.X)
+            ,0,
+            (NewPosition.Z - LastPosition.Z) / (NewPosition.Z - CurrentPosition.Z)
+        ).Magnitude ^ (1/2)]]
+        --[[
+        local blend = ((CurrentPosition - LastPosition) or Vector3.zero):Dot(NewPosition - LastPosition) 
+        print(blend)
+        ]]
+
+        local TestTick = tick() - NpcData.NewTick
+
+        local Alpha = TestTick/NpcDeltaTime
+
+        if (Alpha > 1) then
+            NpcData.Alpha += (NpcData.Alpha * 0.5 + NpcDeltaTime * 0.5)
+        else
+            NpcData.Alpha += TestTick
+        end
+        Alpha = NpcData.Alpha/NpcDeltaTime
+
+        --[[
+        if (Alpha > 1) then
+            local Mod
+            _, Mod = math.modf( ((1/NpcDeltaTime) / (1/NpcData.Alpha)) ^ 0.5 )
+            if (Mod > Alpha) then Alpha = Mod end
+        end]]
+        
+
+
+        --print(1/NpcData.Alpha, 1/NpcDeltaTime, 1/TestTick)
+        --print(NpcData.Alpha, NpcDeltaTime, NpcData.Alpha/NpcDeltaTime)
+        --Alpha = math.random(-100, 200)/100
+        
+        --local blend = Alpha / ((Alpha^2 + (1/NpcDeltaTime)^0.5 )^0.5)
+        local blend = (
+            (1-math.exp(-2*NpcDeltaTime*Alpha))
+            /(1+math.exp(-2*NpcDeltaTime*Alpha))
+        )
+
+        local Position : Vector3 = LastPosition:Lerp(NewPosition, blend)
 
         if (CurrentPosition-Position).Magnitude == 0  then
             --Only move if there is a change in position

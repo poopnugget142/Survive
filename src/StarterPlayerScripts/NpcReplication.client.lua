@@ -52,6 +52,7 @@ local function CreateNewNpc(NpcId : number, Position : Vector3)
             LastTick = tick();
             NewPosition = Position;
             NewTick = tick();
+            Alpha = 0;
             Hidden = true;
         }
 
@@ -90,6 +91,7 @@ UpdateNPCPosition.OnClientEvent:Connect(function(PositionDataArray)
         NpcData.LastTick = NpcData.NewTick
         NpcData.NewPosition = Position
         NpcData.NewTick = tick()
+        NpcData.Alpha = 0
     end
 end)
 

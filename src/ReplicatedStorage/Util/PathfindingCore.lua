@@ -2,11 +2,8 @@
     Tilegrid Notetaking
 
     Hierarchial Abstraction
-        Whenever a max detail point is added to a navgrid search, add the tile and all abstraction layers to closed fronts
-            Regardless of what abstraction layer is being searched in the pathfinding query - it wont backtrack
-        Tiles are localised to an abstracted child, if the adjacent check cannot find another tile - step up to an abstracted layer
-        
-    Rewrite uniform cost search function to act like a quadtree
+        Add an abstraction step down function (abstraction -> tilegrid)
+        Add a re/calculate adjacent costs for abstraction layers
 ]]
 
 local function mathsummation(values : table | number)
@@ -49,6 +46,8 @@ export type Tilegrid = {
 
 export type Front = { --Frontier tile
     Tile : Tile | Tilegrid
+    ,Position : Vector2
+    ,CameFrom : Vector2
     ,InterpolantMultipliers : table | number
     ,CumulativeCost : number
     --,ClosedFronts : table | Front--used only for A*, can be shorthanded in UCS
@@ -299,17 +298,53 @@ function Tilegrid:Abstract(AbstractionSize : Vector2)
                             end
                             if continue2 then
                                 continue
-                            end
+                            end       
 
                             table.insert(Abstract.Adjacents, {
                                 Position = QueryAbstract.MapParams.OriginCorner
                                 ,Midpoint = QueryAbstract.MapParams.OriginCorner + self.Abstraction.Size * 0.5
-                                ,Costs = { Terrain = 10 } --IMPLEMENT ABSTRACTION COSTS!!!!
+                                ,Costs = {} --IMPLEMENT ABSTRACTION COSTS!!!!
                             })
                         end
                    end
                 end
             end
+
+            --TEMP COST, CHANGE WITH COST CALCULATION FUNCTION LATER
+            local newCost = {}
+            for u, _ in Abstract.Tiles do --get the cost of all interpolants in the abstraction
+                for v, _ in Abstract.Tiles[u] do
+                    local Child = Abstract.Tiles[u][v]
+                    for InterpolantName, Interpolant in Child.Interpolants do
+                        --local newCost = {}
+
+                        if not newCost[InterpolantName] then newCost[InterpolantName] = 0 end
+                        newCost[InterpolantName] += Interpolant
+                        --[[
+                        if u < 0.5 then
+
+                        else
+
+                        end
+                        if v < 0.5 then
+
+                        else
+
+                        end
+                        ]]
+                    end
+                    --print(Child.Interpolants)
+                end
+            end
+            for InterpolantName, Interpolant in newCost do --square root all costs
+                newCost[InterpolantName] ^= 2
+            end
+            print(mathsummation(newCost))
+
+            for _, Adjacent in Abstract.Adjacents do
+                Adjacent.Costs = newCost
+            end
+
             task.wait()
         end
     end
@@ -369,6 +404,8 @@ function Tilegrid:UniformCostSearch(
 
             local newFront = {
                 Tile = Tile
+                ,Position = _target
+                ,CameFrom = _target
                 ,InterpolantMultipliers = newInterpolantMultipliers -- does not account for cost weightings from a target
                 ,CumulativeCost = 0
             } :: Front
@@ -387,6 +424,8 @@ function Tilegrid:UniformCostSearch(
             if Tile then
                 local newFront = {
                     Tile = Tile
+                    ,Position = _detail
+                    ,CameFrom = _detail
                     ,InterpolantMultipliers = {} -- does not account for cost weightings from a target
                     ,CumulativeCost = math.huge
                 } :: Front
@@ -427,10 +466,6 @@ function Tilegrid:UniformCostSearch(
                 --print(adjacent)
                 --if not adjacent.Position then --[[warn("Continued! 4")]] print(adjacent) continue end
 
-                --[==[local query = currentTile.Parent:QueryPoint(adjacent.Position.X,adjacent.Position.Y)
-                if not query.Tile then --[[print(adjacent.Position)]] continue end
-
-                local adjacentTile = query.Tile]==]
                 local adjacentPosition = adjacent.Position
 
                 local adjacentSearch
@@ -468,29 +503,11 @@ function Tilegrid:UniformCostSearch(
 
                 --if adjacentSearch then print(adjacentSearch) end
 
-                --[==[if self.Abstraction.Children ~= nil and self.Abstraction.Size ~= nil then --check to see if were abstracted
-                    if not query.AbstractChild then --[[warn("Continued! 1")]] continue end
-                    if currentTile.Parent and query.AbstractChild.MapParams ~= currentTile.Parent.MapParams then 
-                        adjacentTile = query.AbstractChild
-                        adjacentPosition = query.AbstractChild.MapParams.OriginCorner
-                    end
-                end]==]
-
-
-                --[[if not adjacentTile then
-                    --warn("Continued! 3")
-                    continue
-                end]]
-
                 local multipliedCosts = {}
                 if current.InterpolantMultipliers then
                     for InterpolantName, _ in adjacent.Costs do
                         multipliedCosts[InterpolantName] = adjacent.Costs[InterpolantName] * (current.InterpolantMultipliers[InterpolantName] or 1)
                         --print(multipliedCosts[InterpolantName])
-                    end
-                    if adjacent.Costs["LowWall"] then
-                        --print("Base", adjacent.Costs)
-                        --print("Modified", multipliedCosts)
                     end
                 end
 
@@ -516,17 +533,21 @@ function Tilegrid:UniformCostSearch(
                 end
                 if adjacentClosed ~= nil and adjacentClosed.CumulativeCost then
                     --warn("Attempted to backtrack!")
-                    if adjacentSearch.MapParams ~= nil and adjacentClosed.MapParams == nil then --[[warn("Attempted to move down layers!") continue]] end
+                    if currentTile.MapParams ~= nil and adjacentClosed.Tile.MapParams == nil then warn("Step down!") continue end
 
                     if newCost < adjacentClosed.CumulativeCost and newCost ~= nil then
                         adjacentClosed.CumulativeCost = newCost
+                        adjacentClosed.CameFrom = currentPosition
                     end
+                    
                     --print(adjacentClosed.CumulativeCost)
                     continue
                 else
                     --print("Enqueue!")
                     local newFront = {
                         Tile = adjacentSearch
+                        ,Position = adjacentPosition
+                        ,CameFrom = currentPosition
                         ,InterpolantMultipliers = InterpolantMultipliers -- does not account for cost weightings from a target
                         ,CumulativeCost = newCost
                     }::Front
@@ -622,7 +643,7 @@ function Navgrid:KernalConvolute(Position : Vector3)
     local AdjacentSearchArea
     if Abstracted then AdjacentSearchArea = StandardAdjacents
         else AdjacentSearchArea = ConvolutionAdjacents end
-
+    
     local vectors = {}
     for v, vertex : Vector2 in AdjacentSearchArea do
         vertex *= SnapSize
@@ -646,7 +667,7 @@ function Navgrid:KernalConvolute(Position : Vector3)
             ]]
 
             --Vector2.new(Position.X, Position.Z)
-            newVector = vertex * path.CumulativeCost
+            newVector = (path.Position - path.CameFrom).Unit * path.CumulativeCost
 
             
             --print(newVector)
@@ -655,6 +676,10 @@ function Navgrid:KernalConvolute(Position : Vector3)
             table.insert(vectors, newVector)
         end
 	end
+
+    table.insert(vectors, (SnapPath.Position - SnapPath.CameFrom).Unit)
+    --print(SnapPath.Position - SnapPath.CameFrom)
+
     --print(#vectors)
     --print(vectors)
 	for v, vector in vectors do

@@ -137,4 +137,11 @@ Module.GetPosition = function(Entity : any)
     return AllMovementData[EntityNpcId].Position
 end
 
+Module.GetMovementData = function(Entity : any)
+    local CharacterData = CharacterStates.World.get(Entity)
+    local EntityNpcId = CharacterData.NPC
+
+    return AllMovementData[EntityNpcId]
+end
+
 return Module

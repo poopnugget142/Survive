@@ -14,8 +14,7 @@ local QuadtreeModule = require(ReplicatedStorage.Scripts.Util.Quadtree)
 
 local CharacterController = ServerScriptService.CharacterController
 
-local NpcEnum = Enums.NPC.Guy
-local NearbyBaddieDistance = NpcRegistry.GetNearbyNpcDistance(NpcEnum)
+local NpcEnum = Enums.NPC.Gargoyle
 local AttackRange = NpcRegistry.GetAttackRange(NpcEnum)
 
 local function OnHit(Entity : any)
@@ -42,7 +41,7 @@ CharacterStates[NpcEnum] = CharacterStates.World.factory(NpcEnum, {
 
         CharacterStates.MovementData.add(Entity)
         ]]
-        CharacterStates.WalkSpeed.add(Entity, 10)
+        CharacterStates.WalkSpeed.add(Entity, 12)
         CharacterStates.AutoRotate.add(Entity)
         CharacterStates.Moving.add(Entity)
 
@@ -93,7 +92,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
         if (finalTarget) then
             displacement = (finalTarget.Position + finalTarget.Velocity - Position) * Vector3.new(1,0,1)
         end
-        travel = Pathfinding.GetNavgrid("ZombieGeneric"):KernalConvolute(Position + Velocity*0.1)
+        travel = Pathfinding.GetNavgrid("ZombieFlying"):KernalConvolute(Position + Velocity*0.1)
         if (finalTarget) then
             if (finalTarget.Part) then
                 local theta = math.acos(travel:Dot(finalTarget.Position - Position))
@@ -104,33 +103,8 @@ RunService.Heartbeat:Connect(function(deltaTime)
             end
         end
 
-
-        --[[NOTE
-            if the travel's angle is within THETA of the player, snap the move direction towards the player
-        ]]
-
-        local Quad = QuadtreeModule.GetQuadtree("GroundUnits")
-        local NearbyPoints = Quad:QueryRange(QuadtreeModule.BuildBox(Position.X, Position.Z, NearbyBaddieDistance, NearbyBaddieDistance))
-        --print(NearbyPoints)
-
-        local BaddieCumulativePosition = Vector3.zero
-        for _, Point in NearbyPoints do
-            --print(Point)
-            local Difference = (Vector3.new(Point.X, 0, Point.Y) - Position) * Vector3.new(1,0,1)
-            BaddieCumulativePosition += Difference*(math.max(0.001, 1-Difference.Magnitude/NearbyBaddieDistance))^0.5 
-        end
-        --print(BaddieCumulativePosition)
-
-        --Reverse the vector
-        local MoveAwayVector
-        if BaddieCumulativePosition.Magnitude == 0 then
-            MoveAwayVector = Vector3.zero
-        else
-            MoveAwayVector = -(BaddieCumulativePosition)
-        end
-
         if (travel ~= Vector3.zero and travel ~= nil) then
-            local MoveDirection = ((travel*1)+(MoveAwayVector*2)).Unit
+            local MoveDirection = travel.Unit
             CharacterController:SendMessage("UpdateMoveDirection", NpcId, MoveDirection)
             --MovementData.travel = travel
         end

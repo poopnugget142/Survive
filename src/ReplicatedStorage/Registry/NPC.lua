@@ -9,6 +9,7 @@ local Module = {}
 
 local BaddieModels = {
     [Enums.NPC.Guy] = CharacterAssets.Nasty;
+    [Enums.NPC.Gargoyle] = CharacterAssets.Gargoyle;
 }
 
 Module.GetBaddieModel = function(BaddieEnum : number)
@@ -30,6 +31,7 @@ end
 
 local AttackRange = {
     [Enums.NPC.Guy] = 10;
+    [Enums.NPC.Gargoyle] = 10;
 }
 
 Module.GetAttackRange = function(BaddieEnum : number)

@@ -9,6 +9,7 @@ Camera.CameraType = Enum.CameraType.Scriptable
 Camera.FieldOfView = 70/isometer
 
 local TopDownOffset = Vector3.new(-27, 40, -27)  * isometer
+--TopDownOffset = Vector3.new(-54, 80, -54)  * isometer
 local RootOffset = Vector3.new(-2, 0, -2)
 
 local function UpdateCameraPosition()

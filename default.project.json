@@ -19,6 +19,9 @@
     "ServerStorage": {
       "Scripts" : {
         "$path": "src/ServerStorage"
+      },
+      "Packages": {
+        "$path": "./ServerPackages"
       }
     },
 

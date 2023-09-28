@@ -130,7 +130,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
         end
 
         if (travel ~= Vector3.zero and travel ~= nil) then
-            local MoveDirection = ((travel*1)+(MoveAwayVector*2)).Unit
+            local MoveDirection = ((travel*1)+(MoveAwayVector*2.25)).Unit
             CharacterController:SendMessage("UpdateMoveDirection", NpcId, MoveDirection)
             --MovementData.travel = travel
         end

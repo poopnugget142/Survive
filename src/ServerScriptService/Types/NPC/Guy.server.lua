@@ -110,7 +110,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
         ]]
 
         local Quad = QuadtreeModule.GetQuadtree("GroundUnits")
-        local NearbyPoints = Quad:QueryRange(QuadtreeModule.BuildBox(Position.X, Position.Z, NearbyBaddieDistance, NearbyBaddieDistance))
+        local NearbyPoints = Quad:QueryRange(QuadtreeModule.BuildCircle(Position.X, Position.Z, NearbyBaddieDistance))
         --print(NearbyPoints)
 
         local BaddieCumulativePosition = Vector3.zero

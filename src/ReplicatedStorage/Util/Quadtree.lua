@@ -10,7 +10,11 @@ export type Box = {
     w : number, -- the width and height are half dimensions constrained to the center point
     h : number
 }
-
+export type Circle = {
+    X : number,
+    Y : number,
+    r : number,
+}
 export type Point = {
     X : number,
     Y : number,
@@ -18,7 +22,7 @@ export type Point = {
 }
 
 function Quadtree:Insert(Point : Point)
-    if not Module.PointCheck(self.Box, Point) then return end -- if the point is outside the quadtree, ignore
+    if not Module.BoxCheck(self.Box, Point) then return end -- if the point is outside the quadtree, ignore
 
     if (#self.Points < self.Capacity and #self.Children == 0) then --if there is enough space in the quadtree, accept the point and leave
         table.insert(self.Points, Point)
@@ -61,15 +65,17 @@ function Quadtree:Subdivide()
     self.Points = {}
 end
 
-function Quadtree:QueryRange(range : Box)
+function Quadtree:QueryRange(range : Box | Circle)
     local out = {}
 
     --abort if not within range
-    if not Module.IntersectCheck(self.Box, range) then return out end
+    if not Module.BoxCheck(self.Box, range) then return out end
     
     --check and add points to output
     for _, Point in self.Points do
-        if Module.PointCheck(range, Point) then table.insert(out, Point) end
+        if (range.r and Module.CircleCheck(range, Point)) or --if we are a circle and pass a circle check
+        ((not range.r) and Module.BoxCheck(range,Point)) --if we are not a circle and pass a box check
+        then table.insert(out, Point) end
     end
 
     --if there are no child quadtrees, terminate
@@ -96,21 +102,35 @@ Module.BuildBox = function(X,Y,w,h)
         h = h;
     } :: Box
 end
+Module.BuildCircle = function(X,Y,r)
+    return {
+        X = X,
+        Y = Y,
+        r = r
+    } :: Circle
+end
+Module.newPoint = function(X,Y)
+    return {
+        X = X,
+        Y = Y,
+        Data = {}
+    } :: Point
+end
 
-Module.IntersectCheck = function(Box : Box, Other : Box)
+Module.BoxCheck = function(Box : Box, Other : Box | Circle | Point)
     return not (
-        Box.X - Box.w >= Other.X + Other.w or
-        Box.X + Box.w < Other.X - Other.w or
-        Box.Y - Box.h >= Other.Y + Other.h or
-        Box.Y + Box.h < Other.Y - Other.h
+        Box.X - Box.w >= Other.X + (Other.w or Other.r or 0) or
+        Box.X + Box.w < Other.X - (Other.w or Other.r or 0) or
+        Box.Y - Box.h >= Other.Y + (Other.h or Other.r or 0) or
+        Box.Y + Box.h < Other.Y - (Other.h or Other.r or 0)
     )
 end
-Module.PointCheck = function(Box : Box, Point : Point)
-    return not (
-        Box.X - Box.w >= Point.X or
-        Box.X + Box.w < Point.X or
-        Box.Y - Box.h >= Point.Y or
-        Box.Y + Box.h < Point.Y
+Module.CircleCheck = function(Circle : Circle, Other : Circle | Point)
+    return (
+        (
+            (Other.X-(Circle.X or 0))^2 + 
+            (Other.Y-(Circle.Y or 0))^2) <= 
+            (Circle.r^2 + (Other.r or 0)^2)
     )
 end
 
@@ -128,17 +148,8 @@ Module.newQuadtree = function(X,Y,w,h, QuadName : string?)
     
     return NewQuadtree
 end
-
 Module.GetQuadtree = function(QuadName : string)
     return AllQuadTrees[QuadName]
-end
-
-Module.newPoint = function(X,Y)
-    return {
-        X = X,
-        Y = Y,
-        Data = {}
-    } :: Point
 end
 
 return Module

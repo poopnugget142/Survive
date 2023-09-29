@@ -216,7 +216,7 @@ Module.ServerGotItemID = function(Entity, ItemID)
     local EquipmentData = EquipmentStates.World.get(Entity)
 
     local Model = EquipmentData.Model
-    
+
     KeyBindings.BindAction("Attack", Enum.UserInputState.Begin, function()
         shooting = true
         while shooting do
@@ -227,13 +227,16 @@ Module.ServerGotItemID = function(Entity, ItemID)
                 local Displacement = MouseCast.Position - Origin
                 local DisplacementRight = Vector3.new(-Displacement.Z, 0, Displacement.X)
 
-                
+
                 local AimDeviation = (Displacement.Unit*deviation.Y + DisplacementRight.Unit*deviation.X)*Displacement.Magnitude*Vector3.new(1,0,1) or Vector3.zero
                 --print((Displacement.Unit*deviation.Y + DisplacementRight.Unit*deviation.X))
                 local DeviatedAim = MouseCast.Position + AimDeviation
                 if (DeviatedAim.Magnitude == nil) then DeviatedAim = MouseCast.Position end
                 --print(DeviatedAim)
 
+                Attack:FireServer(ItemID, DeviatedAim)
+
+                --[[
                 --distance values to modify shotgun speed
                 local MinDist = math.huge 
                 local MaxDist = 1 --never divide by 0
@@ -262,6 +265,7 @@ Module.ServerGotItemID = function(Entity, ItemID)
                 for _, Target in TracerTargets do
                     GunModule.CreateTracer(Origin, Target.Position*Vector3.new(1,0,1) + Origin*Vector3.yAxis, GunEnum, Enums.Bullet["9mmTracer"], Target.Distance/((MaxDist+MinDist)/2)*100+math.random(-100,100)/10 or 100)
                 end
+                ]]
 
                 local SpreadPermutations = 10^3
                 deviation += Vector2.new( --RECOIL!!!

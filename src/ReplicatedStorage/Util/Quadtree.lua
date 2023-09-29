@@ -8,12 +8,14 @@ export type Box = {
     X : number, -- X and y define a center point, not a corner point
     Y : number,
     w : number, -- the width and height are half dimensions constrained to the center point
-    h : number
+    h : number,
+    Data : table
 }
 export type Circle = {
     X : number,
     Y : number,
     r : number,
+    Data : table
 }
 export type Point = {
     X : number,
@@ -21,7 +23,7 @@ export type Point = {
     Data : table
 }
 
-function Quadtree:Insert(Point : Point)
+function Quadtree:Insert(Point : Point | Circle)
     if not Module.BoxCheck(self.Box, Point) then return end -- if the point is outside the quadtree, ignore
 
     if (#self.Points < self.Capacity and #self.Children == 0) then --if there is enough space in the quadtree, accept the point and leave
@@ -96,24 +98,26 @@ end
 Module.BuildBox = function(X,Y,w,h)
     --print(X, y, w, h)
     return {
-        X = X;
-        Y = Y;
-        w = w;
-        h = h;
+        X = X
+        ;Y = Y
+        ;w = w
+        ;h = h
+        ;Data = {}
     } :: Box
 end
 Module.BuildCircle = function(X,Y,r)
     return {
-        X = X,
-        Y = Y,
-        r = r
+        X = X
+        ;Y = Y
+        ;r = r
+        ;Data = {}
     } :: Circle
 end
 Module.newPoint = function(X,Y)
     return {
-        X = X,
-        Y = Y,
-        Data = {}
+        X = X
+        ;Y = Y
+        ;Data = {}
     } :: Point
 end
 
@@ -130,7 +134,7 @@ Module.CircleCheck = function(Circle : Circle, Other : Circle | Point)
         (
             (Other.X-(Circle.X or 0))^2 + 
             (Other.Y-(Circle.Y or 0))^2) <= 
-            (Circle.r^2 + (Other.r or 0)^2)
+            (Circle.r^2 + ((Other.r^2) or 0))
     )
 end
 

@@ -7,6 +7,7 @@ local Quadtree = require(ReplicatedStorage.Scripts.Util.Quadtree)
 local CharacterClass = require(ReplicatedStorage.Scripts.Class.Character)
 local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 local Enums = require(ReplicatedStorage.Scripts.Enums)
+local NPCRegistry = require(ReplicatedStorage.Scripts.Registry.NPC)
 
 
 local AllMovementData = SharedTableRegistry:GetSharedTable("AllMovementData")
@@ -30,14 +31,15 @@ RunService.Heartbeat:Connect(function(deltaTime)
     local Quad = Quadtree.newQuadtree(175,175,175,175, "GroundUnits")
     
     for NpcId, MovementData in AllMovementData do
-        local NewPoint = Quadtree.newPoint(MovementData.Position.X, MovementData.Position.Z)
-        NewPoint.Data.NpcId = NpcId
-
         local Entity = CharacterClass.GetEntityFromNpcId(NpcId)
         local EntityData = CharacterStates.World.get(Entity)
-        
-        if (EntityData.NPCType ~= Enums.NPC.Gargoyle) then
+
+        local CollisionRadius = NPCRegistry.GetNearbyNpcDistance(EntityData.NPCType)
+        local NewPoint = Quadtree.BuildCircle(MovementData.Position.X, MovementData.Position.Z, CollisionRadius)
+        NewPoint.Data.NpcId = NpcId
+
+        --if (EntityData.NPCType ~= Enums.NPC.Gargoyle) then
             Quad:Insert(NewPoint)
-        end
+        --end
     end
 end)

@@ -10,6 +10,7 @@ local Module = {}
 local BaddieModels = {
     [Enums.NPC.Guy] = CharacterAssets.Nasty;
     [Enums.NPC.Gargoyle] = CharacterAssets.Gargoyle;
+    [Enums.NPC.Big] = CharacterAssets.Big;
 }
 
 Module.GetBaddieModel = function(BaddieEnum : number)
@@ -20,18 +21,31 @@ end
 
 --Defines the distance for a npc to be considered close to another one and move away
 local NearbyNpcDistance = {
-    [Enums.NPC.Guy] = 3;
+    [Enums.NPC.Guy] = 1.5;
+    [Enums.NPC.Big] = 4
 }
 
 Module.GetNearbyNpcDistance = function(BaddieEnum : number)
-    assert(NearbyNpcDistance[BaddieEnum], "BaddieEnum "..BaddieEnum.." has no nearby npc distance")
+    --assert(NearbyNpcDistance[BaddieEnum], "BaddieEnum "..BaddieEnum.." has no nearby npc distance")
 
     return NearbyNpcDistance[BaddieEnum]
+end
+
+local Mass = {
+    [Enums.NPC.Guy] = 1;
+    [Enums.NPC.Big] = 10
+}
+
+Module.GetMass = function(BaddieEnum : number)
+    --assert(Mass[BaddieEnum], "BaddieEnum "..BaddieEnum.." has no mass")
+
+    return Mass[BaddieEnum]
 end
 
 local AttackRange = {
     [Enums.NPC.Guy] = 10;
     [Enums.NPC.Gargoyle] = 10;
+    [Enums.NPC.Big] = 10
 }
 
 Module.GetAttackRange = function(BaddieEnum : number)

@@ -9,6 +9,7 @@ return {
     NPC = {
         Guy = NextId();
         Gargoyle = NextId();
+        Big = NextId();
     },
     Action = {
         Die = NextId();

@@ -14,12 +14,12 @@ local QuadtreeModule = require(ReplicatedStorage.Scripts.Util.Quadtree)
 
 local CharacterController = ServerScriptService.CharacterController
 
-local NpcEnum = Enums.NPC.Guy
+local NpcEnum = Enums.NPC.Big
 local CollisionRadius = NpcRegistry.GetNearbyNpcDistance(NpcEnum)
 local AttackRange = NpcRegistry.GetAttackRange(NpcEnum)
 
 local function OnHit(Entity : any)
-    local HealthData = CharacterStates.Health.add(Entity, 100)
+    local HealthData = CharacterStates.Health.add(Entity, 1000)
 
     --I'VE DIED NOOOOOOOOOOO
     if HealthData.Current <= 0 then
@@ -42,7 +42,7 @@ CharacterStates[NpcEnum] = CharacterStates.World.factory(NpcEnum, {
 
         CharacterStates.MovementData.add(Entity)
         ]]
-        CharacterStates.WalkSpeed.add(Entity, 10)
+        CharacterStates.WalkSpeed.add(Entity, 6)
         CharacterStates.AutoRotate.add(Entity)
         CharacterStates.Moving.add(Entity)
 

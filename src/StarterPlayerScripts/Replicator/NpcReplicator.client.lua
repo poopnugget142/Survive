@@ -1,8 +1,4 @@
---[[
-    Notes need way to remove npcs on death
-]]
 if script:GetActor() == nil then
-    print("returning")
     return
 end
 

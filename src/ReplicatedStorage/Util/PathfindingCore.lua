@@ -359,6 +359,7 @@ function Tilegrid:UniformCostSearch(
     InterpolantMultipliers : table?,
     Details : table? --zombies that use the tilegrid
 )
+    return Promise.new(function(resolve, reject, onCancel)
     local NewNavgrid = setmetatable({}, Navgrid)
 
     local Frontier = PriorityQueue.Create() --SHOULD I BE CREATING NEW PRIORITY QUEUES ALL THE TIME???
@@ -569,11 +570,11 @@ function Tilegrid:UniformCostSearch(
         end
         --print(#Frontier.Values)
         --generationTime += task.wait()
-        --task.wait()
+        task.wait()
     end
 
     generationTime = os.clock() - generationTime
-    print("Finished Pathfinding query: " , Name , " in " , generationTime , " seconds after searching " , querycount , " tiles")
+    --print("Finished Pathfinding query: " , Name , " in " , generationTime , " seconds after searching " , querycount , " tiles")
 
     NewNavgrid.Tilegrid = self
     NewNavgrid.Map = ClosedFronts
@@ -582,7 +583,9 @@ function Tilegrid:UniformCostSearch(
         AllNavgrids[Name] = NewNavgrid
     end
     --print(NewNavgrid)
-    return NewNavgrid
+    resolve( NewNavgrid )
+
+    end)
 end
 
 function Navgrid:KernalConvolute(Position : Vector3)

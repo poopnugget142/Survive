@@ -1,11 +1,5 @@
 local RunService = game:GetService("RunService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Quadtree = require(ReplicatedStorage.Scripts.Util.Quadtree)
 local SharedTableRegistry = game:GetService("SharedTableRegistry")
-
-local Squash = require(ReplicatedStorage.Packages.Squash)
-
-local UpdateNPCPosition : RemoteEvent = ReplicatedStorage.Remotes.UpdateNPCPosition
 
 --for raycastparams
 local CharactersFolder = workspace:WaitForChild("Characters")
@@ -55,8 +49,6 @@ local TerrainParams = RaycastParams.new()
 TerrainParams.IgnoreWater = true
 TerrainParams.FilterType = Enum.RaycastFilterType.Exclude
 TerrainParams.FilterDescendantsInstances = {JunkFolder, CharactersFolder}
-
-
 
 RunService.Heartbeat:ConnectParallel(function(deltaTime)
     debug.profilebegin("Enemy Step")
@@ -156,19 +148,6 @@ RunService.Heartbeat:ConnectParallel(function(deltaTime)
         MovementData.Position = newPosition
     end
     debug.profileend()
-
-    task.synchronize()
-    
-    local PositionDataArray = {}
-    for NpcId, MovementData in AllMovementData do
-        local Position = MovementData.Position
-        table.insert(PositionDataArray, Squash.uint.ser(NpcId, 2))
-        table.insert(PositionDataArray, Squash.Vector3.ser(Position))
-    end
-
-    if #PositionDataArray == 0 then return end
-    task.synchronize()
-    UpdateNPCPosition:FireAllClients(PositionDataArray)
 end)
 
 return Module

@@ -246,7 +246,7 @@ function Tilegrid:Abstract(AbstractionSize : Vector2)
                         TileGrid[horizontal][vertical].Parent = NewTilegrid
                         --print(self.Tiles[u][v])
                         TileCount += 1
-                        self.TileCount -= 1
+                        --self.TileCount -= 1 --not reducing tile counts is spaghetti to fix another bug -> turn tile count into an array later to fix
                     end
                 end
             end
@@ -436,8 +436,9 @@ function Tilegrid:UniformCostSearch(
     end
     --print(#Frontier.Values)
     local tileCount = self.TileCount
-    local desiredTileRate = math.max(1,tileCount / 20)
-    local generationTime = os.clock()
+    local desiredTileRate = #StandardAdjacents
+    local desiredTime = 0.05
+    local generationTimeStart = os.clock()
     local querycount = 0
 
     while #Frontier.Values > 0 do
@@ -568,13 +569,18 @@ function Tilegrid:UniformCostSearch(
                 break
             end
         end
+
+        local generationTimeDelta = os.clock() - generationTimeStart
+
+        desiredTileRate = (tileCount * (generationTimeDelta / desiredTime))^2
+
         --print(#Frontier.Values)
-        --generationTime += task.wait()
+        --generationTimeStart += task.wait()
         task.wait()
     end
 
-    generationTime = os.clock() - generationTime
-    --print("Finished Pathfinding query: " , Name , " in " , generationTime , " seconds after searching " , querycount , " tiles")
+    local generationTime = os.clock() - generationTimeStart
+    print("Finished Pathfinding query: " , Name , " in " , generationTime , " seconds after searching " , querycount , " tiles")
 
     NewNavgrid.Tilegrid = self
     NewNavgrid.Map = ClosedFronts

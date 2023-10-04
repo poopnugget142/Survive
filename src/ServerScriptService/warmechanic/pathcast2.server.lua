@@ -126,6 +126,6 @@ while true do
         },
         {}
     )
-    repeat task.wait() until flowfield0 or flowfield1
-    --task.wait(0.05)
+    --repeat task.wait() until flowfield0 or flowfield1
+    task.wait(0.05)
 end

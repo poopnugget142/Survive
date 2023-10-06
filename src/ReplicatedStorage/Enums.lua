@@ -21,4 +21,8 @@ return {
     Bullet = {
         ["9mmTracer"] = NextId()
     };
+    DamageType = {
+        Bullet = NextId();
+        Explosion = NextId();
+    };
 }

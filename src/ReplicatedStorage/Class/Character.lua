@@ -33,13 +33,14 @@ Module.FindFirstCharacter = function(Object : Instance)
 end
 
 --Easy way to update health and update the event
-Module.UpdateHealth = function(Entity : any, NewHealth : number)
+Module.UpdateHealth = function(Entity : any, NewHealth : number, DamageType : number?)
     local HealthData = CharacterStates.World.get(Entity).Health
 
     --HealthData.Current = NewHealth
     if (HealthData) then
-        HealthData.Current += NewHealth/HealthData.Max --damage
-        HealthData.Update:Fire()
+        local DamageAmount = NewHealth/HealthData.Max
+        HealthData.Current += DamageAmount --damage
+        HealthData.Update:Fire(Entity, DamageAmount, DamageType)
     else
         warn("Attempted to damage an entity with no health!")
     end

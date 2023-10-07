@@ -535,7 +535,8 @@ function Tilegrid:UniformCostSearch(
                 end
                 if adjacentClosed ~= nil and adjacentClosed.CumulativeCost then
                     --warn("Attempted to backtrack!")
-                    if currentTile.MapParams ~= nil and adjacentClosed.Tile.MapParams == nil then warn("Step down!") continue end
+                    --if currentTile.MapParams ~= nil and adjacentClosed.Tile.MapParams == nil then warn("Step down!") continue end
+                    if currentTile.MapParams ~= nil and adjacentClosed.Tile.MapParams == nil then continue end
 
                     if newCost < adjacentClosed.CumulativeCost and newCost ~= nil then
                         adjacentClosed.CumulativeCost = newCost

@@ -47,7 +47,7 @@ CharacterStates[NpcEnum] = CharacterStates.World.factory(NpcEnum, {
         CharacterStates.Moving.add(Entity)
 
         CharacterModule.CreatedMovementData(Entity, SpawnPosition)
-        
+
         return true
     end;
     remove = function(Factory, Entity : any)

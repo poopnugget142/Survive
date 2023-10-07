@@ -69,6 +69,14 @@ RunService.RenderStepped:ConnectParallel(function(DeltaTime)
             Model.Name = tostring(NpcId)
             Model.Parent = workspace.Characters.NPCs
             Model:MoveTo(LastPosition)
+
+            --Spaghetti
+            local AnimationController : AnimationController = Model.Model.AnimationController
+            local Animation = AnimationController.Animation
+            local AnimationTrack = AnimationController:LoadAnimation(Animation)
+            AnimationTrack:Play()
+            AnimationTrack:AdjustSpeed(2)
+
             task.desynchronize()
         end
 

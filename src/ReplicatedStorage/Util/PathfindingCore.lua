@@ -339,7 +339,7 @@ function Tilegrid:Abstract(AbstractionSize : Vector2)
             for InterpolantName, Interpolant in newCost do --square root all costs
                 newCost[InterpolantName] ^= 2
             end
-            print(mathsummation(newCost))
+            --print(mathsummation(newCost))
 
             for _, Adjacent in Abstract.Adjacents do
                 Adjacent.Costs = newCost
@@ -580,7 +580,7 @@ function Tilegrid:UniformCostSearch(
     end
 
     local generationTime = os.clock() - generationTimeStart
-    print("Finished Pathfinding query: " , Name , " in " , generationTime , " seconds after searching " , querycount , " tiles")
+    --print("Finished Pathfinding query: " , Name , " in " , generationTime , " seconds after searching " , querycount , " tiles")
 
     NewNavgrid.Tilegrid = self
     NewNavgrid.Map = ClosedFronts

@@ -1,11 +1,10 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CollectionService = game:GetService("CollectionService")
 local RunService = game:GetService("RunService")
-local ServerScriptService = game:GetService("ServerScriptService")
 
 local Stew = require(ReplicatedStorage.Packages.Stew)
 local Signal = require(ReplicatedStorage.Packages.Signal)
-local Promise = require(ReplicatedStorage.Packages.Promise)
+local Enums =  require(ReplicatedStorage.Scripts.Enums)
 
 local World = Stew.world()
 
@@ -71,22 +70,7 @@ Module.Model = World.factory("Model", {
 
 Module.NPC = World.factory("NPC", {
     add = function(Factory, Entity : any, NpcId : number)
-        local Character = World.get(Entity).Model
-
-        --This is temp until we get k trees up
-        if Character and RunService:IsServer() then
-            CollectionService:AddTag(Character, "NPC")
-        end
-
         return NpcId
-    end;
-
-    remove = function(Factory, Entity : any)
-        local Character = World.get(Entity).Model
-
-        if Character then
-            CollectionService:RemoveTag(Character, "NPC")
-        end
     end;
 })
 
@@ -95,6 +79,28 @@ Module.NPCType = World.factory("NPCType", {
         return NpcType
     end;
 })
+
+Module.State = World.factory("State", {
+    add = function(Factory, Entity : any, State : number)
+        return State
+    end;
+})
+
+Module.LoadedAnimations = World.factory("LoadedAnimations", {
+    add = function(Factory, Entity : any, Animations : any)
+        return Animations
+    end;
+})
+
+Module.CurrentAnimation = World.factory("CurrentAnimation", {
+    add = function(Factory, Entity : any, Animation : AnimationTrack)
+        return Animation
+    end;
+})
+
+for _, StateEnum in Enums.States do
+    Module[StateEnum] = World.tag(StateEnum)
+end
 
 --// Status Effects
 --[[
@@ -123,17 +129,6 @@ Module.Crippled = World.factory("Crippled", {
     end;
 })
 ]]
-
-
-
-
-
-
-
-
-
-
-
 
 Module.World = World
 

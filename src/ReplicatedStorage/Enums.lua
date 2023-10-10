@@ -7,12 +7,19 @@ end
 
 return {
     NPC = {
+        Player = NextId();
         Guy = NextId();
         Gargoyle = NextId();
         Big = NextId();
     },
     Action = {
         Die = NextId();
+        Attack = NextId();
+        Walk = NextId();
+    };
+    States = {
+        Walking = NextId();
+        Attacking = NextId();
     };
     Gun = {
         M1911 = NextId();
@@ -24,5 +31,6 @@ return {
     DamageType = {
         Bullet = NextId();
         Explosion = NextId();
+        Physical = NextId();
     };
 }

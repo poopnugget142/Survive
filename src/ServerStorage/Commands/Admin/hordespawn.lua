@@ -5,7 +5,7 @@ return {
 	Group = "DefaultUtil",
 	Args = {
 		{
-			Type = "string",
+			Type = "npc",
 			Name = "Type",
 			Description = "The type of zombie to spawn in"
 		},

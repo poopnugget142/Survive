@@ -11,6 +11,7 @@ local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
 local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 local Promise = require(ReplicatedStorage.Packages.Promise)
 local Enums = require(ReplicatedStorage.Scripts.Enums)
+local EventHandler = require(ReplicatedStorage.Scripts.Util.EventHandler)
 
 local NpcReplication : Script = Replicator:WaitForChild("NpcReplicator")
 
@@ -21,8 +22,12 @@ local NpcAction : RemoteEvent = Remotes.NpcAction
 local CurrentCamera = workspace.CurrentCamera
 
 local SharedNpcData = SharedTable.new()
+local QueryNpcModels = SharedTable.new()
 
 SharedTableRegistry:SetSharedTable("NpcData", SharedNpcData)
+SharedTableRegistry:SetSharedTable("QueryNpcModels", QueryNpcModels)
+
+local DeleteNpc = EventHandler.CreateEvent("Npc", "DeleteNpc")
 
 local NumberOfActors = 64
 local CoreNumber = 0
@@ -43,8 +48,7 @@ local function CreateNewNpc(NpcId : number, Position : Vector3)
 
         local Entity = CharacterStates.World.entity()
         CharacterModule.RegisterNPC(Entity, NpcId)
-
-        local EntityData = CharacterStates.World.get(Entity)
+        CharacterStates[NpcEnum].add(Entity, Position)
 
         SharedNpcData[tostring(NpcId)] = {
             Enum = NpcEnum;
@@ -95,33 +99,44 @@ UpdateNPCPosition.OnClientEvent:Connect(function(PositionDataArray)
     end
 end)
 
+DeleteNpc:Connect(function(_, NpcId : number)
+    local Actor = BoundIds[NpcId]
+    if Actor then
+        Actor:SendMessage("RemoveNpc", NpcId)
+        BoundIds[NpcId] = nil
+    end
+end)
+
 --Later let's move this to be able to hook up to the enum so it can have custom actions
 NpcAction.OnClientEvent:Connect(function(CompressedId, CompressedAction)
     local NpcId = Squash.uint.des(CompressedId, 2)
     local Action = Squash.uint.des(CompressedAction, 2)
 
-    if Action == Enums.Action.Die then
-        local Actor = BoundIds[NpcId]
-        if Actor then
-            Actor:SendMessage("RemoveNpc", NpcId)
-            BoundIds[NpcId] = nil
-        end
-    end
+    local Entity = CharacterModule.GetEntityFromNpcId(NpcId)
+
+    if not Entity then return end
+
+    EventHandler.FireEvent(Entity, "Action", Action)
 end)
 
 RunService.RenderStepped:Connect(function(DeltaTime)
     local CenterResult = workspace:Raycast(CurrentCamera.CFrame.Position, CurrentCamera.CFrame.LookVector * 1000, RaycastParams.new())
     local CenterPosition = CenterResult and CenterResult.Position or Vector3.zero
     SharedNpcData.CenterPosition = CenterPosition
-end)
 
-workspace.Characters.NPCs.ChildAdded:Connect(function(Character : Model)
-    if not Character:FindFirstChild("Model") then
-        task.wait()
-        --You have to pause the thread to delete the character for some reason
-        Character:Destroy()
-    else
-        local Entity = CharacterModule.GetEntityFromNpcId(tonumber(Character.Name))
-        CharacterModule.RegisterCharacter(Entity, Character)
+    --When the actor queries to create a new npc, it will do so here
+    for NpcId, Value in QueryNpcModels do
+        QueryNpcModels[NpcId] = nil
+        
+        local Entity = CharacterModule.GetEntityFromNpcId(NpcId)
+
+        if not Entity then continue end
+
+        if not Value then
+            EventHandler.FireEvent(Entity, "RemoveModel")
+            continue
+        end
+        
+        EventHandler.FireEvent(Entity, "CreateModel", Value)
     end
 end)

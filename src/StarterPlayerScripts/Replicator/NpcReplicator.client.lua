@@ -6,12 +6,12 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local SharedTableRegistry = game:GetService("SharedTableRegistry")
 
-local NpcRegistry = require(ReplicatedStorage.Scripts.Registry.NPC)
 local Promise = require(ReplicatedStorage.Packages.Promise)
 
 local Actor : Actor = script.Parent
 
 local SharedNpcData = SharedTableRegistry:GetSharedTable("NpcData")
+local QueryNpcModels = SharedTableRegistry:GetSharedTable("QueryNpcModels")
 
 local RenderedGuys = {}
 local DeletePromise = {}
@@ -20,16 +20,16 @@ Actor:BindToMessageParallel("AddNpc", function(NpcId : number)
     RenderedGuys[NpcId] = true
 end)
 
-Actor:BindToMessage("RemoveNpc", function(NpcId : number)
+Actor:BindToMessageParallel("RemoveNpc", function(NpcId : number)
     RenderedGuys[NpcId] = nil
-    local Model : Model = workspace.Characters.NPCs:FindFirstChild(tostring(NpcId))
-    if Model then
-        Model:Destroy()
-    end
+    QueryNpcModels[NpcId] = false
 end)
 
 RunService.RenderStepped:ConnectParallel(function(DeltaTime)
+    local MovedNpcs = {}
+
     for NpcId, Value in RenderedGuys do
+
         local NpcData = SharedNpcData[tostring(NpcId)]
 
         local LastPosition : Vector3 = NpcData.LastPosition
@@ -48,9 +48,7 @@ RunService.RenderStepped:ConnectParallel(function(DeltaTime)
 
             DeletePromise[NpcId] = Promise.try(function(resolve, reject, onCancel)
                 task.wait(5)
-                task.synchronize()
-                Model:Destroy()
-                task.desynchronize()
+                QueryNpcModels[NpcId] = false
             end)
 
             continue
@@ -63,22 +61,11 @@ RunService.RenderStepped:ConnectParallel(function(DeltaTime)
             end
         end
 
-        if not Model then
-            task.synchronize()
-            Model = NpcRegistry.GetBaddieModel(NpcData.Enum):Clone()
-            Model.Name = tostring(NpcId)
-            Model.Parent = workspace.Characters.NPCs
-            Model:MoveTo(LastPosition)
-
-            --Spaghetti
-            local AnimationController : AnimationController = Model.Model.AnimationController
-            local Animation = AnimationController.Animation
-            local AnimationTrack = AnimationController:LoadAnimation(Animation)
-            AnimationTrack:Play()
-            AnimationTrack:AdjustSpeed(2)
-
-            task.desynchronize()
+        if not Model and not QueryNpcModels[NpcId] then
+            QueryNpcModels[NpcId] = LastPosition
         end
+
+        if not Model then continue end
 
         local CurrentPosition = Model.PrimaryPart.Position
 
@@ -106,9 +93,16 @@ RunService.RenderStepped:ConnectParallel(function(DeltaTime)
 
         local Angle = CFrame.lookAt(CurrentPosition, Position)
         local NewCFrame = CFrame.new(Position)*(Angle-Angle.Position)
-
-        task.synchronize()
-        Model:PivotTo(NewCFrame)
-        task.desynchronize()
+        
+        MovedNpcs[NpcId] = NewCFrame
     end
+
+    task.synchronize()
+    for NpcId, NewCFrame in MovedNpcs do
+        local Model : Model = workspace.Characters.NPCs:FindFirstChild(tostring(NpcId))
+        if Model then
+            Model:PivotTo(NewCFrame)
+        end
+    end
+    task.desynchronize()
 end)

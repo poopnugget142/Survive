@@ -15,7 +15,7 @@ local QuadtreeModule = require(ReplicatedStorage.Scripts.Util.Quadtree)
 local CharacterController = ServerScriptService.CharacterController
 
 local NpcEnum = Enums.NPC.Big
-local CollisionRadius = NpcRegistry.GetNearbyNpcDistance(NpcEnum)
+local CollisionRadius = NpcRegistry.GetCollisionRadius(NpcEnum)
 local AttackRange = NpcRegistry.GetAttackRange(NpcEnum)
 
 local function OnHit(Entity : any)
@@ -116,17 +116,19 @@ RunService.Heartbeat:Connect(function(deltaTime)
         local BaddieCumulativePosition = Vector3.zero
         for _, Point in NearbyPoints do
             --print(Point)
-            if Point.Data.NpcId == NpcId then continue end
+            if Point.Data.Entity == Entity then continue end
 
-            local OtherNpcId = Point.Data.NpcId
-            local OtherEntity = CharacterModule.GetEntityFromNpcId(OtherNpcId)
+            local OtherEntity = Point.Data.Entity
             local OtherEntityData = CharacterStates.World.get(OtherEntity)
             local OtherEntityEnum = OtherEntityData.NPCType
+
+            --If other entity is not an npc, continue
+            if not OtherEntityData.NPC then continue end
 
             local Difference = (Vector3.new(Point.X, 0, Point.Y) - Position) * Vector3.new(1,0,1)
             BaddieCumulativePosition += Difference*
                 ((NpcRegistry.GetMass(OtherEntityEnum) or 1) / (NpcRegistry.GetMass(NpcEnum) or 1))*
-                (math.max(0.001, 1-Difference.Magnitude/(CollisionRadius + (NpcRegistry.GetNearbyNpcDistance(OtherEntityEnum) or 0))))^0.5 
+                (math.max(0.001, 1-Difference.Magnitude/(CollisionRadius + (NpcRegistry.GetCollisionRadius(OtherEntityEnum) or 0))))^0.5 
         end
         --print(BaddieCumulativePosition)
 

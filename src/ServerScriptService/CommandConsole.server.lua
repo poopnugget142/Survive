@@ -6,3 +6,4 @@ local Cmdr = require(ServerStorage.Packages.Cmdr)
 Cmdr:RegisterDefaultCommands() -- This loads the default set of commands that Cmdr comes with. (Optional)
 Cmdr:RegisterCommandsIn(ServerStorage.Scripts.Commands.Admin) -- Register commands from your own folder. (Optional
 Cmdr:RegisterHooksIn(ServerStorage.Scripts.Commands.Hooks)
+Cmdr:RegisterTypesIn(ServerStorage.Scripts.Commands.Types)

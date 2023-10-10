@@ -49,6 +49,11 @@ RunService.RenderStepped:Connect(function(DeltaTime)
     for Character in CharacterStates.World.query{CharacterStates.Stamina} do
         local CharacterData = CharacterStates.World.get(Character)
         local Stamina = CharacterData.Stamina
+
+        if not Stamina then
+            continue
+        end
+
         local alpha = Stamina.Current/Stamina.Max
 
         if CharacterData.Sprinting then

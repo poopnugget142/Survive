@@ -104,11 +104,8 @@ Module.Attack = function(Entity, MousePosition)
         --
         local Victims = {}
         for _, Point in NearbyPoints do
-            local NpcId = Point.Data.NpcId
-            if not NpcId then continue end
-
-            local HitEntity = CharacterModule.GetEntityFromNpcId(NpcId)
-            if not HitEntity then return end
+            local HitEntity = Point.Data.Entity
+            if not HitEntity then continue end
 
             local HitData = CharacterStates.World.get(HitEntity)
             if not HitData.Health then return end

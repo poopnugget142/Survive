@@ -1,4 +1,3 @@
-local PathfindingService = game:GetService("PathfindingService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
@@ -15,7 +14,7 @@ local QuadtreeModule = require(ReplicatedStorage.Scripts.Util.Quadtree)
 local CharacterController = ServerScriptService.CharacterController
 
 local NpcEnum = Enums.NPC.Guy
-local CollisionRadius = NpcRegistry.GetNearbyNpcDistance(NpcEnum)
+
 local AttackRange = NpcRegistry.GetAttackRange(NpcEnum)
 
 local function OnHit(Entity : any)
@@ -29,24 +28,49 @@ local function OnHit(Entity : any)
     end
 end
 
+local function OnAttack(Entity : any)
+    CharacterModule.Action(Entity, Enums.Action.Attack)
+
+    task.wait(1.6)
+    local MovementData = CharacterModule.GetMovementData(Entity)
+    local Position = MovementData.Position
+
+    local Quad = QuadtreeModule.GetQuadtree("GroundUnits")
+    local NearbyHostiles = CharacterModule.GetNearbyHostiles(Quad, Entity, Position, 10)
+
+    for _, OtherEntity in NearbyHostiles do
+        CharacterModule.UpdateHealth(OtherEntity, -10, Enums.DamageType.Physical)
+    end
+
+    task.wait(0.9)
+
+    CharacterModule.SetState(Entity, Enums.States.Walking)
+end
+
+local function OnWalk(Entity : any)
+    CharacterModule.Action(Entity, Enums.Action.Walk)
+end
+
 CharacterStates[NpcEnum] = CharacterStates.World.factory(NpcEnum, {
     add = function(Factory, Entity : any, SpawnPosition : Vector3)
         local NpcId = CharacterModule.RegisterNPC(Entity)
 
+        local AttackData = CharacterModule.GetStateData(Entity, Enums.States.Attacking)
+        AttackData.Enter:Connect(OnAttack)
+
+        local WalkData = CharacterModule.GetStateData(Entity, Enums.States.Walking)
+        WalkData.Enter:Connect(OnWalk)
+
+        CharacterModule.SetState(Entity, Enums.States.Walking)
+
         local HealthData = CharacterStates.Health.add(Entity, 100)
         HealthData.Update:Connect(function() OnHit(Entity) end)
-
-        --[[
-        CharacterStates.Character.add(Entity)
-        CharacterStates.Baddie.add(Entity)
-
-        CharacterStates.MovementData.add(Entity)
-        ]]
+        
         CharacterStates.WalkSpeed.add(Entity, 10)
         CharacterStates.AutoRotate.add(Entity)
         CharacterStates.Moving.add(Entity)
 
-        CharacterModule.CreatedMovementData(Entity, SpawnPosition)
+        CharacterModule.CreateMovementData(Entity, SpawnPosition)
 
         return true
     end;
@@ -93,7 +117,12 @@ RunService.Heartbeat:Connect(function(deltaTime)
         if (finalTarget) then
             displacement = (finalTarget.Position + finalTarget.Velocity - Position) * Vector3.new(1,0,1)
         end
-        travel = Pathfinding.GetNavgrid("ZombieGeneric"):KernalConvolute(Position + Velocity*0.1)
+
+        local Navgrid = Pathfinding.GetNavgrid("ZombieGeneric")
+
+        if not Navgrid then continue end
+
+        travel = Navgrid:KernalConvolute(Position + Velocity*0.1)
         if (finalTarget) then
             if (finalTarget.Part) then
                 local theta = math.acos(travel:Dot(finalTarget.Position - Position))
@@ -110,39 +139,18 @@ RunService.Heartbeat:Connect(function(deltaTime)
         ]]
 
         local Quad = QuadtreeModule.GetQuadtree("GroundUnits")
-        local NearbyPoints = Quad:QueryRange(QuadtreeModule.BuildCircle(Position.X, Position.Z, CollisionRadius))
-        --print(NearbyPoints)
 
-        local BaddieCumulativePosition = Vector3.zero
-        for _, Point in NearbyPoints do
-            --print(Point)
-            if Point.Data.NpcId == NpcId then continue end
+        local NearbyHostiles = CharacterModule.GetNearbyHostiles(Quad, Entity, Position, AttackRange)
 
-            local OtherNpcId = Point.Data.NpcId
-            local OtherEntity = CharacterModule.GetEntityFromNpcId(OtherNpcId)
-            local OtherEntityData = CharacterStates.World.get(OtherEntity)
-            local OtherEntityEnum = OtherEntityData.NPCType
-
-            local Difference = (Vector3.new(Point.X, 0, Point.Y) - Position) * Vector3.new(1,0,1)
-            BaddieCumulativePosition += Difference*
-                ((NpcRegistry.GetMass(OtherEntityEnum) or 1) / (NpcRegistry.GetMass(NpcEnum) or 1))*
-                (math.max(0.001, 1-Difference.Magnitude/(CollisionRadius + (NpcRegistry.GetNearbyNpcDistance(OtherEntityEnum) or 0))))^0.5 
+        if #NearbyHostiles > 0 then
+            CharacterModule.SetState(Entity, Enums.States.Attacking)
         end
-        --print(BaddieCumulativePosition)
 
-        --Reverse the vector
-        local MoveAwayVector
-        if BaddieCumulativePosition.Magnitude == 0 then
-            MoveAwayVector = Vector3.zero
-        else
-            MoveAwayVector = -(BaddieCumulativePosition)
-        end
+        local MoveAwayVector = CharacterModule.GetMoveAwayVector(Quad, Entity)
 
         if (travel ~= Vector3.zero and travel ~= nil) then
             local MoveDirection = ((travel*1)+(MoveAwayVector*2.25)).Unit
             CharacterController:SendMessage("UpdateMoveDirection", NpcId, MoveDirection)
-            --MovementData.travel = travel
         end
-	    --return travel
     end
 end)

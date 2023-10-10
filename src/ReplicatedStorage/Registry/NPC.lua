@@ -20,15 +20,16 @@ Module.GetBaddieModel = function(BaddieEnum : number)
 end
 
 --Defines the distance for a npc to be considered close to another one and move away
-local NearbyNpcDistance = {
+local CollisionRadius = {
+    [Enums.NPC.Player] = 1.5;
     [Enums.NPC.Guy] = 1.5;
     [Enums.NPC.Big] = 4
 }
 
-Module.GetNearbyNpcDistance = function(BaddieEnum : number)
+Module.GetCollisionRadius = function(BaddieEnum : number)
     --assert(NearbyNpcDistance[BaddieEnum], "BaddieEnum "..BaddieEnum.." has no nearby npc distance")
 
-    return NearbyNpcDistance[BaddieEnum]
+    return CollisionRadius[BaddieEnum]
 end
 
 local Mass = {

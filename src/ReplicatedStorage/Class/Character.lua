@@ -7,6 +7,11 @@ local Remotes = ReplicatedStorage.Remotes
 
 local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 local Squash = require(ReplicatedStorage.Packages.Squash)
+local Signal = require(ReplicatedStorage.Packages.Signal)
+local EventHandler = require(ReplicatedStorage.Scripts.Util.EventHandler)
+local QuadtreeModule = require(ReplicatedStorage.Scripts.Util.Quadtree)
+local NpcRegistry = require(ReplicatedStorage.Scripts.Registry.NPC)
+local Enums = require(ReplicatedStorage.Scripts.Enums)
 
 local NpcAction : RemoteEvent = Remotes.NpcAction
 
@@ -15,6 +20,7 @@ SharedTableRegistry:SetSharedTable("AllMovementData", AllMovementData)
 
 local CharacterToEntity = {}
 local IdToNpc = {}
+local CharacterStateData = {}
 
 local NpcId = 0
 
@@ -33,12 +39,11 @@ Module.FindFirstCharacter = function(Object : Instance)
 end
 
 --Easy way to update health and update the event
-Module.UpdateHealth = function(Entity : any, NewHealth : number, DamageType : number?)
+Module.UpdateHealth = function(Entity : any, HealthDifference : number, DamageType : number?)
     local HealthData = CharacterStates.World.get(Entity).Health
 
-    --HealthData.Current = NewHealth
     if (HealthData) then
-        local DamageAmount = NewHealth/HealthData.Max
+        local DamageAmount = HealthDifference/HealthData.Max
         HealthData.Current += DamageAmount --damage
         HealthData.Update:Fire(Entity, DamageAmount, DamageType)
     else
@@ -108,7 +113,7 @@ Module.Action = function(Entity : any, Action : number)
     NpcAction:FireAllClients(CompressedId, CompressedAction)
 end
 
-Module.CreatedMovementData = function(Entity : any, SpawnPosition : Vector3?)
+Module.CreateMovementData = function(Entity : any, SpawnPosition : Vector3?)
     local CharacterData = CharacterStates.World.get(Entity)
 
     local WalkSpeed = CharacterData.WalkSpeed.Current
@@ -143,6 +148,126 @@ Module.GetMovementData = function(Entity : any)
     local EntityNpcId = CharacterData.NPC
 
     return AllMovementData[EntityNpcId]
+end
+
+Module.PlayAnimation = function(Entity : any, State: number)
+    local EntityData = CharacterStates.World.get(Entity)
+    local LoadedAnimations = EntityData.LoadedAnimations
+    local CurrentAnimation = EntityData.CurrentAnimation
+
+    if CurrentAnimation then
+        CurrentAnimation:Stop()
+    end
+
+    CurrentAnimation = LoadedAnimations[State]
+
+    EntityData.CurrentAnimation = CurrentAnimation
+    CurrentAnimation:Play()
+end
+
+Module.SetState = function(Entity: any, State : number, ...)
+    local EntityData = CharacterStates.World.get(Entity)
+
+    if not EntityData.State then
+        --There was no previous state
+        CharacterStates.State.add(Entity, State)
+    else
+        local LastState = EntityData.State
+
+        if LastState == State then return end
+
+        EntityData.State = State
+
+        local LastStateData = Module.GetStateData(Entity, LastState)
+        LastStateData.Leave:Fire(Entity)
+        CharacterStates[LastState].remove(Entity)
+    end
+
+    CharacterStates[State].add(Entity)
+    local StateData = Module.GetStateData(Entity, State)
+    StateData.Enter:Fire(Entity, ...)
+
+    EventHandler.FireEvent(Entity, "SetState", State)
+
+    return StateData
+end
+
+local function CreateStateData()
+    return {
+        Leave = Signal.new()
+        ;Enter = Signal.new()
+    }
+end
+
+Module.GetStateData = function(Entity : any, State : number)
+    if not CharacterStateData[Entity] then
+        CharacterStateData[Entity] = {}
+    end
+
+    if not CharacterStateData[Entity][State] then
+        CharacterStateData[Entity][State] = CreateStateData()
+    end
+
+    return CharacterStateData[Entity][State]
+end
+
+Module.GetMoveAwayVector = function(Quad, Entity : any)
+    local EntityData = CharacterStates.World.get(Entity)
+    local NpcEnum = EntityData.NPCType
+
+    local MovementData = Module.GetMovementData(Entity)
+    local Position = MovementData.Position
+
+    local CollisionRadius = NpcRegistry.GetCollisionRadius(NpcEnum)
+
+    local NearbyPoints = Quad:QueryRange(QuadtreeModule.BuildCircle(Position.X, Position.Z, CollisionRadius))
+
+    local BaddieCumulativePosition = Vector3.zero
+    for _, Point in NearbyPoints do
+
+        if Point.Data.Entity == Entity then continue end
+
+        local OtherEntity = Point.Data.Entity
+        local OtherEntityData = CharacterStates.World.get(OtherEntity)
+        local OtherEntityEnum = OtherEntityData.NPCType
+
+        --If other entity is not an npc, continue
+        if not OtherEntityData.NPC then continue end
+
+        local Difference = (Vector3.new(Point.X, 0, Point.Y) - Position) * Vector3.new(1,0,1)
+        BaddieCumulativePosition += Difference*
+            ((NpcRegistry.GetMass(OtherEntityEnum) or 1) / (NpcRegistry.GetMass(NpcEnum) or 1))*
+            (math.max(0.001, 1-Difference.Magnitude/(CollisionRadius + (NpcRegistry.GetCollisionRadius(OtherEntityEnum) or 0))))^0.5 
+    end
+
+    --Reverse the vector
+    local MoveAwayVector
+    if BaddieCumulativePosition.Magnitude == 0 then
+        MoveAwayVector = Vector3.zero
+    else
+        MoveAwayVector = -(BaddieCumulativePosition)
+    end
+
+    return MoveAwayVector
+end
+
+Module.GetNearbyHostiles = function(Quad, Entity : any, Position : Vector3, Radius : number)
+    local NearbyPoints = Quad:QueryRange(QuadtreeModule.BuildCircle(Position.X, Position.Z, Radius))
+
+    local NearbyHostiles = {}
+    for _, Point in NearbyPoints do
+        --Need a way to check if entity is hostile perhaps a team system
+        if Point.Data.Entity == Entity then continue end
+
+        local OtherEntity = Point.Data.Entity
+        local OtherEntityData = CharacterStates.World.get(OtherEntity)
+
+        if OtherEntityData.NPC then continue end
+
+        table.insert(NearbyHostiles, OtherEntity)
+    end
+
+    return NearbyHostiles
 end
 
 return Module

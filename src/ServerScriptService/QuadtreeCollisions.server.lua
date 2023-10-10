@@ -34,12 +34,32 @@ RunService.Heartbeat:Connect(function(deltaTime)
         local Entity = CharacterClass.GetEntityFromNpcId(NpcId)
         local EntityData = CharacterStates.World.get(Entity)
 
-        local CollisionRadius = NPCRegistry.GetNearbyNpcDistance(EntityData.NPCType)
+        local CollisionRadius = NPCRegistry.GetCollisionRadius(EntityData.NPCType)
         local NewPoint = Quadtree.BuildCircle(MovementData.Position.X, MovementData.Position.Z, CollisionRadius)
-        NewPoint.Data.NpcId = NpcId
+        NewPoint.Data.Entity = Entity
 
         --if (EntityData.NPCType ~= Enums.NPC.Gargoyle) then
             Quad:Insert(NewPoint)
         --end
+    end
+
+    for _, Player in game:GetService("Players"):GetPlayers() do
+        local Character = Player.Character
+
+        if not Character then continue end
+
+        local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
+
+        if not HumanoidRootPart then continue end
+
+        local Position = HumanoidRootPart.Position
+
+        local Entity = CharacterClass.GetEntityFromCharacter(Character)
+
+        local CollisionRadius = NPCRegistry.GetCollisionRadius(Enums.NPC.Player)
+        local NewPoint = Quadtree.BuildCircle(Position.X, Position.Z, CollisionRadius)
+        NewPoint.Data.Entity = Entity
+
+        Quad:Insert(NewPoint)
     end
 end)

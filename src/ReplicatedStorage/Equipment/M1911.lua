@@ -21,6 +21,8 @@ local EquipmentStates = require(ReplicatedStorage.Scripts.States.Equipment)
 local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
 local GunModule = require(ReplicatedStorage.Scripts.Class.Gun)
 local Enums = require(ReplicatedStorage.Scripts.Enums)
+local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
+local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 
 local GunEnum = Enums.Gun.M1911
 
@@ -40,83 +42,27 @@ Module.Give = function(Entity)
 
     local Character = Player.Character
 
-    local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+    Character:WaitForChild("HumanoidRootPart")
 
     Model.Parent = Character
     Grip.Part1 = Character.RightHand
 
-    --IK WILL MOVE SOMEWEHRE ELSE LATER TRUST ME THIS IS TOO LONG
-    --IK Attachments
-    local IKGoal = Instance.new("Attachment")
-    IKGoal.Parent = HumanoidRootPart
-    IKGoal.Position = Vector3.new(0.5, 0.5, -1.5)
-    IKGoal.CFrame *= CFrame.Angles(math.rad(90), 0, 0)
-    IKGoal.Name = "IKGoal"
+    local CharacterEntity = CharacterModule.GetEntityFromCharacter(Character)
+    local CharacterData = CharacterStates.World.get(CharacterEntity)
 
-    local Pole = Instance.new("Attachment")
-    Pole.Parent = HumanoidRootPart
-    Pole.Position = Vector3.new(10, 0, 1)
-    Pole.Name = "Pole"
+    local IKControllers = CharacterData.IKControllers
 
-    --[[
-        note from yours truly
-        i commented out your constraints because they dont really seem to be doing much
-            (the arm and the elbow dont connect very well?)
-        
-        i advise hard coding some rotation adjustments instead
-    ]]
+    local IKControlR = IKControllers["RightHand"]
+    IKControlR.Enabled = true
+    IKControlR.SmoothTime = 0.1
 
-    --Elbow Constraint
+    local IKGoalR = IKControlR.Target
+    local PoleR = IKControlR.Pole
 
-    local RightElbowConstraint = Instance.new("HingeConstraint")
-    RightElbowConstraint.Visible = true
-    RightElbowConstraint.Parent = Character.RightLowerArm
-    RightElbowConstraint.Name = "RightElbowConstraint"
+    IKGoalR.Position = Vector3.new(0.5, 0.5, -1.5)
+    IKGoalR.CFrame *= CFrame.Angles(math.rad(90), 0, 0)
 
-    local RightElbowConstraintAttachment0 = Instance.new("Attachment")
-    RightElbowConstraintAttachment0.Parent = Character.RightUpperArm.RightElbowRigAttachment
-
-    local RightElbowConstraintAttachment1 = Instance.new("Attachment")
-    RightElbowConstraintAttachment1.Parent = Character.RightLowerArm.RightElbowRigAttachment
-
-    RightElbowConstraintAttachment1.CFrame = RightElbowConstraintAttachment0.CFrame
-
-    RightElbowConstraint.Attachment0 = RightElbowConstraintAttachment0
-    RightElbowConstraint.Attachment1 = RightElbowConstraintAttachment1
-
-    --Wrist Constraint
-    
-    local RightWristConstraint = Instance.new("BallSocketConstraint")
-    RightWristConstraint.Parent = Character.RightHand
-    RightWristConstraint.Name = "LeftWristConstraint"
-
-    local RightWristConstraintAttachment0 = Instance.new("Attachment")
-    RightWristConstraintAttachment0.CFrame *= CFrame.Angles(0, math.rad(-180), math.rad(-90))
-    RightWristConstraintAttachment0.Parent = Character.RightLowerArm.RightWristRigAttachment
-
-    local RightWristConstraintAttachment1 = Instance.new("Attachment")
-    RightWristConstraintAttachment1.Parent = Character.RightHand.RightWristRigAttachment
-
-    RightWristConstraintAttachment1.CFrame = RightWristConstraintAttachment0.CFrame
-
-    RightWristConstraint.Attachment0 = RightWristConstraintAttachment0
-    RightWristConstraint.Attachment1 = RightWristConstraintAttachment1
-
-    RightWristConstraint.LimitsEnabled = true
-    RightWristConstraint.UpperAngle = 80
-    
-    --IK Control Set up
-    local IKControl = Instance.new("IKControl")
-    IKControl.Name = "RightArmControl"
-    IKControl.SmoothTime = 0.1
-    IKControl.Pole = Pole
-
-    IKControl.ChainRoot = Character.RightUpperArm
-    IKControl.EndEffector = Character.RightHand
-
-    IKControl.Type = Enum.IKControlType.Transform
-    IKControl.Target = IKGoal
-    IKControl.Parent = Character.Humanoid
+    PoleR.Position = Vector3.new(10, 0, 1)
 end
 
 Module.ServerGotItemID = function(Entity, ItemID)

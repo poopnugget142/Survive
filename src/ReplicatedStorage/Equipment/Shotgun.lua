@@ -12,6 +12,8 @@ local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
 local PlayerModule = require(ReplicatedStorage.Scripts.Class.Player)
 local GunModule = require(ReplicatedStorage.Scripts.Class.Gun)
 local Enums = require(ReplicatedStorage.Scripts.Enums)
+local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
+local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 
 local CharactersFolder = workspace:WaitForChild("Characters")
 local JunkFolder = workspace:WaitForChild("JunkFolder")
@@ -38,51 +40,38 @@ Module.Give = function(Entity)
 
     local Character = Player.Character
 
-    local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+    Character:WaitForChild("HumanoidRootPart")
 
     Model.Parent = Character
     Grip.Part1 = Character.RightHand
 
-    --IK WILL MOVE SOMEWEHRE ELSE LATER TRUST ME THIS IS TOO LONG
+    local CharacterEntity = CharacterModule.GetEntityFromCharacter(Character)
+    local CharacterData = CharacterStates.World.get(CharacterEntity)
+
+    local IKControllers = CharacterData.IKControllers
+
+    local IKControlR, IKControlL = IKControllers["RightHand"], IKControllers["LeftHand"]
+    IKControlR.Enabled, IKControlL.Enabled = true, true
+    local IKGoalR, IKGoalL = IKControlR.Target, IKControlL.Target
+    local PoleR, PoleL = IKControlR.Pole, IKControlL.Pole
+
+    IKControlL.SmoothTime = 0.001
+    IKControlR.SmoothTime = 0.05
+
+    IKGoalR.Position = Vector3.new(0.7, 0, 0.5)
+    IKGoalR.CFrame *= CFrame.Angles(math.rad(90), math.rad(0), math.rad(0))
+
+    PoleR.Position = Vector3.new(10, 0, 10)
+
+    IKGoalL.Position = Vector3.new(0, -2, 0)
+    IKGoalL.CFrame *= CFrame.Angles(math.rad(-90), math.rad(0), math.rad(90))
+
+    PoleL.Position = Vector3.new(-10, 0, -10)
 
     local Waist : Motor6D = Character.UpperTorso.Waist
     Waist.C0 *= CFrame.fromOrientation(0,math.rad(-10),math.rad(3))
     local Neck : Motor6D = Character.Head.Neck
     Neck.C0 *= CFrame.fromOrientation(0,math.rad(10),0)
-
-    --IK Attachments
-    local IKGoalR = Instance.new("Attachment")
-    IKGoalR.Name = "IKGoalR"
-    --[[
-    IKGoalR.Parent = HumanoidRootPart
-    IKGoalR.Position = Vector3.new(0.7, 0, -0.7)
-    IKGoalR.CFrame *= CFrame.Angles(math.rad(90), math.rad(0), math.rad(0))
-    ]]
-    IKGoalR.Parent = Character.UpperTorso
-    IKGoalR.Position = Vector3.new(0.7, 0, 0.5)
-    IKGoalR.CFrame *= CFrame.Angles(math.rad(90), math.rad(0), math.rad(0))
-
-    local PoleR = Instance.new("Attachment")
-    PoleR.Parent = HumanoidRootPart
-    PoleR.Position = Vector3.new(10, 0, 10)
-    PoleR.Name = "PoleR"
-
-    
-    local IKGoalL = Instance.new("Attachment")
-    IKGoalL.Name = "IKGoalL"
-    --[[
-    IKGoalL.Parent = HumanoidRootPart
-    IKGoalL.Position = Vector3.new(0, 0.5, -2.5)
-    IKGoalL.CFrame *= CFrame.Angles(math.rad(0), math.rad(0), math.rad(90))
-    ]]
-    IKGoalL.Parent = Character.RightHand
-    IKGoalL.Position = Vector3.new(0, -2, 0)
-    IKGoalL.CFrame *= CFrame.Angles(math.rad(-90), math.rad(0), math.rad(90))
-
-    local PoleL = Instance.new("Attachment")
-    PoleL.Parent = HumanoidRootPart
-    PoleL.Position = Vector3.new(-10, 0, -10)
-    PoleL.Name = "PoleL"
 
     local HeadBase = Character.Head.Neck.C0
     RunService.RenderStepped:Connect(function(deltaTime)
@@ -92,112 +81,8 @@ Module.Give = function(Entity)
         local lookUpFactor = (IKGoalR.WorldCFrame.Rotation.ZVector.Y+1) -- -1 to 1 based on whether aiming up or down
         IKGoalR.WorldCFrame = gunCFrame
         IKGoalR.Position = Vector3.new(0.7, -0.5, -0.3) + Vector3.new(0,0,-1)*lookUpFactor
-        --print(IKGoalR.WorldCFrame.Rotation.XVector)
-        --print(IKGoalR.WorldCFrame.Rotation.YVector)
-        --print(IKGoalR.WorldCFrame.Rotation.ZVector)
         --Character.Head.Neck.C0 = HeadBase * CFrame.lookAt(Vector3.zero, Aimpoint) * CFrame.Angles(math.rad(0), math.rad(90) + math.atan2(Aimpoint.Z, Aimpoint.X), math.rad(0))
     end)
-
-
-    --Elbow Constraint
-    local RightElbowConstraint = Instance.new("HingeConstraint")
-    RightElbowConstraint.Visible = true
-    RightElbowConstraint.Parent = Character.RightLowerArm
-    RightElbowConstraint.Name = "RightElbowConstraint"
-
-    local RightElbowConstraintAttachment0 = Instance.new("Attachment")
-    RightElbowConstraintAttachment0.Parent = Character.RightUpperArm.RightElbowRigAttachment
-
-    local RightElbowConstraintAttachment1 = Instance.new("Attachment")
-    RightElbowConstraintAttachment1.Parent = Character.RightLowerArm.RightElbowRigAttachment
-
-    RightElbowConstraintAttachment1.CFrame = RightElbowConstraintAttachment0.CFrame
-
-    RightElbowConstraint.Attachment0 = RightElbowConstraintAttachment0
-    RightElbowConstraint.Attachment1 = RightElbowConstraintAttachment1
-
-    --Wrist Constraint
-    local RightWristConstraint = Instance.new("BallSocketConstraint")
-    RightWristConstraint.Parent = Character.RightHand
-    RightWristConstraint.Name = "LeftWristConstraint"
-
-    local RightWristConstraintAttachment0 = Instance.new("Attachment")
-    RightWristConstraintAttachment0.CFrame *= CFrame.Angles(0, math.rad(-180), math.rad(-90))
-    RightWristConstraintAttachment0.Parent = Character.RightLowerArm.RightWristRigAttachment
-
-    local RightWristConstraintAttachment1 = Instance.new("Attachment")
-    RightWristConstraintAttachment1.Parent = Character.RightHand.RightWristRigAttachment
-
-    RightWristConstraintAttachment1.CFrame = RightWristConstraintAttachment0.CFrame
-
-    RightWristConstraint.Attachment0 = RightWristConstraintAttachment0
-    RightWristConstraint.Attachment1 = RightWristConstraintAttachment1
-
-    RightWristConstraint.LimitsEnabled = true
-    RightWristConstraint.UpperAngle = 80
-
-    --Elbow Constraint
-    local LeftElbowConstraint = Instance.new("HingeConstraint")
-    LeftElbowConstraint.Visible = true
-    LeftElbowConstraint.Parent = Character.LeftLowerArm
-    LeftElbowConstraint.Name = "LeftElbowConstraint"
-
-    local LeftElbowConstraintAttachment0 = Instance.new("Attachment")
-    LeftElbowConstraintAttachment0.Parent = Character.LeftUpperArm.LeftElbowRigAttachment
-
-    local LeftElbowConstraintAttachment1 = Instance.new("Attachment")
-    LeftElbowConstraintAttachment1.Parent = Character.LeftUpperArm.LeftElbowRigAttachment
-
-    LeftElbowConstraintAttachment1.CFrame = LeftElbowConstraintAttachment0.CFrame
-
-    LeftElbowConstraint.Attachment0 = LeftElbowConstraintAttachment0
-    LeftElbowConstraint.Attachment1 = LeftElbowConstraintAttachment1
-
-    --Wrist Constraint
-    local LeftWristConstraint = Instance.new("BallSocketConstraint")
-    LeftWristConstraint.Parent = Character.LeftHand
-    LeftWristConstraint.Name = "LeftWristConstraint"
-
-    local LeftWristConstraintAttachment0 = Instance.new("Attachment")
-    LeftWristConstraintAttachment0.CFrame *= CFrame.Angles(0, math.rad(-180), math.rad(-90))
-    LeftWristConstraintAttachment0.Parent = Character.LeftLowerArm.LeftWristRigAttachment
-
-    local LeftWristConstraintAttachment1 = Instance.new("Attachment")
-    LeftWristConstraintAttachment1.Parent = Character.LeftHand.LeftWristRigAttachment
-
-    LeftWristConstraintAttachment1.CFrame = LeftWristConstraintAttachment0.CFrame
-
-    LeftWristConstraint.Attachment0 = LeftWristConstraintAttachment0
-    LeftWristConstraint.Attachment1 = LeftWristConstraintAttachment1
-
-    LeftWristConstraint.LimitsEnabled = true
-    LeftWristConstraint.UpperAngle = 80
-
-    --IK Control Set up
-    local IKControlR = Instance.new("IKControl")
-    IKControlR.Name = "RightArmControl"
-    IKControlR.SmoothTime = 0.05
-    IKControlR.Pole = PoleR
-
-    IKControlR.ChainRoot = Character.RightUpperArm
-    IKControlR.EndEffector = Character.RightHand
-
-    IKControlR.Type = Enum.IKControlType.Transform
-    IKControlR.Target = IKGoalR
-    IKControlR.Parent = Character.Humanoid
-
-
-    local IKControlL = Instance.new("IKControl")
-    IKControlL.Name = "LeftArmControl"
-    IKControlL.SmoothTime = 0.001
-    IKControlL.Pole = PoleL
-
-    IKControlL.ChainRoot = Character.LeftUpperArm
-    IKControlL.EndEffector = Character.LeftHand
-
-    IKControlL.Type = Enum.IKControlType.Transform
-    IKControlL.Target = IKGoalL
-    IKControlL.Parent = Character.Humanoid
 end
 
 Module.ServerGotItemID = function(Entity, ItemID)

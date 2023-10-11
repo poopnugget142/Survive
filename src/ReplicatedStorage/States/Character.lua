@@ -98,37 +98,15 @@ Module.CurrentAnimation = World.factory("CurrentAnimation", {
     end;
 })
 
+Module.IKControllers = World.factory("IKControllers", {
+    add = function(Factory, Entity : any, IKControllers : any)
+        return IKControllers
+    end;
+})
+
 for _, StateEnum in Enums.States do
     Module[StateEnum] = World.tag(StateEnum)
 end
-
---// Status Effects
---[[
-Module.Crippled = World.factory("Crippled", {
-    add = function(Factory, Entity : Model, SlowFactor : number)
-        if (World.get(Entity).WalkSpeed == nil) then return false end
-        Promise.try(function(resolve, reject, onCancel)
-            while true do
-                local deltaTime = task.wait()
-                local EntityData = World.get(Entity)
-                if (EntityData.WalkSpeed == nil) then continue end
-                EntityData.WalkSpeed.Current = EntityData.WalkSpeed.Base * (1-EntityData.Crippled)
-
-                EntityData.Crippled -= deltaTime/5
-                EntityData.Crippled = math.clamp(EntityData.Crippled, 0, 1)
-
-                if (EntityData.Crippled <= 0) then
-                    break
-                end
-            end
-            
-            Module.Crippled.remove(Entity)
-            --resolve()
-        end)
-        return SlowFactor
-    end;
-})
-]]
 
 Module.World = World
 

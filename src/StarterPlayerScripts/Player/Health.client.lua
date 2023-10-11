@@ -15,6 +15,7 @@ HealthBar.Visible = true
 
 local HealthFill : Frame = HealthBar.GreenFill
 local RedFill : Frame = HealthBar.RedFill
+local HealthPercent : TextLabel = HealthBar.Percent
 
 local CurrentPromise
 
@@ -26,7 +27,9 @@ HealthUpdate.OnClientEvent:Connect(function(CurrentHealth, DamageType)
     end
 
     CurrentPromise = Promise.new(function(Resolve, Reject, onCancel)
-        local HealthNumber = math.max(CurrentHealth/1, 0)
+        local HealthNumber = math.max(CurrentHealth, 0)
+
+        HealthPercent.Text = tostring(math.floor(HealthNumber*100)) .. "%"
 
         local HealthSize = UDim2.new(HealthNumber, 0, 1, 0)
 

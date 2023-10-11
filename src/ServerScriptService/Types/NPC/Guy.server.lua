@@ -36,7 +36,7 @@ local function OnAttack(Entity : any)
     local Position = MovementData.Position
 
     local Quad = QuadtreeModule.GetQuadtree("GroundUnits")
-    local NearbyHostiles = CharacterModule.GetNearbyHostiles(Quad, Entity, Position, 10)
+    local NearbyHostiles = CharacterModule.GetNearbyHostiles(Quad, Entity, Position, AttackRange)
 
     for _, OtherEntity in NearbyHostiles do
         CharacterModule.UpdateHealth(OtherEntity, -10, Enums.DamageType.Physical)

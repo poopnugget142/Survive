@@ -58,6 +58,9 @@ CharacterStates[NpcEnum] = CharacterStates.World.factory(NpcEnum, {
 RunService.Heartbeat:Connect(function(deltaTime) 
     for Entity in CharacterStates.World.query{CharacterStates[NpcEnum]} do
         local EntityData = CharacterStates.World.get(Entity)
+
+        if not EntityData[NpcEnum] then continue end
+
         local MovementData = CharacterModule.GetMovementData(Entity)
         local Position = MovementData.Position
         local Velocity = MovementData.Velocity

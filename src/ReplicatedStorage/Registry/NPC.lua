@@ -44,7 +44,7 @@ Module.GetMass = function(BaddieEnum : number)
 end
 
 local AttackRange = {
-    [Enums.NPC.Guy] = 10;
+    [Enums.NPC.Guy] = 8;
     [Enums.NPC.Gargoyle] = 10;
     [Enums.NPC.Big] = 10
 }

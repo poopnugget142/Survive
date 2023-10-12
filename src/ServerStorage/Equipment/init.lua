@@ -9,8 +9,6 @@ local SetEquipmentModel : RemoteEvent = Remotes.SetEquipmentModel
 
 local Equipment = {}
 
-local PendingEquipment = {}
-
 local Id = 0
 
 --Creates a custom id for each Equipment that we have
@@ -30,63 +28,20 @@ end
 
 local Module = {}
 
-Module.AddEquipment = function(Player : Player, ItemName : string, ItemID : number?, ...)
-    local Entity = Equipment[ItemID]
+--TODO: Add wait for Pending equipment here
+Module.RegisterEquipment = function(Player : Player, ItemName : string, ...) : number
+    local ItemID = NextId()
+    local Entity = EquipmentStates.World.entity()
 
-    if not Entity then
-        ItemID = NextId()
-        Entity = EquipmentStates.World.entity()
-
-        EquipmentStates.ItemID.add(Entity, ItemID)
-    else
-        EquipmentStates.Owner.remove(Entity)
-        EquipmentStates.Owner.add(Entity, Player)
-        return
-    end
+    EquipmentStates.ItemID.add(Entity, ItemID)
 
     EquipmentStates.Name.add(Entity, ItemName)
     EquipmentStates.Owner.add(Entity, Player)
     
     Equipment[ItemID] = Entity
 
-    if not PendingEquipment[Player] then
-        PendingEquipment[Player] = {}
-    end
-
-    PendingEquipment[Player][ItemName] = Entity
-
     local EquipmentData = GetEquipmentData(ItemName)
-    EquipmentData.Create(Entity, ...)
-
-    return Entity
-end
-
---TODO: Add wait for Pending equipment here
-Module.CreateEquipment = function(Player : Player, ItemName : string) : number
-    if not PendingEquipment[Player] then
-        PendingEquipment[Player] = {}
-    end
-
-    local Entity = PendingEquipment[Player][ItemName]
-
-    --If not entity wait for it
-    if not Entity then
-        local Worked
-        Worked, Entity = Promise.new(function(resolve, reject, onCancel)
-            repeat task.wait()
-                
-            until PendingEquipment[Player][ItemName]
-
-            resolve(PendingEquipment[Player][ItemName])
-        end):timeout(10):await()
- 
-        if not Worked then
-            error(Entity)
-        end
-    end
-
-    local Entity = PendingEquipment[Player][ItemName]
-    PendingEquipment[Player][ItemName] = nil
+    EquipmentData.Register(Entity, ...)
 
     return EquipmentStates.World.get(Entity).ItemID
 end

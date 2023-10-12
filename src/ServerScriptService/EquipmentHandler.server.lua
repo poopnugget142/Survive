@@ -9,7 +9,7 @@ local CustomActions = Remotes.Custom
 local RegisterEquipment : RemoteFunction = Remotes.RegisterEquipment
 local SetEquipmentModel : RemoteEvent = Remotes.SetEquipmentModel
 
-RegisterEquipment.OnServerInvoke = Equipment.CreateEquipment
+RegisterEquipment.OnServerInvoke = Equipment.RegisterEquipment
 SetEquipmentModel.OnServerEvent:Connect(Equipment.SetEquipmentModel)
 
 for _, Remote : RemoteEvent in CustomActions:GetChildren() do

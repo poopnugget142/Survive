@@ -1,6 +1,8 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Remotes = ReplicatedStorage.Remotes
+local CustomActions = Remotes.Custom
+
 local Promise = require(ReplicatedStorage.Packages.Promise)
 local EquipmentStates = require(ReplicatedStorage.Scripts.States.Equipment)
 
@@ -60,6 +62,7 @@ Module.CreateEntity = function(ItemName : string, ItemID : number?, ...)
             EquipmentStates.ItemID.add(Entity, ItemID)
         else
             --Entity does not exist on server
+            --Requests item id from server
             SetItemID(Entity, ItemName)
         end
     end
@@ -71,6 +74,19 @@ end
 
 Module.GetEntity = function(ItemId : number) : any
     return EquipmentEntitys[ItemId]
+end
+
+Module.FireCustomAction = function(Entity : any, ActionName : string, ...)
+    local EntityData = EquipmentStates.World.get(Entity)
+    local ItemID = EntityData.ItemID
+
+    local Action = CustomActions:FindFirstChild(ActionName)
+
+    if not Action then
+        error("Action "..ActionName.." does not exist")
+    end
+
+    Action:FireServer(ItemID, ...)
 end
 
 SetEquipmentModel.OnClientEvent:Connect(function(Instance, ItemID)

@@ -2,11 +2,10 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
 
-local Remotes = ReplicatedStorage.Remotes
 local Assets = ReplicatedStorage.Assets
 
+local EquipmentModule = require(script.Parent)
 local EquipmentStates = require(ReplicatedStorage.Scripts.States.Equipment)
 local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
 local PlayerModule = require(ReplicatedStorage.Scripts.Class.Player)
@@ -23,9 +22,6 @@ TerrainParams.FilterType = Enum.RaycastFilterType.Exclude
 TerrainParams.FilterDescendantsInstances = {JunkFolder, CharactersFolder}
 
 local GunEnum = Enums.Gun.Shotgun
-
-local Attack : RemoteEvent = Remotes.Custom.Attack
-local SetEquipmentModel : RemoteEvent = Remotes.SetEquipmentModel
 
 local Player = Players.LocalPlayer
 
@@ -67,11 +63,6 @@ Module.Give = function(Entity)
     IKGoalL.CFrame *= CFrame.Angles(math.rad(-90), math.rad(0), math.rad(90))
 
     PoleL.Position = Vector3.new(-10, 0, -10)
-
-    local Waist : Motor6D = Character.UpperTorso.Waist
-    Waist.C0 *= CFrame.fromOrientation(0,math.rad(-10),math.rad(3))
-    local Neck : Motor6D = Character.Head.Neck
-    Neck.C0 *= CFrame.fromOrientation(0,math.rad(10),0)
 
     local HeadBase = Character.Head.Neck.C0
     RunService.RenderStepped:Connect(function(deltaTime)
@@ -119,8 +110,9 @@ Module.ServerGotItemID = function(Entity, ItemID)
                 if (DeviatedAim.Magnitude == nil) then DeviatedAim = MouseCast.Position end
                 --print(DeviatedAim)
 
-                Attack:FireServer(ItemID, DeviatedAim)
 
+                EquipmentModule.FireCustomAction(Entity, "Attack", DeviatedAim)
+                
                 --[[
                 --distance values to modify shotgun speed
                 local MinDist = math.huge 

@@ -14,7 +14,7 @@ local GunEnum = Enums.Gun.M1911
 
 local Module = {}
 
-Module.Create = function(Entity)
+Module.Register = function(Entity)
     
 end
 

@@ -12,8 +12,6 @@ local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 local UpdateHealth = Remotes.UpdateHealth
 
 Players.PlayerAdded:Connect(function(Player)
-    Equipment.AddEquipment(Player, "Shotgun")
-
     local function HealthUpdate(Entity, DamageAmount, DamageType)
         local HealthData = CharacterStates.World.get(Entity).Health
         local CurrentHealth = HealthData.Current

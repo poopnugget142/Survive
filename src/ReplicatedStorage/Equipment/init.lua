@@ -14,6 +14,8 @@ local EquipmentEntitys : { [number] : any } = {}
 
 local Module = {}
 
+Module.States = EquipmentStates
+
 --Gets the corresponding module script with the item name
 local function GetEquipmentData(ItemName : string) : table
     local ItemData = script:FindFirstChild(ItemName)
@@ -30,12 +32,13 @@ local function SetItemID(Entity : any, ItemName : string?)
     end
 
     --Asks server for ItemID to mark item with
-    local ItemPromise = Promise.new(function(resolve, reject, onCancel)
+    local ItemPromise = Promise.new(function(resolve)
         ItemID = RegisterEquipment:InvokeServer(ItemName)
 
-        EquipmentStates.ItemID.add(Entity, ItemID)
-
         EquipmentEntitys[ItemID] = Entity
+        EquipmentIDs[Entity] = ItemID
+
+        EquipmentStates.ItemID.add(Entity, ItemID)
 
         local ItemData = GetEquipmentData(ItemName)
 
@@ -45,7 +48,6 @@ local function SetItemID(Entity : any, ItemName : string?)
 	end)
 
     EquipmentIDs[Entity] = ItemPromise
-    return ItemPromise
 end
 
 Module.CreateEntity = function(ItemName : string, ItemID : number?, ...)
@@ -70,6 +72,20 @@ Module.CreateEntity = function(ItemName : string, ItemID : number?, ...)
     local ItemData = GetEquipmentData(ItemName)
 
     ItemData.Give(Entity, ...)
+
+    return Entity
+end
+
+Module.WaitUntilItemID = function(Entity : any) : number?
+    local ItemID = EquipmentIDs[Entity]
+
+    if not Promise.is(ItemID) then
+        return ItemID
+    end
+
+    ItemID = ItemID:await()
+
+    return ItemID
 end
 
 Module.GetEntity = function(ItemId : number) : any
@@ -87,6 +103,28 @@ Module.FireCustomAction = function(Entity : any, ActionName : string, ...)
     end
 
     Action:FireServer(ItemID, ...)
+end
+
+Module.Equip = function(Entity : any, ...)
+    local EntityData = EquipmentStates.World.get(Entity)
+    local ItemName = EntityData.Name
+    local ItemData = GetEquipmentData(ItemName)
+    ItemData.Equip(Entity, ...)
+end
+
+Module.Unequip = function(Entity : any, ...)
+    local EntityData = EquipmentStates.World.get(Entity)
+    local ItemName = EntityData.Name
+    local ItemData = GetEquipmentData(ItemName)
+    ItemData.Unequip(Entity, ...)
+end
+
+--Asks server to load model
+Module.RequestModel = function(Entity : any, ...)
+    local EntityData = EquipmentStates.World.get(Entity)
+    local ItemID = EntityData.ItemID
+
+    SetEquipmentModel:FireServer(ItemID, ...)
 end
 
 SetEquipmentModel.OnClientEvent:Connect(function(Instance, ItemID)

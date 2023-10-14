@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
+local Assets = ReplicatedStorage.Assets
 local Remotes = ReplicatedStorage.Remotes
 
 local EquipmentStates = require(ReplicatedStorage.Scripts.States.Equipment)
@@ -26,7 +27,21 @@ Module.Register = function(Entity)
 end
 
 Module.LoadModel = function(Entity)
-    
+    local EntityData = EquipmentStates.World.get(Entity)
+
+    local Model = Assets.Guns.Shotgun:Clone()
+
+    local Handle = Model.Handle
+    local Grip = Handle.Grip
+
+    local Player = EntityData.Owner
+
+    local Character = Player.Character
+
+    Model.Parent = Character
+    Grip.Part1 = Character.RightHand
+
+    return Model
 end
 
 --In the future we can check if this really hit but for now we trust it
@@ -40,9 +55,6 @@ Module.Attack = function(Entity, MousePosition)
     local Origin --= Model.Muzzle.Position
                     = HumanoidRootPart.Position
     local TracerPlayers = Util.GetAllPlayersExcept{GunOwner}
-
-
-
 
     --Explosions
     local TracerTargets = {}

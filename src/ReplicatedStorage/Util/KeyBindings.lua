@@ -13,7 +13,18 @@ local InputActions = {
     ;["Inventory_Interact2"] =  {Enum.UserInputType.MouseButton2} --mouse2, typically item place
     ;["Inventory_RotateLeft"] =     {Enum.KeyCode.Q}
     ;["Inventory_RotateRight"] =     {Enum.KeyCode.E}
-    ;
+    
+    --Numberkeys
+    ;["1"] = {Enum.KeyCode.One, Enum.KeyCode.KeypadOne}
+    ;["2"] = {Enum.KeyCode.Two, Enum.KeyCode.KeypadTwo}
+    ;["3"] = {Enum.KeyCode.Three, Enum.KeyCode.KeypadThree}
+    ;["4"] = {Enum.KeyCode.Four, Enum.KeyCode.KeypadFour}
+    ;["5"] = {Enum.KeyCode.Five, Enum.KeyCode.KeypadFive}
+    ;["6"] = {Enum.KeyCode.Six, Enum.KeyCode.KeypadSix}
+    ;["7"] = {Enum.KeyCode.Seven, Enum.KeyCode.KeypadSeven}
+    ;["8"] = {Enum.KeyCode.Eight, Enum.KeyCode.KeypadEight}
+    ;["9"] = {Enum.KeyCode.Nine, Enum.KeyCode.KeypadNine}
+    ;["0"] = {Enum.KeyCode.Zero, Enum.KeyCode.KeypadZero}
 }
 
 local InputFunctions = {}

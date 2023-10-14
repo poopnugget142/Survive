@@ -53,7 +53,7 @@ Module.SetEquipmentModel = function(Player : Player, ItemID : number)
     local EquipmentData = GetEquipmentData(ItemName)
     local Model : Model = EquipmentData.LoadModel(Entity)
     EquipmentStates.Model.add(Entity, Model)
-    Model:SetAttribute("ItemID", ItemID)
+    --Model:SetAttribute("ItemID", ItemID)
 
     SetEquipmentModel:FireClient(Player, Model, ItemID)
 end

@@ -26,6 +26,8 @@ local NpcId = 0
 
 local Module = {}
 
+Module.States = CharacterStates
+
 Module.IdToNpc = IdToNpc
 
 --Returns the first ancestor Model of Object that has an "Character" tag, nil if none are found

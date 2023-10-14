@@ -2,12 +2,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Stew = require(ReplicatedStorage.Packages.Stew)
 local Util = require(ReplicatedStorage.Scripts.Util)
+local Enums = require(ReplicatedStorage.Scripts.Enums)
 
 local World = Stew.world()
 
 local Module = {}
-
-Module.Shooting = World.tag("Shooting")
 
 Module.Name = World.factory("Name", {
     add = Util.EasyStewReturn;
@@ -21,7 +20,8 @@ Module.Model = World.factory("Model", {
     add = Util.EasyStewReturn;
 
     remove = function(Factory, Entity : any)
-        local Model = World.Component.Get(Entity, "Model")
+        local EntityData = World.get(Entity)
+        local Model = EntityData.Model
 
         Model:Destroy()
     end
@@ -29,22 +29,6 @@ Module.Model = World.factory("Model", {
 
 Module.Owner = World.factory("Owner", {
     add = Util.EasyStewReturn;
-})
-
---Creates a temporary model that will be destroyed once the server loads its version
-Module.LoadingItem = World.factory("LoadingItem", {
-    add = function(Factory, Entity : any, Model : Instance)
-
-        Module.Model.add(Entity, Model)
-
-        return Model
-    end;
-
-    remove = function(Factory, Entity : any, NewModel : Instance)
-        Module.Model.remove(Entity)
-        
-        Module.Model.add(Entity, NewModel)
-    end;
 })
 
 Module.LoadingConnections = World.factory("LoadingConnections", {
@@ -57,6 +41,25 @@ Module.LoadingConnections = World.factory("LoadingConnections", {
             Connection:Disconnect()
         end
     end;
+})
+
+--~Weapon~--
+for  _, GunEnum in Enums.Gun do
+    Module[GunEnum] = World.tag(GunEnum)
+end
+
+Module.Shooting = World.tag("Shooting")
+
+Module.Cooldown = World.factory("Cooldown", {
+    add = Util.EasyStewReturn;
+})
+
+Module.Deviation = World.factory("Deviation", {
+    add = Util.EasyStewReturn;
+})
+
+Module.Firerate = World.factory("Firerate", {
+    add = Util.EasyStewReturn;
 })
 
 Module.World = World

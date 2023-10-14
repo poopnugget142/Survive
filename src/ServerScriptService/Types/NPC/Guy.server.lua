@@ -31,7 +31,7 @@ end
 local function OnAttack(Entity : any)
     CharacterModule.Action(Entity, Enums.Action.Attack)
 
-    task.wait(1.6)
+    task.wait(1)
     local MovementData = CharacterModule.GetMovementData(Entity)
     local Position = MovementData.Position
 
@@ -42,7 +42,7 @@ local function OnAttack(Entity : any)
         CharacterModule.UpdateHealth(OtherEntity, -10, Enums.DamageType.Physical)
     end
 
-    task.wait(0.9)
+    task.wait(0.6)
 
     CharacterModule.SetState(Entity, Enums.States.Walking)
 end

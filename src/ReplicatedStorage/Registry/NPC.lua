@@ -34,7 +34,7 @@ end
 
 local Mass = {
     [Enums.NPC.Guy] = 1;
-    [Enums.NPC.Big] = 10
+    [Enums.NPC.Big] = 6
 }
 
 Module.GetMass = function(BaddieEnum : number)

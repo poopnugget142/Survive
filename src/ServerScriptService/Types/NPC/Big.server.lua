@@ -33,7 +33,7 @@ CharacterStates[NpcEnum] = CharacterStates.World.factory(NpcEnum, {
     add = function(Factory, Entity : any, SpawnPosition : Vector3)
         local NpcId = CharacterModule.RegisterNPC(Entity)
 
-        local HealthData = CharacterStates.Health.add(Entity, 100)
+        local HealthData = CharacterStates.Health.add(Entity, 1000)
         HealthData.Update:Connect(function() OnHit(Entity) end)
 
         --[[

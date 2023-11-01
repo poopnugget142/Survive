@@ -133,8 +133,9 @@ Module.CircleCheck = function(Circle : Circle, Other : Circle | Point)
     return (
         (
             (Other.X-(Circle.X or 0))^2 + 
-            (Other.Y-(Circle.Y or 0))^2) <= 
-            (Circle.r^2 + ((Other.r^2) or 0))
+            (Other.Y-(Circle.Y or 0))^2
+        ) <= 
+        ((Circle.r or 0)^2 + (Other.r or 0)^2)
     )
 end
 

@@ -23,7 +23,7 @@ end
 local CollisionRadius = {
     [Enums.NPC.Player] = 1.5;
     [Enums.NPC.Guy] = 1.5;
-    [Enums.NPC.Big] = 4
+    [Enums.NPC.Big] = 4;
 }
 
 Module.GetCollisionRadius = function(BaddieEnum : number)
@@ -34,7 +34,7 @@ end
 
 local Mass = {
     [Enums.NPC.Guy] = 1;
-    [Enums.NPC.Big] = 6
+    [Enums.NPC.Big] = 6;
 }
 
 Module.GetMass = function(BaddieEnum : number)
@@ -46,7 +46,7 @@ end
 local AttackRange = {
     [Enums.NPC.Guy] = 8;
     [Enums.NPC.Gargoyle] = 10;
-    [Enums.NPC.Big] = 10
+    [Enums.NPC.Big] = 10;
 }
 
 Module.GetAttackRange = function(BaddieEnum : number)

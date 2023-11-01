@@ -45,7 +45,7 @@ CharacterStates[NpcEnum] = CharacterStates.World.factory(NpcEnum, {
         CharacterStates.AutoRotate.add(Entity)
         CharacterStates.Moving.add(Entity)
 
-        CharacterModule.CreatedMovementData(Entity, SpawnPosition)
+        CharacterModule.CreateMovementData(Entity, SpawnPosition)
         
         return true
     end;

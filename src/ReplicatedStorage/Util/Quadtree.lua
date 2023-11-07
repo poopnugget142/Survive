@@ -23,7 +23,7 @@ export type Point = {
     Data : table
 }
 
-function Quadtree:Insert(Point : Point | Circle)
+function Quadtree:Insert(Point : Point | Circle | Box)
     if not Module.BoxCheck(self.Box, Point) then return end -- if the point is outside the quadtree, ignore
 
     if (#self.Points < self.Capacity and #self.Children == 0) then --if there is enough space in the quadtree, accept the point and leave
@@ -76,7 +76,7 @@ function Quadtree:QueryRange(range : Box | Circle)
     --check and add points to output
     for _, Point in self.Points do
         if (range.r and Module.CircleCheck(range, Point)) or --if we are a circle and pass a circle check
-        ((not range.r) and Module.BoxCheck(range,Point)) --if we are not a circle and pass a box check
+        ((not range.r) and Module.BoxCheck(range, Point)) --if we are not a circle and pass a box check
         then table.insert(out, Point) end
     end
 

@@ -38,8 +38,9 @@ local LocalTreeventory = TreeventoryCore.BuildTreeventory(
     )
 )
 
-local TEMPITEM1 = TreeventoryCore.BuildItem(QuadtreeModule.newPoint(1,1), {QuadtreeModule.BuildBox(0,0,1/2,1/2)}) --remember that qtree width extends to each side, divide by 2
-local TEMPITEM2 = TreeventoryCore.BuildItem(QuadtreeModule.newPoint(2,2), {QuadtreeModule.BuildBox(0,0,1/2,1/2)})
+local TEMPITEM1 = TreeventoryCore.BuildItem(QuadtreeModule.newPoint(1,1), {QuadtreeModule.BuildBox(2/4, 0/4, 2/2, 1/2), QuadtreeModule.BuildBox(-2/4, 0/4, 2/2, 1/2)}) --remember that qtree width extends to each side, divide by 2
+local TEMPITEM2 = TreeventoryCore.BuildItem(QuadtreeModule.newPoint(2,2), {QuadtreeModule.BuildBox(0/4, 0/4, 1/2, 1/2)})
+TEMPITEM1.Rotation = 1
 
 table.insert(LocalTreeventory.Items, TEMPITEM1)
 table.insert(LocalTreeventory.Items, TEMPITEM2)

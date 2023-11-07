@@ -42,6 +42,18 @@ module.GetItemFromId = function(Id : number)
 end
 
 
+--recurring format for adding a position and a boundary
+module.PositionPlusBoundary = function(Position : Point, Boundary : Box, Rotation : number?)
+    local Theta = math.round(Rotation or 0) * math.pi * 0.5
+    --print(Theta)
+
+    return QuadtreeModule.BuildBox(
+        Position.X + (Boundary.X * math.cos(Theta) - Boundary.Y * math.sin(Theta)) --boundary offset
+        ,Position.Y + (Boundary.X * math.sin(Theta) + Boundary.Y * math.cos(Theta))
+        ,math.abs(Boundary.w * math.cos(Theta) - Boundary.h * math.sin(Theta)) - MathSmall --boundary box
+        ,math.abs(Boundary.w * math.sin(Theta) + Boundary.h * math.cos(Theta)) - MathSmall
+    )
+end
 
 
 module.Treeventory_CheckBox = function(Treeventory : Treeventory, Box : Box)
@@ -57,6 +69,7 @@ module.Treeventory_CheckBox = function(Treeventory : Treeventory, Box : Box)
         ,QuadtreeModule.newPoint(Box.X,Box.Y)
     )
 
+    --print(BoundaryCheck)
     if not BoundaryCheck then return false end
 
     --check if box collides with any other items
@@ -69,17 +82,12 @@ module.Treeventory_CheckBox = function(Treeventory : Treeventory, Box : Box)
     for _, Item : Item in Treeventory.Items do
         --items can have multiple boundaries, another for loop here
         for _, Boundary : Box in Item.Boundaries do
-            TreeventoryQuad:Insert(QuadtreeModule.BuildBox(
-                Item.Position.X + Boundary.X
-                ,Item.Position.Y + Boundary.Y
-                ,Boundary.w - MathSmall
-                ,Boundary.h - MathSmall
-            ))
+            TreeventoryQuad:Insert(module.PositionPlusBoundary(Item.Position, Boundary, Item.Rotation))
         end
     end
 
     local QueryRange = TreeventoryQuad:QueryRange(Box)
-    print(QueryRange)
+    --print(QueryRange)
     if #QueryRange > 0 then return false end --if the box collides with any items, return false
 
     --return true if valid
@@ -89,12 +97,8 @@ end
 module.Item_PlaceInTreeventory = function(Item : Item, Treeventory : Treeventory, Position : Point)
     --check target item position
     for _, Boundary in Item.Boundaries do
-        local BoundaryCheck = QuadtreeModule.BuildBox(
-            Position.X + Boundary.X --account for individual boundary offsets
-            ,Position.Y + Boundary.Y
-            ,Boundary.w - MathSmall
-            ,Boundary.h - MathSmall
-        )
+        local BoundaryCheck = module.PositionPlusBoundary(Position, Boundary, Item.Rotation)
+        --print(BoundaryCheck)
         if not module.Treeventory_CheckBox(Treeventory, BoundaryCheck) then return false end
     end
 

@@ -4,6 +4,8 @@
     Hierarchial Abstraction
         Add an abstraction step down function (abstraction -> tilegrid)
         Add a re/calculate adjacent costs for abstraction layers
+
+    Refactor code to use generic quadtree library
 ]]
 
 local function mathsummation(values : table | number)

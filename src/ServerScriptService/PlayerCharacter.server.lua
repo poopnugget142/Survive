@@ -8,6 +8,7 @@ local Remotes = ReplicatedStorage.Remotes
 local Equipment = require(ServerStorage.Scripts.Equipment)
 local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
 local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
+local GridventoryCore = require(ReplicatedStorage.Scripts.Util.GridventoryCore)
 
 local UpdateHealth = Remotes.UpdateHealth
 

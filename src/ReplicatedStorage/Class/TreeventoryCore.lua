@@ -11,7 +11,7 @@ local QuadtreeModule = require(ReplicatedStorage.Scripts.Util.Quadtree)
 
 local module = {}
 
-type Gridventory = {
+type Treeventory = {
     Id : number
     ;Boundary : Box --The space that items can be stored in; Larger boundary means larger inventory
     ;Items : table | Item
@@ -30,12 +30,12 @@ local function NextId()
     Id += 1
     return Id
 end
-local GridventoryList = {}
+local TreeventoryList = {}
 local ItemList = {}
 
 
-module.GetGridventoryFromId = function(Id : number)
-    return GridventoryList[Id]
+module.GetTreeventoryFromId = function(Id : number)
+    return TreeventoryList[Id]
 end
 module.GetItemFromId = function(Id : number)
     return ItemList[Id]
@@ -44,15 +44,15 @@ end
 
 
 
-module.Gridventory_CheckBox = function(Gridventory : Gridventory, Box : Box)
-    --check if box is within gridventory boundary
+module.Treeventory_CheckBox = function(Treeventory : Treeventory, Box : Box)
+    --check if box is within Treeventory boundary
     --make a new box to account for excessively large items
     local BoundaryCheck = QuadtreeModule.BoxCheck(
         QuadtreeModule.BuildBox(
-            Gridventory.Boundary.X
-            ,Gridventory.Boundary.Y
-            ,Gridventory.Boundary.w + MathSmall - Box.w --quadtree fails on == cases, add a very small number to boundary check size
-            ,Gridventory.Boundary.h + MathSmall - Box.h
+            Treeventory.Boundary.X
+            ,Treeventory.Boundary.Y
+            ,Treeventory.Boundary.w + MathSmall - Box.w --quadtree fails on == cases, add a very small number to boundary check size
+            ,Treeventory.Boundary.h + MathSmall - Box.h
         )
         ,QuadtreeModule.newPoint(Box.X,Box.Y)
     )
@@ -60,16 +60,16 @@ module.Gridventory_CheckBox = function(Gridventory : Gridventory, Box : Box)
     if not BoundaryCheck then return false end
 
     --check if box collides with any other items
-    local GridventoryQuad = QuadtreeModule.newQuadtree(
-        Gridventory.Boundary.X
-        ,Gridventory.Boundary.Y
-        ,Gridventory.Boundary.w
-        ,Gridventory.Boundary.h
+    local TreeventoryQuad = QuadtreeModule.newQuadtree(
+        Treeventory.Boundary.X
+        ,Treeventory.Boundary.Y
+        ,Treeventory.Boundary.w
+        ,Treeventory.Boundary.h
     )
-    for _, Item : Item in Gridventory.Items do
+    for _, Item : Item in Treeventory.Items do
         --items can have multiple boundaries, another for loop here
         for _, Boundary : Box in Item.Boundaries do
-            GridventoryQuad:Insert(QuadtreeModule.BuildBox(
+            TreeventoryQuad:Insert(QuadtreeModule.BuildBox(
                 Item.Position.X + Boundary.X
                 ,Item.Position.Y + Boundary.Y
                 ,Boundary.w - MathSmall
@@ -78,7 +78,7 @@ module.Gridventory_CheckBox = function(Gridventory : Gridventory, Box : Box)
         end
     end
 
-    local QueryRange = GridventoryQuad:QueryRange(Box)
+    local QueryRange = TreeventoryQuad:QueryRange(Box)
     print(QueryRange)
     if #QueryRange > 0 then return false end --if the box collides with any items, return false
 
@@ -86,7 +86,7 @@ module.Gridventory_CheckBox = function(Gridventory : Gridventory, Box : Box)
     return true
 end
 
-module.Item_PlaceInGridventory = function(Item : Item, Gridventory : Gridventory, Position : Point)
+module.Item_PlaceInTreeventory = function(Item : Item, Treeventory : Treeventory, Position : Point)
     --check target item position
     for _, Boundary in Item.Boundaries do
         local BoundaryCheck = QuadtreeModule.BuildBox(
@@ -95,11 +95,11 @@ module.Item_PlaceInGridventory = function(Item : Item, Gridventory : Gridventory
             ,Boundary.w - MathSmall
             ,Boundary.h - MathSmall
         )
-        if not module.Gridventory_CheckBox(Gridventory, BoundaryCheck) then return false end
+        if not module.Treeventory_CheckBox(Treeventory, BoundaryCheck) then return false end
     end
 
     --set the position of an item to an XY
-    Item.Parent = Gridventory
+    Item.Parent = Treeventory
     Item.Position = Position
 
     return true
@@ -120,12 +120,12 @@ end
 
 
 
-module.BuildGridventory = function(Boundary : Box)
+module.BuildTreeventory = function(Boundary : Box)
     return {
         Id = -1
         ,Boundary = Boundary
         ,Items = {}
-    } :: Gridventory
+    } :: Treeventory
 end
 module.BuildItem = function(Position : Point, Boundaries : Box | Table)
     return {

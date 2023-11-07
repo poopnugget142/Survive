@@ -13,7 +13,7 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
     local LocalPlayer = Players.LocalPlayer
 
-local GridventoryCore = require(ReplicatedStorage.Scripts.Class.GridventoryCore)
+local TreeventoryCore = require(ReplicatedStorage.Scripts.Class.TreeventoryCore)
 local QuadtreeModule = require(ReplicatedStorage.Scripts.Util.Quadtree)
 local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
 
@@ -29,7 +29,7 @@ local ItemHeldOffset
 --Create inventory
 local TEMPSIZE = Vector2.new(10,10)--TEMP SIZE, REFERENCE LATER !!!!!!!!!!!!!
 
-local LocalGridventory = GridventoryCore.BuildGridventory(
+local LocalTreeventory = TreeventoryCore.BuildTreeventory(
     QuadtreeModule.BuildBox( 
         TEMPSIZE.X/2,
         TEMPSIZE.Y/2,
@@ -38,15 +38,15 @@ local LocalGridventory = GridventoryCore.BuildGridventory(
     )
 )
 
-local TEMPITEM1 = GridventoryCore.BuildItem(QuadtreeModule.newPoint(1,1), {QuadtreeModule.BuildBox(0,0,1/2,1/2)}) --remember that qtree width extends to each side, divide by 2
-local TEMPITEM2 = GridventoryCore.BuildItem(QuadtreeModule.newPoint(2,2), {QuadtreeModule.BuildBox(0,0,1/2,1/2)})
+local TEMPITEM1 = TreeventoryCore.BuildItem(QuadtreeModule.newPoint(1,1), {QuadtreeModule.BuildBox(0,0,1/2,1/2)}) --remember that qtree width extends to each side, divide by 2
+local TEMPITEM2 = TreeventoryCore.BuildItem(QuadtreeModule.newPoint(2,2), {QuadtreeModule.BuildBox(0,0,1/2,1/2)})
 
-table.insert(LocalGridventory.Items, TEMPITEM1)
-table.insert(LocalGridventory.Items, TEMPITEM2)
+table.insert(LocalTreeventory.Items, TEMPITEM1)
+table.insert(LocalTreeventory.Items, TEMPITEM2)
 
-print(LocalGridventory)
-print(GridventoryCore.Item_PlaceInGridventory(TEMPITEM1, LocalGridventory, QuadtreeModule.newPoint(2,3)))
-print(LocalGridventory)
+print(LocalTreeventory)
+print(TreeventoryCore.Item_PlaceInTreeventory(TEMPITEM1, LocalTreeventory, QuadtreeModule.newPoint(2,3)))
+print(LocalTreeventory)
 
 local ItemPick = function()
     --Pick up an item

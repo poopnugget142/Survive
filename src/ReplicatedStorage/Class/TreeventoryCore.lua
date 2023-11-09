@@ -103,8 +103,10 @@ module.Item_PlaceInTreeventory = function(Item : Item, Treeventory : Treeventory
     end
 
     --set the position of an item to an XY
+    if Item.Parent and Item.Parent.Items then Item.Parent.Items[Item.Id] = nil end
     Item.Parent = Treeventory
     Item.Position = Position
+    Item.Parent.Items[Item.Id] = Item
 
     return true
 end
@@ -131,11 +133,11 @@ module.BuildTreeventory = function(Boundary : Box)
         ,Items = {}
     } :: Treeventory
 end
-module.BuildItem = function(Position : Point, Boundaries : Box | Table)
+module.BuildItem = function(Boundaries : Box | Table)
     return {
-        Id = -1
+        Id = NextId()
         ,Parent = nil
-        ,Position = Position
+        ,Position = QuadtreeModule.newPoint(-1,-1)
         ,Rotation = 0 --value from 0 -> 3 (pi/2)
         ,Boundaries = Boundaries
 

@@ -70,7 +70,7 @@ module.Treeventory_CheckBox = function(Treeventory : Treeventory, Box : Box)
     )
 
     --print(BoundaryCheck)
-    if not BoundaryCheck then return false end
+    if not BoundaryCheck then return {Value = false} end
 
     --check if box collides with any other items
     local TreeventoryQuad = QuadtreeModule.newQuadtree(
@@ -88,27 +88,31 @@ module.Treeventory_CheckBox = function(Treeventory : Treeventory, Box : Box)
 
     local QueryRange = TreeventoryQuad:QueryRange(Box)
     --print(QueryRange)
-    if #QueryRange > 0 then return false end --if the box collides with any items, return false
+    if #QueryRange > 0 then return {Value = false, Error = QueryRange} end --if the box collides with any items, return false
 
     --return true if valid
-    return true
+    return {Value = true}
 end
 
 module.Item_PlaceInTreeventory = function(Item : Item, Treeventory : Treeventory, Position : Point)
+    if Item.Parent and Item.Parent.Items then Item.Parent.Items[Item.Id] = nil end
     --check target item position
     for _, Boundary in Item.Boundaries do
-        local BoundaryCheck = module.PositionPlusBoundary(Position, Boundary, Item.Rotation)
-        --print(BoundaryCheck)
-        if not module.Treeventory_CheckBox(Treeventory, BoundaryCheck) then return false end
+        local CollisionCheck = module.Treeventory_CheckBox(Treeventory, module.PositionPlusBoundary(Position, Boundary, Item.Rotation))
+        --print(CollisionCheck)
+        if not CollisionCheck.Value then 
+            Item.Parent.Items[Item.Id] = Item
+            return CollisionCheck 
+        end
     end
 
     --set the position of an item to an XY
-    if Item.Parent and Item.Parent.Items then Item.Parent.Items[Item.Id] = nil end
+    
     Item.Parent = Treeventory
     Item.Position = Position
     Item.Parent.Items[Item.Id] = Item
 
-    return true
+    return {Value = true}
 end
 
 

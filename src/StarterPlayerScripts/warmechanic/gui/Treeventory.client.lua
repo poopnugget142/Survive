@@ -39,18 +39,34 @@ local LocalTreeventory = TreeventoryCore.BuildTreeventory(
 )
 
 --I should make a function for adding items to an inventory, huh
---local TEMPITEM1 = TreeventoryCore.BuildItem(QuadtreeModule.newPoint(1,1), {QuadtreeModule.BuildBox(2/4, 0/4, 2/2, 1/2), QuadtreeModule.BuildBox(-2/4, 0/4, 2/2, 1/2)}) --remember that qtree width extends to each side, divide by 2
+local TEMPITEM1 = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(2/4, 0/4, 2/2, 1/2), QuadtreeModule.BuildBox(-2/4, 0/4, 2/2, 1/2)}) --remember that qtree width extends to each side, divide by 2
+local TEMPDUMMY1 : GuiObject = ScreenGui.mainFrame.inventoryFrame.prefabs.itemButton:Clone()
+TEMPDUMMY1.Parent = ScreenGui.mainFrame.inventoryFrame.itemStorage
+TEMPDUMMY1.ben.Position = UDim2.fromScale(0,0)
+TEMPDUMMY1.Size = UDim2.fromScale(1/TEMPSIZE.X,1/TEMPSIZE.Y)
+TEMPDUMMY1.ben.Size = UDim2.fromScale(3,1)
 --TEMPITEM1.Rotation = 1
-local TEMPITEM1 = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(0/4, 0/4, 1/2, 1/2)})
+--local TEMPITEM1 = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(0/4, 0/4, 1/2, 1/2)})
 local TEMPITEM2 = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(0/4, 0/4, 1/2, 1/2)})
+local TEMPDUMMY2 : GuiObject = ScreenGui.mainFrame.inventoryFrame.prefabs.itemButton:Clone()
+TEMPDUMMY2.Parent = ScreenGui.mainFrame.inventoryFrame.itemStorage
+TEMPDUMMY2.Position = UDim2.fromScale(1/10*2,1/10*2)
+TEMPDUMMY2.ben.Position = UDim2.fromScale(0,0)
+TEMPDUMMY2.Size = UDim2.fromScale(1/TEMPSIZE.X,1/TEMPSIZE.Y)
+TEMPDUMMY2.ben.Size = UDim2.fromScale(1,1)
+
+ItemHeld = TEMPITEM1
 
 TreeventoryCore.Item_PlaceInTreeventory(TEMPITEM1, LocalTreeventory, QuadtreeModule.newPoint(1,1))
 TreeventoryCore.Item_PlaceInTreeventory(TEMPITEM2, LocalTreeventory, QuadtreeModule.newPoint(2,2))
 
+--[[
 print(LocalTreeventory)
-print(TreeventoryCore.Item_PlaceInTreeventory(TEMPITEM1, LocalTreeventory, QuadtreeModule.newPoint(2,3)))
+local Move = TreeventoryCore.Item_PlaceInTreeventory(TEMPITEM1, LocalTreeventory, QuadtreeModule.newPoint(2,2))
+print(Move)
+if Move.Value == false then warn("Item Collision!") end
 print(LocalTreeventory)
-
+]]
 
 
 
@@ -69,3 +85,60 @@ local ItemPlace = function()
         return
     end
 end
+
+
+
+
+local ItemRotate = function(amount : number)
+    if ItemHeld then
+        print("Rotated item by ", amount*90, " degrees")
+        ItemHeld.Rotation += amount
+        TEMPDUMMY1.ben.Rotation += amount*90
+        --cosmetic item rotation
+            if (math.abs(ItemHeld.Rotation or 0) > 3) then ItemHeld.Rotation = 0 end --return to center
+    end
+end
+
+
+KeyBindings.BindAction("Inventory_Open", Enum.UserInputState.Begin, function()
+    --print("Bing Chilling!")
+    ScreenGui.mainFrame.Visible = not ScreenGui.mainFrame.Visible
+    if (ScreenGui.mainFrame.Visible) then
+        --[[KeyBindings.BindAction("Inventory_Interact1", Enum.UserInputState.Begin, function()
+            ItemPick()
+        end, 2)]]
+        KeyBindings.BindAction("Inventory_RotateLeft", Enum.UserInputState.Begin, function()
+            ItemRotate(-1)
+        end)
+        KeyBindings.BindAction("Inventory_RotateRight", Enum.UserInputState.Begin, function()
+            ItemRotate(1)
+        end)
+    else
+        KeyBindings.UnbindAction("Inventory_Interact1")
+        KeyBindings.UnbindAction("Inventory_RotateLeft")
+        KeyBindings.UnbindAction("Inventory_RotateRight")
+    end
+end)
+
+
+RunService.RenderStepped:Connect(function(deltaTime)
+    if ItemHeld and ScreenGui.mainFrame.Visible then
+        --[==[
+            ItemPicking.Dummy.Parent = screenGui
+            ItemPicking.Dummy.Position = UDim2.fromOffset(userInputService:GetMouseLocation().X, userInputService:GetMouseLocation().Y) 
+                + UDim2.fromScale((--[[ItemPicking.DummyOffset.X]]-ItemPickOffset.X)/inventorySize.X, (--[[ItemPicking.DummyOffset.Y]]-ItemPickOffset.Y)/inventorySize.Y)
+        ]==]
+
+        local LocalMouse = LocalPlayer:GetMouse()
+
+        local NewPoint = QuadtreeModule.newPoint(LocalMouse.X / LocalMouse.ViewSizeX * 10, LocalMouse.Y / LocalMouse.ViewSizeY * 10) --debug 10x10 inventory
+        TEMPDUMMY1.Position = UDim2.fromScale(NewPoint.X / 10, NewPoint.Y / 10)
+        print(NewPoint)
+        local Move = TreeventoryCore.Item_PlaceInTreeventory(
+            ItemHeld
+            , LocalTreeventory
+            , NewPoint
+        )
+        if Move.Value == false then warn("Item Collision!") end
+    end
+end)

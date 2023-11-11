@@ -18,7 +18,7 @@ local QuadtreeModule = require(ReplicatedStorage.Scripts.Util.Quadtree)
 local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
 
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
-local ScreenGui : ScreenGui = PlayerGui:WaitForChild("ScreenGui")
+local ScreenGui : ScreenGui = PlayerGui:WaitForChild("HUD")
 
 
 
@@ -40,20 +40,9 @@ local LocalTreeventory = TreeventoryCore.BuildTreeventory(
 
 --I should make a function for adding items to an inventory, huh
 local TEMPITEM1 = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(2/4, 0/4, 2/2, 1/2), QuadtreeModule.BuildBox(-2/4, 0/4, 2/2, 1/2)}) --remember that qtree width extends to each side, divide by 2
-local TEMPDUMMY1 : GuiObject = ScreenGui.mainFrame.inventoryFrame.prefabs.itemButton:Clone()
-TEMPDUMMY1.Parent = ScreenGui.mainFrame.inventoryFrame.itemStorage
-TEMPDUMMY1.ben.Position = UDim2.fromScale(0,0)
-TEMPDUMMY1.Size = UDim2.fromScale(1/TEMPSIZE.X,1/TEMPSIZE.Y)
-TEMPDUMMY1.ben.Size = UDim2.fromScale(3,1)
 --TEMPITEM1.Rotation = 1
 --local TEMPITEM1 = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(0/4, 0/4, 1/2, 1/2)})
 local TEMPITEM2 = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(0/4, 0/4, 1/2, 1/2)})
-local TEMPDUMMY2 : GuiObject = ScreenGui.mainFrame.inventoryFrame.prefabs.itemButton:Clone()
-TEMPDUMMY2.Parent = ScreenGui.mainFrame.inventoryFrame.itemStorage
-TEMPDUMMY2.Position = UDim2.fromScale(1/10*2,1/10*2)
-TEMPDUMMY2.ben.Position = UDim2.fromScale(0,0)
-TEMPDUMMY2.Size = UDim2.fromScale(1/TEMPSIZE.X,1/TEMPSIZE.Y)
-TEMPDUMMY2.ben.Size = UDim2.fromScale(1,1)
 
 ItemHeld = TEMPITEM1
 
@@ -67,6 +56,50 @@ print(Move)
 if Move.Value == false then warn("Item Collision!") end
 print(LocalTreeventory)
 ]]
+
+--Inventory Cell Rendering
+local ItemCells = {}
+for i = 0, TEMPSIZE.X do
+    for j = 0, TEMPSIZE.Y do
+        if not ItemCells[i] then
+			ItemCells[i] = {}
+		end
+
+        local instance : GuiObject = ReplicatedStorage.Assets.GUI.ItemCell:Clone()
+        instance.Parent = ScreenGui.InventoryMenu.Background.Tileinset.Tilespace
+        --instance.Position = UDim2.fromScale(0.25+i/20,0.25+j/20) --rewrite later to use start + end positions
+        instance.Position = UDim2.fromScale(i/TEMPSIZE.X,j/TEMPSIZE.Y) --rewrite later to use start + end positions
+        instance.Size = UDim2.fromScale(1/TEMPSIZE.X,1/TEMPSIZE.Y)
+        instance.BackgroundTransparency = 0
+
+        
+        instance.MouseLeave:Connect(function() 
+            --if ItemHovering  then
+            --    instance.BackgroundColor3 = Color3.fromHSV(0.5,.25,1)
+            --else 
+                instance.BackgroundColor3 = Color3.fromHSV(0,0,1)
+            --end
+            --CellHovering = nil
+            --ItemHovering = nil
+        end)
+        instance.MouseEnter:Connect(function() 
+            --print(NewCell) 
+            task.wait()
+            --CellHovering = NewCell
+            --print(CellHovering)
+            --if (NewCell.CellItemIndex ~= nil) then --check to see if cell has item
+            --    ItemHovering = itemItems[NewCell.CellItemIndex]
+            --    print(ItemHovering)
+            --end
+            instance.BackgroundColor3 = Color3.fromHSV(0,0,.5)
+        end)
+        
+
+        ItemCells[i][j] = instance
+
+        --print("iterate")
+    end
+end
 
 
 
@@ -93,7 +126,7 @@ local ItemRotate = function(amount : number)
     if ItemHeld then
         print("Rotated item by ", amount*90, " degrees")
         ItemHeld.Rotation += amount
-        TEMPDUMMY1.ben.Rotation += amount*90
+        --TEMPDUMMY1.ben.Rotation += amount*90
         --cosmetic item rotation
             if (math.abs(ItemHeld.Rotation or 0) > 3) then ItemHeld.Rotation = 0 end --return to center
     end
@@ -102,8 +135,8 @@ end
 
 KeyBindings.BindAction("Inventory_Open", Enum.UserInputState.Begin, function()
     --print("Bing Chilling!")
-    ScreenGui.mainFrame.Visible = not ScreenGui.mainFrame.Visible
-    if (ScreenGui.mainFrame.Visible) then
+    ScreenGui.InventoryMenu.Visible = not ScreenGui.InventoryMenu.Visible
+    if (ScreenGui.InventoryMenu.Visible) then
         --[[KeyBindings.BindAction("Inventory_Interact1", Enum.UserInputState.Begin, function()
             ItemPick()
         end, 2)]]
@@ -122,17 +155,16 @@ end)
 
 
 RunService.RenderStepped:Connect(function(deltaTime)
-    if ItemHeld and ScreenGui.mainFrame.Visible then
-        --[==[
+    if ItemHeld and ScreenGui.InventoryMenu.Visible then
+            --[==[
             ItemPicking.Dummy.Parent = screenGui
             ItemPicking.Dummy.Position = UDim2.fromOffset(userInputService:GetMouseLocation().X, userInputService:GetMouseLocation().Y) 
-                + UDim2.fromScale((--[[ItemPicking.DummyOffset.X]]-ItemPickOffset.X)/inventorySize.X, (--[[ItemPicking.DummyOffset.Y]]-ItemPickOffset.Y)/inventorySize.Y)
-        ]==]
-
+                + UDim2.fromScale((--[[ItemPicking.DummyOffset.X]]-ItemPickOffset.X)/TEMPSIZE.X, (--[[ItemPicking.DummyOffset.Y]]-ItemPickOffset.Y)/TEMPSIZE.Y)
+            ]==]
         local LocalMouse = LocalPlayer:GetMouse()
 
         local NewPoint = QuadtreeModule.newPoint(LocalMouse.X / LocalMouse.ViewSizeX * 10, LocalMouse.Y / LocalMouse.ViewSizeY * 10) --debug 10x10 inventory
-        TEMPDUMMY1.Position = UDim2.fromScale(NewPoint.X / 10, NewPoint.Y / 10)
+        --TEMPDUMMY1.Position = UDim2.fromScale(NewPoint.X / 10, NewPoint.Y / 10)
         print(NewPoint)
         local Move = TreeventoryCore.Item_PlaceInTreeventory(
             ItemHeld

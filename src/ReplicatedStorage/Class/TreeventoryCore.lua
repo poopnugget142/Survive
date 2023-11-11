@@ -1,4 +1,4 @@
-local MathSmall = 10^-7
+local MathSmall = 10^-5
 
 
 
@@ -56,15 +56,15 @@ module.PositionPlusBoundary = function(Position : Point, Boundary : Box, Rotatio
 end
 
 
-module.Treeventory_CheckBox = function(Treeventory : Treeventory, Box : Box)
+module.Treeventory_CheckBox = function(Treeventory : Treeventory, Box : Box | Point)
     --check if box is within Treeventory boundary
     --make a new box to account for excessively large items
     local BoundaryCheck = QuadtreeModule.BoxCheck(
         QuadtreeModule.BuildBox(
             Treeventory.Boundary.X
             ,Treeventory.Boundary.Y
-            ,Treeventory.Boundary.w + MathSmall - Box.w --quadtree fails on == cases, add a very small number to boundary check size
-            ,Treeventory.Boundary.h + MathSmall - Box.h
+            ,Treeventory.Boundary.w + MathSmall - (Box.w or 0) --quadtree fails on == cases, add a very small number to boundary check size
+            ,Treeventory.Boundary.h + MathSmall - (Box.h or 0)
         )
         ,QuadtreeModule.newPoint(Box.X,Box.Y)
     )
@@ -82,7 +82,9 @@ module.Treeventory_CheckBox = function(Treeventory : Treeventory, Box : Box)
     for _, Item : Item in Treeventory.Items do
         --items can have multiple boundaries, another for loop here
         for _, Boundary : Box in Item.Boundaries do
-            TreeventoryQuad:Insert(module.PositionPlusBoundary(Item.Position, Boundary, Item.Rotation))
+            local NewBoundary = module.PositionPlusBoundary(Item.Position, Boundary, Item.Rotation)
+            NewBoundary.Data.Item = Item
+            TreeventoryQuad:Insert(NewBoundary)
         end
     end
 
@@ -97,20 +99,22 @@ end
 module.Item_PlaceInTreeventory = function(Item : Item, Treeventory : Treeventory, Position : Point)
     if Item.Parent and Item.Parent.Items then Item.Parent.Items[Item.Id] = nil end
     --check target item position
-    for _, Boundary in Item.Boundaries do
-        local CollisionCheck = module.Treeventory_CheckBox(Treeventory, module.PositionPlusBoundary(Position, Boundary, Item.Rotation))
-        --print(CollisionCheck)
-        if not CollisionCheck.Value then 
-            Item.Parent.Items[Item.Id] = Item
-            return CollisionCheck 
+    --if Item.Boundaries then
+        for _, Boundary in Item.Boundaries do
+            local CollisionCheck = module.Treeventory_CheckBox(Treeventory, module.PositionPlusBoundary(Position, Boundary, Item.Rotation))
+            --print(CollisionCheck)
+            if not CollisionCheck.Value then 
+                if Item.Parent and Item.Parent.Items then Item.Parent.Items[Item.Id] = Item end
+                return CollisionCheck 
+            end
         end
-    end
+    --end
 
     --set the position of an item to an XY
     
     Item.Parent = Treeventory
     Item.Position = Position
-    Item.Parent.Items[Item.Id] = Item
+    Treeventory.Items[Item.Id] = Item
 
     return {Value = true}
 end
@@ -144,6 +148,7 @@ module.BuildItem = function(Boundaries : Box | Table)
         ,Position = QuadtreeModule.newPoint(-1,-1)
         ,Rotation = 0 --value from 0 -> 3 (pi/2)
         ,Boundaries = Boundaries
+        ,Dummy = nil
 
 
         ,Functions = {}

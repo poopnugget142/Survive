@@ -80,11 +80,13 @@ end
 --Temp Items and item rendering
 
 --local TEMPITEM1 = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(2/4, 0/4, 2/2, 1/2), QuadtreeModule.BuildBox(-2/4, 0/4, 2/2, 1/2)}) --remember that qtree width extends to each side, divide by 2
-local TEMPITEM1 = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(2/4, 0/4, 2/2, 1/2)})
+local TEMPITEM1 = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(4/4, 0/4, 3/2, 1/2)})
 local TEMPITEM2 = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(0/4, 0/4, 1/2, 1/2)})
+local TEMPITEM3 = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(0/4, 0/4, 1/2, 1/2)})
 
 TreeventoryCore.Item_PlaceInTreeventory(TEMPITEM1, LocalTreeventory, QuadtreeModule.newPoint(1,1))
 TreeventoryCore.Item_PlaceInTreeventory(TEMPITEM2, LocalTreeventory, QuadtreeModule.newPoint(2,2))
+TreeventoryCore.Item_PlaceInTreeventory(TEMPITEM3, LocalTreeventory, QuadtreeModule.newPoint(3,2))
 
 local GetMouseRelativeToInventory = function()
     local LocalMouse = LocalPlayer:GetMouse()
@@ -115,6 +117,7 @@ end
 
 CreateItemDummy(TEMPITEM1)
 CreateItemDummy(TEMPITEM2)
+CreateItemDummy(TEMPITEM3)
 
 local ItemPick = function()
     --Pick up an item
@@ -149,30 +152,31 @@ local ItemPlace = function()
         ,NewPoint
     )
     print(Move)
-    if Move.Value and not Move.Error then --if the item doesn't intersect with anything, move dummy stuff
+    if Move.Value == true then --if the item doesn't intersect with anything, move dummy stuff
         ItemHeld.Dummy.Position = UDim2.fromScale(
             (ItemHeld.Position.X-1--[[+newItem.DummyOffset.X]])/CellMax
             ,(ItemHeld.Position.Y-1--[[+newItem.DummyOffset.Y]])/CellMax
         )
 
         ItemHeld = nil
-    elseif #Move.Error == 1 then --otherwise if the item only intersects with 1 other item, swap held items
+    elseif Move.Error ~= false and #Move.Error == 1 then --otherwise if the item only intersects with 1 other item, swap held items
         -- remove item from inventory in temporary storage
         local ItemSwap = table.unpack(Move.Error).Data.Item
         ItemSwap.Parent.Items[ItemSwap.Id] = nil
         ItemSwap.Parent = nil
         
         --reattempt item placement
-        TreeventoryCore.Item_PlaceInTreeventory( 
+        Move = TreeventoryCore.Item_PlaceInTreeventory( 
             ItemHeld
             ,LocalTreeventory
             ,NewPoint
         )
+        if Move.Value == false then return end
+
         ItemHeld.Dummy.Position = UDim2.fromScale(
             (ItemHeld.Position.X-1--[[+newItem.DummyOffset.X]])/CellMax
             ,(ItemHeld.Position.Y-1--[[+newItem.DummyOffset.Y]])/CellMax
         )
-
         ItemHeld = ItemSwap
     else --if the item intersects with more than 1 other item, impossible to swap
         
@@ -243,7 +247,7 @@ RunService.RenderStepped:Connect(function(deltaTime)
                 LocalTreeventory
                 , TreeventoryCore.PositionPlusBoundary(MousePosition, Boundary, ItemHeld.Rotation)
             )
-            if Move.Value == false and not (#Move.Error == 1 and table.unpack(Move.Error).Data.Item == ItemHeld) then warn("Item Collision!") end
+            if Move.Value == false and not (Move.Error ~= false and #Move.Error == 1 and table.unpack(Move.Error).Data.Item == ItemHeld) then warn("Item Collision!") end
         end
     end
 end)

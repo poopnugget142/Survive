@@ -61,16 +61,15 @@ module.Treeventory_CheckBox = function(Treeventory : Treeventory, Box : Box | Po
     --make a new box to account for excessively large items
     local BoundaryCheck = QuadtreeModule.BoxCheck(
         QuadtreeModule.BuildBox(
-            Treeventory.Boundary.X
-            ,Treeventory.Boundary.Y
-            ,Treeventory.Boundary.w + MathSmall - (Box.w or 0) --quadtree fails on == cases, add a very small number to boundary check size
-            ,Treeventory.Boundary.h + MathSmall - (Box.h or 0)
+            Treeventory.Boundary.X+1/2 --spaghetti math to avoid issues, further investigation encouraged
+            ,Treeventory.Boundary.Y+1/2
+            ,(Treeventory.Boundary.w+1)/2 + MathSmall - (Box.w or 0)  --quadtree fails on == cases, add a very small number to boundary check size
+            ,(Treeventory.Boundary.h+1)/2 + MathSmall - (Box.h or 0) 
         )
         ,QuadtreeModule.newPoint(Box.X,Box.Y)
     )
 
-    --print(BoundaryCheck)
-    if not BoundaryCheck then return {Value = false} end
+    if not BoundaryCheck then return {Value = false, Error = false} end
 
     --check if box collides with any other items
     local TreeventoryQuad = QuadtreeModule.newQuadtree(
@@ -103,7 +102,7 @@ module.Item_PlaceInTreeventory = function(Item : Item, Treeventory : Treeventory
         for _, Boundary in Item.Boundaries do
             local CollisionCheck = module.Treeventory_CheckBox(Treeventory, module.PositionPlusBoundary(Position, Boundary, Item.Rotation))
             --print(CollisionCheck)
-            if not CollisionCheck.Value then 
+            if CollisionCheck.Value == false then --return if we touch something
                 if Item.Parent and Item.Parent.Items then Item.Parent.Items[Item.Id] = Item end
                 return CollisionCheck 
             end

@@ -99,14 +99,16 @@ module.Item_PlaceInTreeventory = function(Item : Item, Treeventory : Treeventory
     if Item.Parent and Item.Parent.Items then Item.Parent.Items[Item.Id] = nil end
     --check target item position
     --if Item.Boundaries then
+    local Error = {}
         for _, Boundary in Item.Boundaries do
             local CollisionCheck = module.Treeventory_CheckBox(Treeventory, module.PositionPlusBoundary(Position, Boundary, Item.Rotation))
             --print(CollisionCheck)
             if CollisionCheck.Value == false then --return if we touch something
                 if Item.Parent and Item.Parent.Items then Item.Parent.Items[Item.Id] = Item end
-                return CollisionCheck 
+                table.insert(Error, CollisionCheck)
             end
         end
+    if Error and #Error > 0 then return {Value = false, Error = Error} end
     --end
 
     --set the position of an item to an XY

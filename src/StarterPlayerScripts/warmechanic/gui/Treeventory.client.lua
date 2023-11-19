@@ -187,6 +187,7 @@ local ItemPlace = function()
         ,LocalTreeventory
         ,NewPoint
     )
+    print(Move)
     if Move.Value == true then --if the item doesn't intersect with anything, move dummy stuff
         ItemHeld.Dummy.Position = UDim2.fromScale(
             (ItemHeld.Position.X-1--[[+newItem.DummyOffset.X]])/CellMax
@@ -197,9 +198,11 @@ local ItemPlace = function()
         ItemHeldRotationDelta = 0
     elseif Move.Error and #Move.Error then --otherwise attempt to swap held items
         --check if there are multiple items among boundaries
-        local DesiredItem = Move.Error[1].Data.Item
-        for _, Boundary in Move.Error do
-            if Boundary.Data.Item ~= DesiredItem then return Move end
+        local DesiredItem = Move.Error[1].Error[1].Data.Item
+        for _, Check in Move.Error do
+            for _, Boundary in Check.Error do
+                if Boundary.Data.Item ~= DesiredItem then return Move end
+            end
         end
 
         -- remove item from inventory in temporary storage
@@ -290,12 +293,13 @@ RunService.RenderStepped:Connect(function(deltaTime)
             math.ceil(MousePosition.X*CellMax)
             ,math.ceil(MousePosition.Y*CellMax)
         )
+        local CursorOffset = RotateVector2(ItemHeldCursorOffset, ItemHeldRotationDelta)
 
 
         for _, Boundary in ItemHeld.Boundaries do
             local Move = TreeventoryCore.Treeventory_CheckBox(
                 LocalTreeventory
-                , TreeventoryCore.PositionPlusBoundary(CursorPosition, Boundary, ItemHeld.Rotation)
+                , TreeventoryCore.PositionPlusBoundary(CursorPosition + CursorOffset, Boundary, ItemHeld.Rotation)
             )
             if Move.Value == false and not (Move.Error ~= false and #Move.Error == 1 and table.unpack(Move.Error).Data.Item == ItemHeld) then warn("Item Collision!") end
         end

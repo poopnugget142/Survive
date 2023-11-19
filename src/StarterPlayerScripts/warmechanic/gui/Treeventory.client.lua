@@ -220,6 +220,8 @@ local ItemPlace = function()
             ,(ItemHeld.Position.Y-1--[[+newItem.DummyOffset.Y]])/CellMax
         )
         ItemHeld = ItemSwap
+        ItemHeldVisualOffset = Vector2.zero
+        ItemHeldCursorOffset = Vector2.zero
         ItemHeldRotationDelta = 0
     else --failsafe
         

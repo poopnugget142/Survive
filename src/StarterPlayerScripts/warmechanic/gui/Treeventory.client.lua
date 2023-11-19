@@ -91,12 +91,19 @@ TreeventoryCore.Item_PlaceInTreeventory(TEMPITEM3, LocalTreeventory, QuadtreeMod
 local GetMouseRelativeToInventory = function()
     local LocalMouse = LocalPlayer:GetMouse()
     
-    local MouseAbsoluteX = LocalMouse.X - InventoryTilespace.AbsolutePosition.X
-    local MouseAbsoluteY = LocalMouse.Y - InventoryTilespace.AbsolutePosition.Y
+    local MouseRelativeX = LocalMouse.X - InventoryTilespace.AbsolutePosition.X
+    local MouseRelativeY = LocalMouse.Y - InventoryTilespace.AbsolutePosition.Y
 
     return Vector2.new(
-        MouseAbsoluteX/InventoryTilespace.AbsoluteSize.X
-        ,MouseAbsoluteY/InventoryTilespace.AbsoluteSize.Y
+        MouseRelativeX/InventoryTilespace.AbsoluteSize.X
+        ,MouseRelativeY/InventoryTilespace.AbsoluteSize.Y
+    )
+end
+
+local GetAbsolutePositionFromInventory = function(Position : Vector2)
+    return Vector2.new(
+        InventoryTilespace.AbsolutePosition.X + InventoryTilespace.AbsoluteSize.X * (Position.X/TEMPSIZE.X)
+        ,InventoryTilespace.AbsolutePosition.Y + InventoryTilespace.AbsoluteSize.Y * (Position.Y/TEMPSIZE.Y)
     )
 end
 
@@ -137,13 +144,15 @@ local ItemPick = function()
     local ItemCheck = TreeventoryCore.Treeventory_CheckBox(LocalTreeventory, QuadtreeModule.BuildBox(math.ceil(MousePosition.X), math.ceil(MousePosition.Y), 0.5, 0.5))
     print(ItemCheck)
 
-    if (#ItemCheck.Error) then
+    if (ItemCheck.Error and #ItemCheck.Error) then
+        --check if there are multiple items among boundaries
         local DesiredItem = ItemCheck.Error[1].Data.Item
         for _, Boundary in ItemCheck.Error do
             if Boundary.Data.Item ~= DesiredItem then return ItemCheck end
         end
+
         ItemHeld = DesiredItem --table.unpack(ItemCheck.Error).Data.Item
-        ItemHeldOffset = Vector2.new(-0.5, -0.5)--Vector2.new(LocalMouse.X, LocalMouse.Y) - Vector2.new(ItemHeld.Position.X, ItemHeld.Position.Y)
+        ItemHeldOffset = Vector2.new(-0.5, -0.5) --Vector2.new(LocalMouse.X, LocalMouse.Y) - Vector2.new(ItemHeld.Position.X, ItemHeld.Position.Y)
         ItemHeld.Parent.Items[ItemHeld.Id] = nil
         ItemHeld.Parent = nil
     end
@@ -170,7 +179,13 @@ local ItemPlace = function()
         )
 
         ItemHeld = nil
-    elseif Move.Error ~= false and #Move.Error == 1 then --otherwise if the item only intersects with 1 other item, swap held items
+    elseif Move.Error and #Move.Error then --otherwise attempt to swap held items
+        --check if there are multiple items among boundaries
+        local DesiredItem = Move.Error[1].Data.Item
+        for _, Boundary in Move.Error do
+            if Boundary.Data.Item ~= DesiredItem then return Move end
+        end
+
         -- remove item from inventory in temporary storage
         local ItemSwap = table.unpack(Move.Error).Data.Item
         ItemSwap.Parent.Items[ItemSwap.Id] = nil
@@ -189,7 +204,7 @@ local ItemPlace = function()
             ,(ItemHeld.Position.Y-1--[[+newItem.DummyOffset.Y]])/CellMax
         )
         ItemHeld = ItemSwap
-    else --if the item intersects with more than 1 other item, impossible to swap
+    else --failsafe
         
         return
     end

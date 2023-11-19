@@ -80,11 +80,11 @@ end
 --Temp Items and item rendering
 
 --local TEMPITEM1 = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(2/4, 0/4, 2/2, 1/2), QuadtreeModule.BuildBox(-2/4, 0/4, 2/2, 1/2)}) --remember that qtree width extends to each side, divide by 2
-local TEMPITEM1 = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(4/4, 0/4, 3/2, 1/2)})
+local TEMPITEM1 = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(2/4, 0/4, 2/2, 1/2), QuadtreeModule.BuildBox(-2/4, 0/4, 2/2, 1/2)})
 local TEMPITEM2 = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(0/4, 0/4, 1/2, 1/2)})
 local TEMPITEM3 = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(0/4, 0/4, 1/2, 1/2)})
 
-TreeventoryCore.Item_PlaceInTreeventory(TEMPITEM1, LocalTreeventory, QuadtreeModule.newPoint(1,1))
+TreeventoryCore.Item_PlaceInTreeventory(TEMPITEM1, LocalTreeventory, QuadtreeModule.newPoint(4,4))
 TreeventoryCore.Item_PlaceInTreeventory(TEMPITEM2, LocalTreeventory, QuadtreeModule.newPoint(2,2))
 TreeventoryCore.Item_PlaceInTreeventory(TEMPITEM3, LocalTreeventory, QuadtreeModule.newPoint(3,2))
 
@@ -108,8 +108,15 @@ local CreateItemDummy = function(Item)
         ,(Item.Position.Y-1--[[+newItem.DummyOffset.Y]])/CellMax
     )
     NewDummy.Size = UDim2.fromScale(1/CellMax,1/CellMax)
+    --tidy this up later
     NewDummy.AnchorParent.Frame.Position = UDim2.fromScale(Item.Boundaries[1].X/2,Item.Boundaries[1].Y/2)
     NewDummy.AnchorParent.Frame.Size = UDim2.fromScale(Item.Boundaries[1].w,Item.Boundaries[1].h)
+    for i = 2, #Item.Boundaries, 1 do 
+        local NewFrame = NewDummy.AnchorParent.Frame:Clone()
+        NewFrame.Parent = NewDummy.AnchorParent
+        NewFrame.Position = UDim2.fromScale(Item.Boundaries[i].X/2,Item.Boundaries[i].Y/2)
+        NewFrame.Size = UDim2.fromScale(Item.Boundaries[i].w,Item.Boundaries[i].h)
+    end
     
     Item.Dummy = NewDummy
     return true
@@ -130,8 +137,12 @@ local ItemPick = function()
     local ItemCheck = TreeventoryCore.Treeventory_CheckBox(LocalTreeventory, QuadtreeModule.BuildBox(math.ceil(MousePosition.X), math.ceil(MousePosition.Y), 0.5, 0.5))
     print(ItemCheck)
 
-    if (ItemCheck.Error and #ItemCheck.Error == 1) then
-        ItemHeld = table.unpack(ItemCheck.Error).Data.Item
+    if (#ItemCheck.Error) then
+        local DesiredItem = ItemCheck.Error[1].Data.Item
+        for _, Boundary in ItemCheck.Error do
+            if Boundary.Data.Item ~= DesiredItem then return ItemCheck end
+        end
+        ItemHeld = DesiredItem --table.unpack(ItemCheck.Error).Data.Item
         ItemHeldOffset = Vector2.new(-0.5, -0.5)--Vector2.new(LocalMouse.X, LocalMouse.Y) - Vector2.new(ItemHeld.Position.X, ItemHeld.Position.Y)
         ItemHeld.Parent.Items[ItemHeld.Id] = nil
         ItemHeld.Parent = nil

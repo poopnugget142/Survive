@@ -61,10 +61,10 @@ module.Treeventory_CheckBox = function(Treeventory : Treeventory, Box : Box | Po
     --make a new box to account for excessively large items
     local BoundaryCheck = QuadtreeModule.BoxCheck(
         QuadtreeModule.BuildBox(
-            Treeventory.Boundary.X+1/2 --spaghetti math to avoid issues, further investigation encouraged
-            ,Treeventory.Boundary.Y+1/2
-            ,(Treeventory.Boundary.w+1)/2 + MathSmall - (Box.w or 0)  --quadtree fails on == cases, add a very small number to boundary check size
-            ,(Treeventory.Boundary.h+1)/2 + MathSmall - (Box.h or 0) 
+            Treeventory.Boundary.X + 1/2 --spaghetti math, further investigation encouraged
+            ,Treeventory.Boundary.Y + 1/2
+            ,(Treeventory.Boundary.w/2 - ((Box.w) or 0)) + MathSmall  --quadtree fails on == cases, add a very small number to boundary check size
+            ,(Treeventory.Boundary.h/2 - ((Box.h) or 0)) + MathSmall 
         )
         ,QuadtreeModule.newPoint(Box.X,Box.Y)
     )

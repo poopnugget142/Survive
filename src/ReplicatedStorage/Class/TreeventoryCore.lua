@@ -63,8 +63,8 @@ module.Treeventory_CheckBox = function(Treeventory : Treeventory, Box : Box | Po
         QuadtreeModule.BuildBox(
             Treeventory.Boundary.X + 1/2 --spaghetti math, further investigation encouraged
             ,Treeventory.Boundary.Y + 1/2
-            ,(Treeventory.Boundary.w/2 - ((Box.w) or 0)) + MathSmall  --quadtree fails on == cases, add a very small number to boundary check size
-            ,(Treeventory.Boundary.h/2 - ((Box.h) or 0)) + MathSmall 
+            ,(Treeventory.Boundary.w - ((Box.w) or 0)) + MathSmall  --quadtree fails on == cases, add a very small number to boundary check size
+            ,(Treeventory.Boundary.h - ((Box.h) or 0)) + MathSmall 
         )
         ,QuadtreeModule.newPoint(Box.X,Box.Y)
     )

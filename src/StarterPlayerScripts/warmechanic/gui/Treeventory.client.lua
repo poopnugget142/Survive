@@ -37,8 +37,8 @@ local LocalTreeventory = TreeventoryCore.BuildTreeventory(
     QuadtreeModule.BuildBox(
         TEMPSIZE.X/2,
         TEMPSIZE.Y/2,
-        TEMPSIZE.X,
-        TEMPSIZE.Y
+        TEMPSIZE.X/2,
+        TEMPSIZE.Y/2
     )
 )
 
@@ -196,7 +196,7 @@ local ItemPlace = function()
 
         ItemHeld = nil
         ItemHeldRotationDelta = 0
-    elseif Move.Error and #Move.Error then --otherwise attempt to swap held items
+    elseif Move.Error and #Move.Error and Move.Error[1].Error then --otherwise attempt to swap held items
         --check if there are multiple items among boundaries
         local DesiredItem = Move.Error[1].Error[1].Data.Item
         for _, Check in Move.Error do
@@ -226,9 +226,23 @@ local ItemPlace = function()
         ItemHeldVisualOffset = Vector2.zero
         ItemHeldCursorOffset = Vector2.zero
         ItemHeldRotationDelta = 0
-    else --failsafe
-        
-        return
+    else --another case
+        local TouchesInventory = true
+        for _, Boundary in ItemHeld.Boundaries do
+            local CollisionCheck = QuadtreeModule.BoxCheck(LocalTreeventory.Boundary, TreeventoryCore.PositionPlusBoundary(CursorPosition, Boundary, ItemHeld.Rotation))
+            if CollisionCheck == false then --return if we touch something
+                TouchesInventory = CollisionCheck
+                break
+            end
+        end
+
+        if not TouchesInventory then --temp item drop (delete)
+            ItemHeld.Dummy:Destroy()
+            ItemHeld = nil
+            ItemHeldVisualOffset = Vector2.zero
+            ItemHeldCursorOffset = Vector2.zero
+            ItemHeldRotationDelta = 0
+        end
     end
 end
 
@@ -301,7 +315,7 @@ RunService.RenderStepped:Connect(function(deltaTime)
                 LocalTreeventory
                 , TreeventoryCore.PositionPlusBoundary(CursorPosition + CursorOffset, Boundary, ItemHeld.Rotation)
             )
-            if Move.Value == false and not (Move.Error ~= false and #Move.Error == 1 and table.unpack(Move.Error).Data.Item == ItemHeld) then warn("Item Collision!") end
+            if Move.Value == false and not (Move.Error ~= false and #Move.Error == 1 and table.unpack(Move.Error).Data.Item == ItemHeld) then warn("Potential Collision!") end
         end
     end
 end)

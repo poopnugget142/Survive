@@ -25,7 +25,9 @@ local InventoryTilespace = ScreenGui.InventoryMenu.Background.Tileinset.Tilespac
 
 
 local ItemHeld
-local ItemHeldOffset
+local ItemHeldVisualOffset
+local ItemHeldCursorOffset
+local ItemHeldRotationDelta = 0 -- a separate rotation counter for visual item offsets
 
 --Create inventory
 local TEMPSIZE = Vector2.new(13,7)--TEMP SIZE, REFERENCE LATER !!!!!!!!!!!!!
@@ -107,6 +109,14 @@ local GetAbsolutePositionFromInventory = function(Position : Vector2)
     )
 end
 
+local RotateVector2 = function(Target : Vector2, Amount : number)
+    local Theta = math.round(Amount or 0) * math.pi * 0.5
+    return Vector2.new(
+        Target.X * math.cos(Theta) - Target.Y * math.sin(Theta) --boundary offset
+        ,Target.X * math.sin(Theta) + Target.Y * math.cos(Theta)
+    )
+end
+
 local CreateItemDummy = function(Item)
     local NewDummy : GuiObject = ReplicatedStorage.Assets.GUI.ItemFrame:Clone()
     NewDummy.Parent = ScreenGui.InventoryMenu.Background.Tileinset.Tilespace
@@ -135,14 +145,13 @@ CreateItemDummy(TEMPITEM3)
 
 local ItemPick = function()
     --Pick up an item
-    local LocalMouse = LocalPlayer:GetMouse()
     local MousePosition = GetMouseRelativeToInventory()
-    MousePosition = Vector2.new(
+
+    local CursorPosition = Vector2.new(
         math.ceil(MousePosition.X*CellMax)
         ,math.ceil(MousePosition.Y*CellMax)
     )
-    local ItemCheck = TreeventoryCore.Treeventory_CheckBox(LocalTreeventory, QuadtreeModule.BuildBox(math.ceil(MousePosition.X), math.ceil(MousePosition.Y), 0.5, 0.5))
-    print(ItemCheck)
+    local ItemCheck = TreeventoryCore.Treeventory_CheckBox(LocalTreeventory, QuadtreeModule.BuildBox(math.ceil(CursorPosition.X), math.ceil(CursorPosition.Y), 0.5, 0.5))
 
     if (ItemCheck.Error and #ItemCheck.Error) then
         --check if there are multiple items among boundaries
@@ -152,26 +161,32 @@ local ItemPick = function()
         end
 
         ItemHeld = DesiredItem --table.unpack(ItemCheck.Error).Data.Item
-        ItemHeldOffset = Vector2.new(-0.5, -0.5) --Vector2.new(LocalMouse.X, LocalMouse.Y) - Vector2.new(ItemHeld.Position.X, ItemHeld.Position.Y)
         ItemHeld.Parent.Items[ItemHeld.Id] = nil
         ItemHeld.Parent = nil
+
+
+        local ItemScreenPosition = Vector2.new(ItemHeld.Position.X-0.5, ItemHeld.Position.Y-0.5)
+
+        ItemHeldVisualOffset = -( MousePosition*CellMax - ItemScreenPosition) / CellMax
+        ItemHeldCursorOffset = Vector2.new(math.round(ItemHeldVisualOffset.X*CellMax), math.round(ItemHeldVisualOffset.Y*CellMax))
     end
 end
 
 local ItemPlace = function()
     print("Attempted to Place Item")
     local MousePosition = GetMouseRelativeToInventory()
-    MousePosition = Vector2.new(
+    local CursorPosition = Vector2.new(
         math.ceil(MousePosition.X*CellMax)
         ,math.ceil(MousePosition.Y*CellMax)
     )
-    local NewPoint = QuadtreeModule.newPoint(MousePosition.X, MousePosition.Y)
+    local CursorOffset = RotateVector2(ItemHeldCursorOffset, ItemHeldRotationDelta)
+
+    local NewPoint = QuadtreeModule.newPoint(CursorPosition.X + CursorOffset.X, CursorPosition.Y + CursorOffset.Y)
     local Move = TreeventoryCore.Item_PlaceInTreeventory(
         ItemHeld
         ,LocalTreeventory
         ,NewPoint
     )
-    print(Move)
     if Move.Value == true then --if the item doesn't intersect with anything, move dummy stuff
         ItemHeld.Dummy.Position = UDim2.fromScale(
             (ItemHeld.Position.X-1--[[+newItem.DummyOffset.X]])/CellMax
@@ -179,6 +194,7 @@ local ItemPlace = function()
         )
 
         ItemHeld = nil
+        ItemHeldRotationDelta = 0
     elseif Move.Error and #Move.Error then --otherwise attempt to swap held items
         --check if there are multiple items among boundaries
         local DesiredItem = Move.Error[1].Data.Item
@@ -187,7 +203,7 @@ local ItemPlace = function()
         end
 
         -- remove item from inventory in temporary storage
-        local ItemSwap = table.unpack(Move.Error).Data.Item
+        local ItemSwap = DesiredItem
         ItemSwap.Parent.Items[ItemSwap.Id] = nil
         ItemSwap.Parent = nil
         
@@ -204,6 +220,7 @@ local ItemPlace = function()
             ,(ItemHeld.Position.Y-1--[[+newItem.DummyOffset.Y]])/CellMax
         )
         ItemHeld = ItemSwap
+        ItemHeldRotationDelta = 0
     else --failsafe
         
         return
@@ -217,6 +234,7 @@ local ItemRotate = function(amount : number)
     if ItemHeld then
         print("Rotated item by ", amount*90, " degrees")
         ItemHeld.Rotation += amount
+        ItemHeldRotationDelta += amount
         ItemHeld.Dummy.Rotation += amount*90
         --cosmetic item rotation
             if (math.abs(ItemHeld.Rotation or 0) > 3) then ItemHeld.Rotation = 0 end --return to center
@@ -225,7 +243,6 @@ end
 
 
 KeyBindings.BindAction("Inventory_Open", Enum.UserInputState.Begin, function()
-    --print("Bing Chilling!")
     ScreenGui.InventoryMenu.Visible = not ScreenGui.InventoryMenu.Visible
     if (ScreenGui.InventoryMenu.Visible) then
         KeyBindings.BindAction("Inventory_Interact1", Enum.UserInputState.Begin, function()
@@ -249,20 +266,25 @@ end)
 RunService.RenderStepped:Connect(function(deltaTime)
     if ItemHeld and ScreenGui.InventoryMenu.Visible then
         local LocalMouse = LocalPlayer:GetMouse()
+        local VisualOffset = RotateVector2(ItemHeldVisualOffset, ItemHeldRotationDelta)
 
         ItemHeld.Dummy.Parent = InventoryTilespace
         ItemHeld.Dummy.Position = UDim2.fromOffset(
-            LocalMouse.X - InventoryTilespace.AbsolutePosition.X - ItemHeld.Dummy.AbsoluteSize.X
-            , LocalMouse.Y - InventoryTilespace.AbsolutePosition.Y - ItemHeld.Dummy.AbsoluteSize.Y
-        ) 
+            LocalMouse.X - InventoryTilespace.AbsolutePosition.X
+            , LocalMouse.Y - InventoryTilespace.AbsolutePosition.Y
+        )
         + UDim2.fromScale(
-            (--[[ItemPicking.DummyOffset.X]]-ItemHeldOffset.X)/TEMPSIZE.X
-            , (--[[ItemPicking.DummyOffset.Y]]-ItemHeldOffset.Y)/TEMPSIZE.Y
+            -0.5/CellMax
+            ,-0.5/CellMax
+        )
+        + UDim2.fromScale(
+            VisualOffset.X
+            ,VisualOffset.Y
         )
 
 
         local MousePosition = GetMouseRelativeToInventory()
-        MousePosition = Vector2.new(
+        local CursorPosition = Vector2.new(
             math.ceil(MousePosition.X*CellMax)
             ,math.ceil(MousePosition.Y*CellMax)
         )
@@ -271,7 +293,7 @@ RunService.RenderStepped:Connect(function(deltaTime)
         for _, Boundary in ItemHeld.Boundaries do
             local Move = TreeventoryCore.Treeventory_CheckBox(
                 LocalTreeventory
-                , TreeventoryCore.PositionPlusBoundary(MousePosition, Boundary, ItemHeld.Rotation)
+                , TreeventoryCore.PositionPlusBoundary(CursorPosition, Boundary, ItemHeld.Rotation)
             )
             if Move.Value == false and not (Move.Error ~= false and #Move.Error == 1 and table.unpack(Move.Error).Data.Item == ItemHeld) then warn("Item Collision!") end
         end

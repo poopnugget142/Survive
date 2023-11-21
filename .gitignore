@@ -1,11 +1,11 @@
 # Project place file
-/MobileRTS.rbxlx
+MobileRTS.rbxlx
 
 # Roblox Studio lock files
 /*.rbxlx.lock
 /*.rbxl.lock
 
-/wally.lock
-
-/Packages
-/ServerPackages
+# wally stuff
+Packages/
+ServerPackages/
+wally.lock

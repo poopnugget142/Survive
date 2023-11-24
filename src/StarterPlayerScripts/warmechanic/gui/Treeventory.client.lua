@@ -164,6 +164,7 @@ local ItemPick = function()
 
         local ItemScreenPosition = Vector2.new(ItemHeld.Position.X-0.5, ItemHeld.Position.Y-0.5)
 
+        --offset item from cursor
         ItemHeldVisualOffset = -( MousePosition*CellMax - ItemScreenPosition) / CellMax
         ItemHeldCursorOffset = Vector2.new(math.round(ItemHeldVisualOffset.X*CellMax), math.round(ItemHeldVisualOffset.Y*CellMax))
     end
@@ -223,10 +224,14 @@ local ItemPlace = function()
             ,(ItemHeld.Position.Y-1--[[+newItem.DummyOffset.Y]])/CellMax
         )
         ItemHeld = ItemSwap
-        ItemHeldVisualOffset = Vector2.zero
-        ItemHeldCursorOffset = Vector2.zero
+
+        --offset item from cursor
+        local ItemScreenPosition = Vector2.new(ItemHeld.Position.X-0.5, ItemHeld.Position.Y-0.5)
+        ItemHeldVisualOffset = -( MousePosition*CellMax - ItemScreenPosition) / CellMax
+        ItemHeldCursorOffset = Vector2.new(math.round(ItemHeldVisualOffset.X*CellMax), math.round(ItemHeldVisualOffset.Y*CellMax))
+        
         ItemHeldRotationDelta = 0
-    else --another case
+    else --check if the item touches the inventory >>at all<<, if not then we can consider it a drop action
         local TouchesInventory = true
         for _, Boundary in ItemHeld.Boundaries do
             local CollisionCheck = QuadtreeModule.BoxCheck(LocalTreeventory.Boundary, TreeventoryCore.PositionPlusBoundary(CursorPosition, Boundary, ItemHeld.Rotation))

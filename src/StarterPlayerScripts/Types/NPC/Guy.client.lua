@@ -12,7 +12,7 @@ local function CreateModel(Entity : any, Position : Vector3)
     local EntityData = CharacterStates.World.get(Entity)
 
     local Model = NpcRegistry.GetBaddieModel(NpcEnum):Clone()
-    Model.Name = tostring(EntityData.NPC)
+    Model.Name = tostring(EntityData[CharacterStates.NPCId])
     Model.Parent = workspace.Characters.NPCs
     Model:MoveTo(Position)
 
@@ -27,7 +27,7 @@ local function CreateModel(Entity : any, Position : Vector3)
 
     CharacterStates.LoadedAnimations.add(Entity, LoadedAnimations)
 
-    CharacterModule.PlayAnimation(Entity, EntityData.State)
+    CharacterModule.PlayAnimation(Entity, EntityData[CharacterStates.State])
 end
 
 local function RemoveModel(Entity : any)
@@ -39,7 +39,7 @@ local function Action(Entity : any, ActionEnum : number)
     local EntityData = CharacterStates.World.get(Entity)
 
     if ActionEnum == Enums.Action.Die then
-        EventHandler.FireEvent("Npc", "DeleteNpc", EntityData.NPC)
+        EventHandler.FireEvent("Npc", "DeleteNpc", EntityData[CharacterStates.NPCId])
         CharacterStates.World.kill(Entity)
     elseif ActionEnum == Enums.Action.Attack then
         CharacterModule.SetState(Entity, Enums.States.Attacking)
@@ -51,15 +51,13 @@ end
 local function SetState(Entity : any, State : number)
     local EntityData = CharacterStates.World.get(Entity)
 
-    if EntityData.Model then
+    if EntityData[CharacterStates.Model] then
         CharacterModule.PlayAnimation(Entity, State)
     end
 end
 
-CharacterStates[NpcEnum] = CharacterStates.World.factory(NpcEnum, {
+CharacterStates[NpcEnum] = CharacterStates.World.factory({
     add = function(Factory, Entity : any, SpawnPosition : Vector3)
-        local EntityData = CharacterStates.World.get(Entity)
-
         CharacterStates.NPCType.add(Entity, NpcEnum)
 
         CharacterModule.SetState(Entity, Enums.States.Walking)

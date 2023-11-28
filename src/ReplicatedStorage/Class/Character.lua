@@ -42,7 +42,7 @@ end
 
 --Easy way to update health and update the event
 Module.UpdateHealth = function(Entity : any, HealthDifference : number, DamageType : number?)
-    local HealthData = CharacterStates.World.get(Entity).Health
+    local HealthData = CharacterStates.World.get(Entity)[CharacterStates.Health]
 
     if (HealthData) then
         local DamageAmount = HealthDifference/HealthData.Max
@@ -58,10 +58,10 @@ Module.UpdateSpeed = function(Entity : any, NewSpeed : number)
     local CharacterController : Actor = ServerScriptService.CharacterController
 
     local EntityData = CharacterStates.World.get(Entity)
-    local SpeedData = EntityData.WalkSpeed
+    local SpeedData = EntityData[CharacterStates.WalkSpeed]
 
     SpeedData.Current = NewSpeed
-    CharacterController:SendMessage("UpdateWalkSpeed", EntityData.NPC, NewSpeed)
+    CharacterController:SendMessage("UpdateWalkSpeed", EntityData.NPCId, NewSpeed)
 end
 
 --Adds all proper tags to the character and registers it's entity to it's model
@@ -81,13 +81,13 @@ end
 Module.RegisterNPC = function(Entity : any, CustomId : number?)
     if CustomId then
         IdToNpc[CustomId] = Entity
-        CharacterStates.NPC.add(Entity, CustomId)
+        CharacterStates.NPCId.add(Entity, CustomId)
         return
     end
 
     NpcId += 1
     IdToNpc[NpcId] = Entity
-    CharacterStates.NPC.add(Entity, NpcId)
+    CharacterStates.NPCId.add(Entity, NpcId)
 
     return NpcId
 end
@@ -107,7 +107,7 @@ end
 
 Module.Action = function(Entity : any, Action : number)
     local CharacterData = CharacterStates.World.get(Entity)
-    local EntityNpcId = CharacterData.NPC
+    local EntityNpcId = CharacterData[CharacterStates.NPCId]
 
     local CompressedId = Squash.uint.ser(EntityNpcId, 2)
     local CompressedAction = Squash.uint.ser(Action, 2)
@@ -118,8 +118,8 @@ end
 Module.CreateMovementData = function(Entity : any, SpawnPosition : Vector3?)
     local CharacterData = CharacterStates.World.get(Entity)
 
-    local WalkSpeed = CharacterData.WalkSpeed.Current
-    local EntityNpcId = CharacterData.NPC
+    local WalkSpeed = CharacterData[CharacterStates.WalkSpeed].Current
+    local EntityNpcId = CharacterData[CharacterStates.NPCId]
 
     AllMovementData[EntityNpcId] = {
         MoveDirection =  Vector3.new()
@@ -133,29 +133,29 @@ end
 
 Module.RemoveMovementData = function(Entity : any)
     local CharacterData = CharacterStates.World.get(Entity)
-    local EntityNpcId = CharacterData.NPC
+    local EntityNpcId = CharacterData[CharacterStates.NPCId]
 
     AllMovementData[EntityNpcId] = nil
 end
 
 Module.GetPosition = function(Entity : any)
     local CharacterData = CharacterStates.World.get(Entity)
-    local EntityNpcId = CharacterData.NPC
+    local EntityNpcId = CharacterData[CharacterStates.NPCId]
 
     return AllMovementData[EntityNpcId].Position
 end
 
 Module.GetMovementData = function(Entity : any)
     local CharacterData = CharacterStates.World.get(Entity)
-    local EntityNpcId = CharacterData.NPC
+    local EntityNpcId = CharacterData[CharacterStates.NPCId]
 
     return AllMovementData[EntityNpcId]
 end
 
 Module.PlayAnimation = function(Entity : any, State: number)
     local EntityData = CharacterStates.World.get(Entity)
-    local LoadedAnimations = EntityData.LoadedAnimations
-    local CurrentAnimation = EntityData.CurrentAnimation
+    local LoadedAnimations = EntityData[CharacterStates.LoadedAnimations]
+    local CurrentAnimation = EntityData[CharacterStates.CurrentAnimation]
 
     if CurrentAnimation then
         CurrentAnimation:Stop()
@@ -163,26 +163,25 @@ Module.PlayAnimation = function(Entity : any, State: number)
 
     CurrentAnimation = LoadedAnimations[State]
 
-    EntityData.CurrentAnimation = CurrentAnimation
+    EntityData[CharacterStates.CurrentAnimation] = CurrentAnimation
     CurrentAnimation:Play()
 end
 
 Module.SetState = function(Entity: any, State : number, ...)
     local EntityData = CharacterStates.World.get(Entity)
 
-    if not EntityData.State then
+    if not EntityData[CharacterStates.State] then
         --There was no previous state
         CharacterStates.State.add(Entity, State)
     else
-        local LastState = EntityData.State
+        local LastState = EntityData[CharacterStates.State]
 
         if LastState == State then return end
 
-        EntityData.State = State
+        EntityData[CharacterStates.State] = State
 
         local LastStateData = Module.GetStateData(Entity, LastState)
         LastStateData.Leave:Fire(Entity)
-        CharacterStates[LastState].remove(Entity)
     end
 
     CharacterStates[State].add(Entity)
@@ -215,7 +214,7 @@ end
 
 Module.GetMoveAwayVector = function(Quad, Entity : any)
     local EntityData = CharacterStates.World.get(Entity)
-    local NpcEnum = EntityData.NPCType
+    local NpcEnum = EntityData[CharacterStates.NPCType]
 
     local MovementData = Module.GetMovementData(Entity)
     local Position = MovementData.Position
@@ -231,10 +230,10 @@ Module.GetMoveAwayVector = function(Quad, Entity : any)
 
         local OtherEntity = Point.Data.Entity
         local OtherEntityData = CharacterStates.World.get(OtherEntity)
-        local OtherEntityEnum = OtherEntityData.NPCType
+        local OtherEntityEnum = OtherEntityData[CharacterStates.NPCType]
 
         --If other entity is not an npc, continue
-        if not OtherEntityData.NPC then continue end
+        if not OtherEntityData.NPCId then continue end
 
         local Difference = (Vector3.new(Point.X, 0, Point.Y) - Position) * Vector3.new(1,0,1)
         BaddieCumulativePosition += Difference*
@@ -264,7 +263,7 @@ Module.GetNearbyHostiles = function(Quad, Entity : any, Position : Vector3, Radi
         local OtherEntity = Point.Data.Entity
         local OtherEntityData = CharacterStates.World.get(OtherEntity)
 
-        if OtherEntityData.NPC then continue end
+        if OtherEntityData[CharacterStates.NPCId] then continue end
 
         table.insert(NearbyHostiles, OtherEntity)
     end

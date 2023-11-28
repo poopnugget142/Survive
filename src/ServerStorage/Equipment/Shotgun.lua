@@ -47,8 +47,8 @@ end
 --In the future we can check if this really hit but for now we trust it
 Module.Attack = function(Entity, MousePosition)
     local EquipmentData = EquipmentStates.World.get(Entity)
-    local GunOwner = EquipmentData.Owner
-    local Model = EquipmentData.Model
+    local GunOwner = EquipmentData[EquipmentStates.Owner]
+    local Model = EquipmentData[EquipmentStates.Model]
 
     local Character = GunOwner.Character
     local HumanoidRootPart = Character.PrimaryPart
@@ -120,7 +120,7 @@ Module.Attack = function(Entity, MousePosition)
             if not HitEntity then continue end
 
             local HitData = CharacterStates.World.get(HitEntity)
-            if not HitData.Health then return end
+            if not HitData[EquipmentStates.Health] then return end
 
             CharacterModule.UpdateHealth(HitEntity, -100)
         end

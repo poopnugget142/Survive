@@ -43,13 +43,13 @@ Module.RegisterEquipment = function(Player : Player, ItemName : string, ...) : n
     local EquipmentData = GetEquipmentData(ItemName)
     EquipmentData.Register(Entity, ...)
 
-    return EquipmentStates.World.get(Entity).ItemID
+    return EquipmentStates.World.get(Entity)[EquipmentStates.ItemID]
 end
 
 Module.SetEquipmentModel = function(Player : Player, ItemID : number)
     local Entity = Equipment[ItemID]
     local EntityData = EquipmentStates.World.get(Entity)
-    local ItemName = EntityData.Name
+    local ItemName = EntityData[EquipmentStates.Name]
     local EquipmentData = GetEquipmentData(ItemName)
     local Model : Model = EquipmentData.LoadModel(Entity)
     EquipmentStates.Model.add(Entity, Model)
@@ -61,7 +61,7 @@ end
 Module.CustomAction = function(ActionName : string, Player : Player, ItemID : number, ...)
     local Entity = Equipment[ItemID]
     local EntityData = EquipmentStates.World.get(Entity)
-    local ItemName = EntityData.Name
+    local ItemName = EntityData[EquipmentStates.Name]
     local EquipmentData = GetEquipmentData(ItemName)
     EquipmentData[ActionName](Entity, ...)
 end

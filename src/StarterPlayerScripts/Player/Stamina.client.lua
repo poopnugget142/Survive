@@ -10,7 +10,7 @@ local Player = game.Players.LocalPlayer
 
 --We need some sort of cooldown so the player doesn't just spam sprint
 
-CharacterStates.Stamina = CharacterStates.World.factory("Stamina", {
+CharacterStates.Stamina = CharacterStates.World.factory({
     add = function(Factory, Entity : Model, Stamina : number)
         local StaminaBar = Assets.Stamina:Clone()
         StaminaBar.Parent = Entity:WaitForChild("HumanoidRootPart")
@@ -24,11 +24,8 @@ CharacterStates.Stamina = CharacterStates.World.factory("Stamina", {
     end;
 })
 
-CharacterStates.Sprinting = CharacterStates.World.factory("Sprinting", {
+CharacterStates.Sprinting = CharacterStates.World.factory({
     add = function(Factory, Entity : Model)
-
-        --Entity.Humanoid.WalkSpeed = 24
-
         return true
     end;
 
@@ -48,15 +45,17 @@ end)
 RunService.RenderStepped:Connect(function(DeltaTime)
     for Character in CharacterStates.World.query{CharacterStates.Stamina} do
         local CharacterData = CharacterStates.World.get(Character)
-        local Stamina = CharacterData.Stamina
+        local Stamina = CharacterData[CharacterStates.Stamina]
 
+        --[[
         if not Stamina then
             continue
         end
+        ]]
 
         local alpha = Stamina.Current/Stamina.Max
 
-        if CharacterData.Sprinting then
+        if CharacterData[CharacterStates.Sprinting] then
             Stamina.Current -= DeltaTime
             Stamina.Bar.Enabled = true
             
@@ -68,11 +67,10 @@ RunService.RenderStepped:Connect(function(DeltaTime)
                 Stamina.Current + DeltaTime/2
                 ,Stamina.Max
             )
-            --Stamina.Current += DeltaTime
+
             Stamina.Bar.Enabled = true
 
             if Stamina.Current >= Stamina.Max then
-                --Stamina.Current = Stamina.Max
                 Stamina.Bar.Enabled = false
             end
             Character.Humanoid.WalkSpeed = 16
@@ -80,6 +78,8 @@ RunService.RenderStepped:Connect(function(DeltaTime)
 
         local Fill : Frame = Stamina.Bar.Back.Fill
         Fill.Size = UDim2.new(Stamina.Current/Stamina.Max, 0, 1, 0)
+
+        --Effect for the bar moving
         local fillgradient = Fill.UIGradient.Offset
         Fill.UIGradient.Offset = fillgradient - Vector2.new(
             1/60 * 3 --delta

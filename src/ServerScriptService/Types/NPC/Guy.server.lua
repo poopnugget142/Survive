@@ -51,7 +51,7 @@ local function OnWalk(Entity : any)
     CharacterModule.Action(Entity, Enums.Action.Walk)
 end
 
-CharacterStates[NpcEnum] = CharacterStates.World.factory(NpcEnum, {
+CharacterStates[NpcEnum] = CharacterStates.World.factory({
     add = function(Factory, Entity : any, SpawnPosition : Vector3)
         local NpcId = CharacterModule.RegisterNPC(Entity)
 
@@ -85,7 +85,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
         local MovementData = CharacterModule.GetMovementData(Entity)
         local Position = MovementData.Position
         local Velocity = MovementData.Velocity
-        local NpcId = EntityData.NPC
+        local NPCId = EntityData[CharacterStates.NPCId]
 
         local targets = pathfinding.targets
 	    local distanceThreshold = math.huge
@@ -150,7 +150,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
 
         if (travel ~= Vector3.zero and travel ~= nil) then
             local MoveDirection = ((travel*1)+(MoveAwayVector*2.25)).Unit
-            CharacterController:SendMessage("UpdateMoveDirection", NpcId, MoveDirection)
+            CharacterController:SendMessage("UpdateMoveDirection", NPCId, MoveDirection)
         end
     end
 end)

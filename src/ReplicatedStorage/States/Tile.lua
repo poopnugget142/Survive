@@ -10,7 +10,7 @@ Module.World = World
 
 --tile / priority components
 
-Module.FrontierOpen = World.factory("FrontierOpen", {
+Module.FrontierOpen = World.factory({
     add = function(_, Entity : any, Heat : number)
         return
         {
@@ -20,7 +20,7 @@ Module.FrontierOpen = World.factory("FrontierOpen", {
     end;
 })
 
-Module.FrontierClosed = World.factory("FrontierClosed", {
+Module.FrontierClosed = World.factory({
     add = function(_, Entity : any)
         return
         {
@@ -29,7 +29,7 @@ Module.FrontierClosed = World.factory("FrontierClosed", {
     end;
 })
 
-Module.NavData = World.factory("NavData", {
+Module.NavData = World.factory({
     add = function(_, Entity : any, Cost : number)
         return
         {

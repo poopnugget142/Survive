@@ -94,7 +94,7 @@ end
 
 Module.FireCustomAction = function(Entity : any, ActionName : string, ...)
     local EntityData = EquipmentStates.World.get(Entity)
-    local ItemID = EntityData.ItemID
+    local ItemID = EntityData[EquipmentStates.ItemID]
 
     local Action = CustomActions:FindFirstChild(ActionName)
 
@@ -107,14 +107,14 @@ end
 
 Module.Equip = function(Entity : any, ...)
     local EntityData = EquipmentStates.World.get(Entity)
-    local ItemName = EntityData.Name
+    local ItemName = EntityData[EquipmentStates.Name]
     local ItemData = GetEquipmentData(ItemName)
     ItemData.Equip(Entity, ...)
 end
 
 Module.Unequip = function(Entity : any, ...)
     local EntityData = EquipmentStates.World.get(Entity)
-    local ItemName = EntityData.Name
+    local ItemName = EntityData[EquipmentStates.Name]
     local ItemData = GetEquipmentData(ItemName)
     ItemData.Unequip(Entity, ...)
 end
@@ -122,7 +122,7 @@ end
 --Asks server to load model
 Module.RequestModel = function(Entity : any, ...)
     local EntityData = EquipmentStates.World.get(Entity)
-    local ItemID = EntityData.ItemID
+    local ItemID = EntityData[EquipmentStates.ItemID]
 
     SetEquipmentModel:FireServer(ItemID, ...)
 end
@@ -130,7 +130,7 @@ end
 SetEquipmentModel.OnClientEvent:Connect(function(Instance, ItemID)
     local Entity = Module.GetEntity(ItemID)
     local EntityData = EquipmentStates.World.get(Entity)
-    local ItemName = EntityData.Name
+    local ItemName = EntityData[EquipmentStates.Name]
     local ItemData = GetEquipmentData(ItemName)
     ItemData.ServerLoadModel(Entity, Instance)
 end)

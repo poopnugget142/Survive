@@ -40,11 +40,7 @@ module.tileBuild = function(target:Vector3?, u:number?, v:number?, w:number?)
         position = Vector3.new(u,v,w)
     end 
 
-
-    world.entity(position)
     TileStates.NavData.add(position, 1)
-    --tile_navData.add(position, 1)
-    --world.Component.Create(position, "tile_navData", 1)
 
     tileMap[position] = position --adding tileUV to a tileMap gives more options and allows for #tileMap
 
@@ -75,7 +71,9 @@ for i = 0, 70 do
         --    continue
         --end
         local Tile = module.tileBuild(_,i,0,j)
-        local NavData = world.get(Tile).NavData
+        local TileData = world.get(Tile)
+        local NavData = TileData[TileStates.NavData]
+
         if (i > 45/TileSize.X and i < 55/TileSize.X and j < 70/TileSize.Z) then
             NavData.Cost = 1000
         else

@@ -14,7 +14,7 @@ local UpdateHealth = Remotes.UpdateHealth
 
 Players.PlayerAdded:Connect(function(Player)
     local function HealthUpdate(Entity, DamageAmount, DamageType)
-        local HealthData = CharacterStates.World.get(Entity).Health
+        local HealthData = CharacterStates.World.get(Entity)[CharacterStates.Health]
         local CurrentHealth = HealthData.Current
 
         UpdateHealth:FireClient(Player, CurrentHealth, DamageType)

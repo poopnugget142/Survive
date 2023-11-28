@@ -55,7 +55,7 @@ Module.Equip = function(Entity)
     local CharacterEntity = CharacterModule.GetEntityFromCharacter(Character)
     local CharacterData = CharacterStates.World.get(CharacterEntity)
 
-    local IKControllers = CharacterData.IKControllers
+    local IKControllers = CharacterData[CharacterStates.IKControllers]
 
     local IKControlR, IKControlL = IKControllers["RightHand"], IKControllers["LeftHand"]
     IKControlR.Enabled, IKControlL.Enabled = true, true
@@ -91,7 +91,7 @@ Module.Equip = function(Entity)
 
     local EntityData = EquipmentStates.World.get(Entity)
 
-    local ItemID = EntityData.ItemID
+    local ItemID = EntityData[EquipmentStates.ItemID]
 
     --EquipmentModule.RequestModel(Entity, ItemID)
 
@@ -105,7 +105,7 @@ Module.Equip = function(Entity)
             if true then
                 GunModule.DeviationRecovery(Entity, .1)
             end
-        until (--[[cooldown <= 0 or]] EquipmentStates.World.get(Entity).Shooting)
+        until (--[[cooldown <= 0 or]] EquipmentStates.World.get(Entity)[EquipmentStates.Shooting])
     end)
 end
 
@@ -121,7 +121,7 @@ Module.Unequip = function(Entity)
     local CharacterEntity = CharacterModule.GetEntityFromCharacter(Character)
     local CharacterData = CharacterStates.World.get(CharacterEntity)
 
-    local IKControllers = CharacterData.IKControllers
+    local IKControllers = CharacterData[CharacterStates.IKControllers]
 
     local IKControlR, IKControlL = IKControllers["RightHand"], IKControllers["LeftHand"]
     IKControlR.Enabled, IKControlL.Enabled = false, false
@@ -135,9 +135,9 @@ end
 RunService.RenderStepped:Connect(function(deltaTime)
     for Entity in EquipmentStates.World.query{EquipmentStates[GunEnum], EquipmentStates.Shooting} do
         local EntityData = EquipmentStates.World.get(Entity)
-        local Model = EntityData.Model
+        local Model = EntityData[EquipmentStates.Model]
 
-        if EntityData.Cooldown > 0 then
+        if EntityData[EquipmentStates.Cooldown] > 0 then
             continue
         end
 
@@ -145,7 +145,7 @@ RunService.RenderStepped:Connect(function(deltaTime)
         local MouseCast = PlayerModule.MouseCast(TerrainParams, 10000)
         local Displacement = MouseCast.Position - Origin
         local DisplacementRight = Vector3.new(-Displacement.Z, 0, Displacement.X)
-        local Deviation = EntityData.Deviation
+        local Deviation = EntityData[EquipmentStates.Deviation]
 
 
         local AimDeviation = (Displacement.Unit*Deviation.Y + DisplacementRight.Unit*Deviation.X)*Displacement.Magnitude*Vector3.new(1,0,1) or Vector3.zero
@@ -187,7 +187,7 @@ RunService.RenderStepped:Connect(function(deltaTime)
         ]]
 
         local SpreadPermutations = 10^3
-        EntityData.Deviation += Vector2.new( --RECOIL!!!
+        EntityData[EquipmentStates.Deviation] += Vector2.new( --RECOIL!!!
             math.random(
                 -0.75*SpreadPermutations
                 ,0.75*SpreadPermutations
@@ -197,7 +197,7 @@ RunService.RenderStepped:Connect(function(deltaTime)
                 ,2*SpreadPermutations
             )/SpreadPermutations
         ) / math.clamp(Deviation.Magnitude+1, 1, math.huge) --reduce recoil impulse with magnitude
-        EntityData.Cooldown = EntityData.Firerate
+        EntityData[EquipmentStates.Cooldown] = EntityData[EquipmentStates.Firerate]
 
         GunModule.DeviationRecovery(Entity, .1)
     end

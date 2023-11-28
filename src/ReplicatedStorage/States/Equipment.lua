@@ -8,34 +8,34 @@ local World = Stew.world()
 
 local Module = {}
 
-Module.Name = World.factory("Name", {
+Module.Name = World.factory({
     add = Util.EasyStewReturn;
 })
 
-Module.ItemID = World.factory("ItemID", {
+Module.ItemID = World.factory({
     add = Util.EasyStewReturn;
 })
 
-Module.Model = World.factory("Model", {
+Module.Model = World.factory({
     add = Util.EasyStewReturn;
 
     remove = function(Factory, Entity : any)
         local EntityData = World.get(Entity)
-        local Model = EntityData.Model
+        local Model = EntityData[Module.Model]
 
         Model:Destroy()
     end
 })
 
-Module.Owner = World.factory("Owner", {
+Module.Owner = World.factory({
     add = Util.EasyStewReturn;
 })
 
-Module.LoadingConnections = World.factory("LoadingConnections", {
+Module.LoadingConnections = World.factory({
     add = Util.EasyStewReturn;
 
     remove = function(Factory, Entity : any, NewModel : Instance)
-        local LoadingConnections = World.get(Entity).LoadingConnections
+        local LoadingConnections = World.get(Entity)[Module.LoadingConnections]
 
         for _, Connection : RBXScriptConnection in LoadingConnections do
             Connection:Disconnect()
@@ -45,20 +45,20 @@ Module.LoadingConnections = World.factory("LoadingConnections", {
 
 --~Weapon~--
 for  _, GunEnum in Enums.Gun do
-    Module[GunEnum] = World.tag(GunEnum)
+    Module[GunEnum] = World.tag()
 end
 
-Module.Shooting = World.tag("Shooting")
+Module.Shooting = World.tag()
 
-Module.Cooldown = World.factory("Cooldown", {
+Module.Cooldown = World.factory({
     add = Util.EasyStewReturn;
 })
 
-Module.Deviation = World.factory("Deviation", {
+Module.Deviation = World.factory({
     add = Util.EasyStewReturn;
 })
 
-Module.Firerate = World.factory("Firerate", {
+Module.Firerate = World.factory({
     add = Util.EasyStewReturn;
 })
 

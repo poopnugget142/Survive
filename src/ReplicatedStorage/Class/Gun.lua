@@ -104,15 +104,15 @@ end
 
 Module.DeviationRecovery = function(Entity, deviationRecovery)
     local EntityData = EquipmentStates.World.get(Entity)
-    local Deviation = EntityData.Deviation
+    local Deviation = EntityData[EquipmentStates.Deviation]
 
     local deltaTime = task.wait()
 
     if (Deviation.Magnitude > 0) then
-        EntityData.Deviation -= (Deviation.Unit*math.min(deviationRecovery, Deviation.Magnitude)) * (deltaTime/(1/60))
+        EntityData[EquipmentStates.Deviation] -= (Deviation.Unit*math.min(deviationRecovery, Deviation.Magnitude)) * (deltaTime/(1/60))
     end
 
-    EntityData.Cooldown -= deltaTime
+    EntityData[EquipmentStates.Cooldown] -= deltaTime
 end
 
 return Module

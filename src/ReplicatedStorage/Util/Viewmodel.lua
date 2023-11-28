@@ -18,7 +18,10 @@ local RealParts = {}
 local Isometer = (2^1)
 
 --Cloning character to put into viewmodel
-local function BindRigToCharacter(AddedCharacter : Model)
+
+local Module = {}
+
+Module.BindRigToCharacter = function(AddedCharacter : Model)
     repeat task.wait() until Player:HasAppearanceLoaded()
 
     if Character then
@@ -63,12 +66,6 @@ local function UpdateAnimations()
     end
 end
 
-if Player.Character then
-    BindRigToCharacter(Player.Character)
-end
-
-Player.CharacterAdded:Connect(function(AddedCharacter : Model)
-    BindRigToCharacter(AddedCharacter)
-end)
-
 RunService:BindToRenderStep("UpdateAnimations", Enum.RenderPriority.Last.Value, UpdateAnimations)
+
+return Module

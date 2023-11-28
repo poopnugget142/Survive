@@ -28,7 +28,7 @@ local function OnHit(Entity : any)
     end
 end
 
-CharacterStates[NpcEnum] = CharacterStates.World.factory(NpcEnum, {
+CharacterStates[NpcEnum] = CharacterStates.World.factory({
     add = function(Factory, Entity : any, SpawnPosition : Vector3)
         local NpcId = CharacterModule.RegisterNPC(Entity)
 

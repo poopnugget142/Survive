@@ -77,6 +77,14 @@ Module.NPCId = World.factory({
     end;
 })
 
+--[[
+Module.Gridventory = World.factory({
+    add = function(Factory, Entity : any, GridventoryID : number)
+        return GridventoryID
+    end;
+})
+]]
+
 Module.NPCType = World.factory({
     add = function(Factory, Entity : any, NpcType : number)
         return NpcType

@@ -7,10 +7,8 @@ local Remotes = ReplicatedStorage.Remotes
 local CustomActions = Remotes.Custom
 
 local RegisterEquipment : RemoteFunction = Remotes.RegisterEquipment
-local SetEquipmentModel : RemoteEvent = Remotes.SetEquipmentModel
 
 RegisterEquipment.OnServerInvoke = Equipment.RegisterEquipment
-SetEquipmentModel.OnServerEvent:Connect(Equipment.SetEquipmentModel)
 
 for _, Remote : RemoteEvent in CustomActions:GetChildren() do
     Remote.OnServerEvent:Connect(function(Player : Player, ItemID : number, ...)

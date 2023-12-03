@@ -1,11 +1,9 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Remotes = ReplicatedStorage.Remotes
+local CustomActions = Remotes.Custom
 
 local EquipmentStates = require(ReplicatedStorage.Scripts.States.Equipment)
-local Promise = require(ReplicatedStorage.Packages.Promise)
-
-local SetEquipmentModel : RemoteEvent = Remotes.SetEquipmentModel
 
 local Equipment = {}
 
@@ -46,24 +44,31 @@ Module.RegisterEquipment = function(Player : Player, ItemName : string, ...) : n
     return EquipmentStates.World.get(Entity)[EquipmentStates.ItemID]
 end
 
-Module.SetEquipmentModel = function(Player : Player, ItemID : number)
-    local Entity = Equipment[ItemID]
-    local EntityData = EquipmentStates.World.get(Entity)
-    local ItemName = EntityData[EquipmentStates.Name]
-    local EquipmentData = GetEquipmentData(ItemName)
-    local Model : Model = EquipmentData.LoadModel(Entity)
-    EquipmentStates.Model.add(Entity, Model)
-    --Model:SetAttribute("ItemID", ItemID)
-
-    SetEquipmentModel:FireClient(Player, Model, ItemID)
-end
-
 Module.CustomAction = function(ActionName : string, Player : Player, ItemID : number, ...)
     local Entity = Equipment[ItemID]
     local EntityData = EquipmentStates.World.get(Entity)
     local ItemName = EntityData[EquipmentStates.Name]
     local EquipmentData = GetEquipmentData(ItemName)
+
+    if not EquipmentData[ActionName] then
+        error("Action "..ActionName.." does not exist")
+    end
+
     EquipmentData[ActionName](Entity, ...)
+end
+
+Module.BackwardsAction = function(ActionName : string, Entity, ...)
+    local EntityData = EquipmentStates.World.get(Entity)
+    local ItemID = EntityData[EquipmentStates.ItemID]
+    local Player = EntityData[EquipmentStates.Owner]
+
+    local Action = CustomActions:FindFirstChild(ActionName)
+
+    if not Action then
+        error("Action "..ActionName.." does not exist")
+    end
+
+    Action:FireClient(Player, ItemID, ...)
 end
 
 return Module

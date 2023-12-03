@@ -1,17 +1,14 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local ServerScriptService = game:GetService("ServerScriptService")
 
 local Assets = ReplicatedStorage.Assets
 local Remotes = ReplicatedStorage.Remotes
 
+local EquipmentModule = require(script.Parent)
 local EquipmentStates = require(ReplicatedStorage.Scripts.States.Equipment)
 local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
-local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
 local PriorityQueue = require(ReplicatedStorage.Scripts.Util.PriorityQueue)
 local QuadtreeModule = require(ReplicatedStorage.Scripts.Util.Quadtree)
-local NPCRegistry = require(ReplicatedStorage.Scripts.Registry.NPC)
-local PlayerModule = require(ReplicatedStorage.Scripts.Class.Player)
 local GunModule = require(ReplicatedStorage.Scripts.Class.Gun)
 local Enums = require(ReplicatedStorage.Scripts.Enums)
 local Util = require(ReplicatedStorage.Scripts.Util)
@@ -23,25 +20,31 @@ local GunEnum = Enums.Gun.Shotgun
 local Module = {}
 
 Module.Register = function(Entity)
-    
 end
 
-Module.LoadModel = function(Entity)
+Module.SetEquipmentModel = function(Entity)
     local EntityData = EquipmentStates.World.get(Entity)
+
+    if EntityData[EquipmentStates.Model] then
+        EquipmentStates.Model.remove(Entity)
+        return
+    end
 
     local Model = Assets.Guns.Shotgun:Clone()
 
     local Handle = Model.Handle
     local Grip = Handle.Grip
 
-    local Player = EntityData.Owner
+    local Player = EntityData[EquipmentStates.Owner]
 
     local Character = Player.Character
 
     Model.Parent = Character
     Grip.Part1 = Character.RightHand
 
-    return Model
+    EquipmentStates.Model.add(Entity, Model)
+
+    EquipmentModule.BackwardsAction("SetEquipmentModel", Entity, Model)
 end
 
 --In the future we can check if this really hit but for now we trust it
@@ -50,10 +53,8 @@ Module.Attack = function(Entity, MousePosition)
     local GunOwner = EquipmentData[EquipmentStates.Owner]
     local Model = EquipmentData[EquipmentStates.Model]
 
-    local Character = GunOwner.Character
-    local HumanoidRootPart = Character.PrimaryPart
-    local Origin --= Model.Muzzle.Position
-                    = HumanoidRootPart.Position
+    local Origin = Model.Muzzle.Position
+
     local TracerPlayers = Util.GetAllPlayersExcept{GunOwner}
 
     --Explosions

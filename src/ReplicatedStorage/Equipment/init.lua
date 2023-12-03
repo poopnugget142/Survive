@@ -7,7 +7,6 @@ local Promise = require(ReplicatedStorage.Packages.Promise)
 local EquipmentStates = require(ReplicatedStorage.Scripts.States.Equipment)
 
 local RegisterEquipment : RemoteFunction = Remotes.RegisterEquipment
-local SetEquipmentModel : RemoteEvent = Remotes.SetEquipmentModel
 
 local EquipmentIDs : { [any] : number? }= {}
 local EquipmentEntitys : { [number] : any } = {}
@@ -92,19 +91,6 @@ Module.GetEntity = function(ItemId : number) : any
     return EquipmentEntitys[ItemId]
 end
 
-Module.FireCustomAction = function(Entity : any, ActionName : string, ...)
-    local EntityData = EquipmentStates.World.get(Entity)
-    local ItemID = EntityData[EquipmentStates.ItemID]
-
-    local Action = CustomActions:FindFirstChild(ActionName)
-
-    if not Action then
-        error("Action "..ActionName.." does not exist")
-    end
-
-    Action:FireServer(ItemID, ...)
-end
-
 Module.Equip = function(Entity : any, ...)
     local EntityData = EquipmentStates.World.get(Entity)
     local ItemName = EntityData[EquipmentStates.Name]
@@ -120,6 +106,7 @@ Module.Unequip = function(Entity : any, ...)
 end
 
 --Asks server to load model
+--[[
 Module.RequestModel = function(Entity : any, ...)
     local EntityData = EquipmentStates.World.get(Entity)
     local ItemID = EntityData[EquipmentStates.ItemID]
@@ -134,5 +121,29 @@ SetEquipmentModel.OnClientEvent:Connect(function(Instance, ItemID)
     local ItemData = GetEquipmentData(ItemName)
     ItemData.ServerLoadModel(Entity, Instance)
 end)
+]]
+
+Module.FireCustomAction = function(Entity : any, ActionName : string, ...)
+    local EntityData = EquipmentStates.World.get(Entity)
+    local ItemID = EntityData[EquipmentStates.ItemID]
+
+    local Action = CustomActions:FindFirstChild(ActionName)
+
+    if not Action then
+        error("Action "..ActionName.." does not exist")
+    end
+
+    Action:FireServer(ItemID, ...)
+end
+
+for _, Action : RemoteFunction in pairs(CustomActions:GetChildren()) do
+    Action.OnClientEvent:Connect(function(ItemID, ...)
+        local Entity = Module.GetEntity(ItemID)
+        local EntityData = EquipmentStates.World.get(Entity)
+        local ItemName = EntityData[EquipmentStates.Name]
+        local ItemData = GetEquipmentData(ItemName)
+        return ItemData[Action.Name](Entity, ...)
+    end)
+end
 
 return Module

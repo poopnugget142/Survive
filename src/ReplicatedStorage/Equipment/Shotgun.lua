@@ -53,6 +53,8 @@ Module.Equip = function(Entity)
     Model.Parent = Character
     Grip.Part1 = Character.RightHand
 
+    --Model.Mesh.Transparency = 0.5
+
     Viewmodel.BindRigToCharacter(Character)
 
     local CharacterEntity = CharacterModule.GetEntityFromCharacter(Character)
@@ -92,32 +94,17 @@ Module.Equip = function(Entity)
 
     EquipmentModule.WaitUntilItemID(Entity)
 
-    local EntityData = EquipmentStates.World.get(Entity)
-
-    local ItemID = EntityData[EquipmentStates.ItemID]
-
-    --EquipmentModule.RequestModel(Entity, ItemID)
-
-    KeyBindings.BindAction("Attack", Enum.UserInputState.Begin, function()
-        EquipmentStates.Shooting.add(Entity)
-    end)
-
-    KeyBindings.BindAction("Attack", Enum.UserInputState.End, function()
-        EquipmentStates.Shooting.remove(Entity)
-        repeat 
-            if true then
-                GunModule.DeviationRecovery(Entity, .1)
-            end
-        until (--[[cooldown <= 0 or]] EquipmentStates.World.get(Entity)[EquipmentStates.Shooting])
-    end)
+    EquipmentModule.FireCustomAction(Entity, "SetEquipmentModel")
 end
 
 Module.Unequip = function(Entity)
+    EquipmentModule.FireCustomAction(Entity, "SetEquipmentModel")
+
     KeyBindings.UnbindAction("Attack", Enum.UserInputState.Begin)
     KeyBindings.UnbindAction("Attack", Enum.UserInputState.End)
 
-    EquipmentStates.Model.remove(Entity)
     EquipmentStates.Shooting.remove(Entity)
+    EquipmentStates.Model.remove(Entity)
 
     local Character = Player.Character
 
@@ -132,8 +119,22 @@ Module.Unequip = function(Entity)
     IKControlR.Enabled, IKControlL.Enabled = false, false
 end
 
-Module.ServerLoadModel = function(Entity, ItemModel : Model)
-    
+Module.SetEquipmentModel = function(Entity, ItemModel : Model)
+    EquipmentStates.Model.remove(Entity)
+    EquipmentStates.Model.add(Entity, ItemModel)
+
+    KeyBindings.BindAction("Attack", Enum.UserInputState.Begin, function()
+        EquipmentStates.Shooting.add(Entity)
+    end)
+
+    KeyBindings.BindAction("Attack", Enum.UserInputState.End, function()
+        EquipmentStates.Shooting.remove(Entity)
+        repeat 
+            if true then
+                GunModule.DeviationRecovery(Entity, .1)
+            end
+        until (--[[cooldown <= 0 or]] EquipmentStates.World.get(Entity)[EquipmentStates.Shooting])
+    end)
 end
 
 --Shooting

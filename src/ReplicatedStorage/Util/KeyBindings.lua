@@ -7,6 +7,10 @@ local InputActions = {
     ;["Sprint"] =               {Enum.KeyCode.LeftShift}
     ;["Reload"] =               {Enum.KeyCode.R}
 
+    --camera controls
+    ;["Camera_ZoomIn"] =        {Enum.KeyCode.Equals}
+    ;["Camera_ZoomOut"] =       {Enum.KeyCode.Minus}
+
     --inventory controls
     ;["Inventory_Open"] =       {Enum.KeyCode.Tab}
     ;["Inventory_Interact1"] =  {Enum.UserInputType.MouseButton1} --mouse1, typically item pick

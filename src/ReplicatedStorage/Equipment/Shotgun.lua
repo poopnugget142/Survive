@@ -13,6 +13,7 @@ local GunModule = require(ReplicatedStorage.Scripts.Class.Gun)
 local Enums = require(ReplicatedStorage.Scripts.Enums)
 local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
 local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
+local Viewmodel = require(ReplicatedStorage.Scripts.Util.Viewmodel)
 
 local CharactersFolder = workspace:WaitForChild("Characters")
 local JunkFolder = workspace:WaitForChild("JunkFolder")
@@ -51,6 +52,8 @@ Module.Equip = function(Entity)
 
     Model.Parent = Character
     Grip.Part1 = Character.RightHand
+
+    Viewmodel.BindRigToCharacter(Character)
 
     local CharacterEntity = CharacterModule.GetEntityFromCharacter(Character)
     local CharacterData = CharacterStates.World.get(CharacterEntity)
@@ -118,6 +121,8 @@ Module.Unequip = function(Entity)
 
     local Character = Player.Character
 
+    Viewmodel.BindRigToCharacter(Character)
+
     local CharacterEntity = CharacterModule.GetEntityFromCharacter(Character)
     local CharacterData = CharacterStates.World.get(CharacterEntity)
 
@@ -135,6 +140,9 @@ end
 RunService.RenderStepped:Connect(function(deltaTime)
     for Entity in EquipmentStates.World.query{EquipmentStates[GunEnum], EquipmentStates.Shooting} do
         local EntityData = EquipmentStates.World.get(Entity)
+
+        if not EntityData[EquipmentStates.Shooting] then continue end
+
         local Model = EntityData[EquipmentStates.Model]
 
         if EntityData[EquipmentStates.Cooldown] > 0 then

@@ -1,4 +1,7 @@
 local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
 
 local Player = game.Players.LocalPlayer
 local Camera = workspace.CurrentCamera
@@ -9,8 +12,19 @@ Camera.CameraType = Enum.CameraType.Scriptable
 Camera.FieldOfView = 70/isometer
 
 local TopDownOffset = Vector3.new(-27, 40, -27)  * isometer
---TopDownOffset = Vector3.new(-54, 80, -54)  * isometer
 local RootOffset = Vector3.new(-2, 0, -2)
+
+local Zoom = 1
+
+KeyBindings.BindAction("Camera_ZoomIn", Enum.UserInputState.Begin, function()
+    Zoom -= 0.25
+    Zoom = math.clamp(Zoom, 0.1, 1)
+end)
+
+KeyBindings.BindAction("Camera_ZoomOut", Enum.UserInputState.Begin, function()
+    Zoom += 0.25
+    Zoom = math.clamp(Zoom, 0.1, 1)
+end)
 
 local function UpdateCameraPosition()
     local Character : Model = Player.Character
@@ -20,7 +34,7 @@ local function UpdateCameraPosition()
 
     local RootOrgin = Primary.Position + RootOffset
 
-    Camera.CFrame = CFrame.new(RootOrgin + TopDownOffset, RootOrgin) 
+    Camera.CFrame = CFrame.new(RootOrgin + (TopDownOffset*Zoom), RootOrgin) 
 end
 
 Player.CharacterAdded:Wait()

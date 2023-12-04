@@ -222,7 +222,6 @@ Module.GetMoveAwayVector = function(Quad, Entity : any)
     local CollisionRadius = NpcRegistry.GetCollisionRadius(NpcEnum)
 
     local NearbyPoints = Quad:QueryRange(QuadtreeModule.BuildCircle(Position.X, Position.Z, CollisionRadius))
-    print(NearbyPoints)
 
     local BaddieCumulativePosition = Vector3.zero
     for _, Point in NearbyPoints do

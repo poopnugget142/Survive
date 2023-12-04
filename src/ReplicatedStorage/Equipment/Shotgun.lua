@@ -53,7 +53,7 @@ Module.Equip = function(Entity)
     Model.Parent = Character
     Grip.Part1 = Character.RightHand
 
-    --Model.Mesh.Transparency = 0.5
+    Model.Mesh.Transparency = 0.5
 
     Viewmodel.BindRigToCharacter(Character)
 
@@ -129,7 +129,7 @@ Module.SetEquipmentModel = function(Entity, ItemModel : Model)
 
     KeyBindings.BindAction("Attack", Enum.UserInputState.End, function()
         EquipmentStates.Shooting.remove(Entity)
-        repeat 
+        repeat
             if true then
                 GunModule.DeviationRecovery(Entity, .1)
             end
@@ -164,7 +164,6 @@ RunService.RenderStepped:Connect(function(deltaTime)
 
         EquipmentModule.FireCustomAction(Entity, "Attack", DeviatedAim)
         
-        --[[
         --distance values to modify shotgun speed
         local MinDist = math.huge 
         local MaxDist = 1 --never divide by 0
@@ -182,18 +181,10 @@ RunService.RenderStepped:Connect(function(deltaTime)
             end
 
             table.insert(TracerTargets, BulletResult.TerrainResult)
-
-            local NpcId
-            if BulletResult.HitCharacter then
-                NpcId = tonumber(BulletResult.HitCharacter.Name)
-            end
-
-            Attack:FireServer(ItemID, BulletResult.TerrainResult.Position, NpcId)
         end
         for _, Target in TracerTargets do
             GunModule.CreateTracer(Origin, Target.Position*Vector3.new(1,0,1) + Origin*Vector3.yAxis, GunEnum, Enums.Bullet["9mmTracer"], Target.Distance/((MaxDist+MinDist)/2)*100+math.random(-100,100)/10 or 100)
         end
-        ]]
 
         local SpreadPermutations = 10^3
         EntityData[EquipmentStates.Deviation] += Vector2.new( --RECOIL!!!

@@ -2,13 +2,11 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 
-local Assets = ReplicatedStorage.Assets
 local Remotes = ReplicatedStorage.Remotes
 
 local Equipment = require(ServerStorage.Scripts.Equipment)
 local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
 local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
-local TreeventoryCore = require(ReplicatedStorage.Scripts.Class.TreeventoryCore)
 
 local UpdateHealth = Remotes.UpdateHealth
 

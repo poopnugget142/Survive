@@ -3,6 +3,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Remotes = ReplicatedStorage.Remotes
 local CustomActions = Remotes.Custom
 
+local RegisterEquipment : RemoteFunction = Remotes.RegisterEquipment
+
 local EquipmentStates = require(ReplicatedStorage.Scripts.States.Equipment)
 
 local Equipment = {}
@@ -69,6 +71,14 @@ Module.BackwardsAction = function(ActionName : string, Entity, ...)
     end
 
     Action:FireClient(Player, ItemID, ...)
+end
+
+RegisterEquipment.OnServerInvoke = Module.RegisterEquipment
+
+for _, Remote : RemoteEvent in CustomActions:GetChildren() do
+    Remote.OnServerEvent:Connect(function(Player : Player, ItemID : number, ...)
+        Module.CustomAction(Remote.Name, Player, ItemID, ...)
+    end)
 end
 
 return Module

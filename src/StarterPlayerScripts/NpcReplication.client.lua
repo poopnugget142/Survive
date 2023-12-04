@@ -107,7 +107,6 @@ DeleteNpc:Connect(function(_, NpcId : number)
     end
 end)
 
---Later let's move this to be able to hook up to the enum so it can have custom actions
 NpcAction.OnClientEvent:Connect(function(CompressedId, CompressedAction)
     local NpcId = Squash.uint.des(CompressedId, 2)
     local Action = Squash.uint.des(CompressedAction, 2)

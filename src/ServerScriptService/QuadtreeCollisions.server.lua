@@ -29,12 +29,12 @@ print(Quad:QueryRange(Quadtree.BuildBox(50,50,50,50)))
 
 RunService.Heartbeat:Connect(function(deltaTime)
     local Quad = Quadtree.newQuadtree(175,175,175,175, "GroundUnits")
-    
+
     for NpcId, MovementData in AllMovementData do
         local Entity = CharacterClass.GetEntityFromNpcId(NpcId)
         local EntityData = CharacterStates.World.get(Entity)
 
-        local CollisionRadius = NPCRegistry.GetCollisionRadius(EntityData.NPCType)
+        local CollisionRadius = NPCRegistry.GetCollisionRadius(EntityData[CharacterStates.NPCType])
         local NewPoint = Quadtree.BuildCircle(MovementData.Position.X, MovementData.Position.Z, CollisionRadius)
         NewPoint.Data.Entity = Entity
 

@@ -222,6 +222,7 @@ Module.GetMoveAwayVector = function(Quad, Entity : any)
     local CollisionRadius = NpcRegistry.GetCollisionRadius(NpcEnum)
 
     local NearbyPoints = Quad:QueryRange(QuadtreeModule.BuildCircle(Position.X, Position.Z, CollisionRadius))
+    print(NearbyPoints)
 
     local BaddieCumulativePosition = Vector3.zero
     for _, Point in NearbyPoints do
@@ -233,12 +234,12 @@ Module.GetMoveAwayVector = function(Quad, Entity : any)
         local OtherEntityEnum = OtherEntityData[CharacterStates.NPCType]
 
         --If other entity is not an npc, continue
-        if not OtherEntityData.NPCId then continue end
+        if not OtherEntityData[CharacterStates.NPCId] then continue end
 
         local Difference = (Vector3.new(Point.X, 0, Point.Y) - Position) * Vector3.new(1,0,1)
         BaddieCumulativePosition += Difference*
             ((NpcRegistry.GetMass(OtherEntityEnum) or 1) / (NpcRegistry.GetMass(NpcEnum) or 1))*
-            (math.max(0.001, 1-Difference.Magnitude/(CollisionRadius + (NpcRegistry.GetCollisionRadius(OtherEntityEnum) or 0))))^0.5 
+            (math.max(0.001, 1-Difference.Magnitude/(CollisionRadius + (NpcRegistry.GetCollisionRadius(OtherEntityEnum) or 0))))^0.5
     end
 
     --Reverse the vector

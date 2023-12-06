@@ -66,7 +66,7 @@ Module.Model = World.factory({
     end;
 
     remove = function(Factory, Entity : any)
-        local Model = World.get(Entity).Model
+        local Model = World.get(Entity)[Module.Model]
         Model:Destroy()
     end;
 })

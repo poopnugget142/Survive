@@ -47,11 +47,9 @@ RunService.RenderStepped:Connect(function(DeltaTime)
         local CharacterData = CharacterStates.World.get(Character)
         local Stamina = CharacterData[CharacterStates.Stamina]
 
-        --[[
         if not Stamina then
             continue
         end
-        ]]
 
         local alpha = Stamina.Current/Stamina.Max
 

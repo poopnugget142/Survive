@@ -53,7 +53,7 @@ Module.Equip = function(Entity)
     Model.Parent = Character
     Grip.Part1 = Character.RightHand
 
-    Model.Mesh.Transparency = 0.5
+    --Model.Mesh.Transparency = 0.5
 
     Viewmodel.BindRigToCharacter(Character)
 

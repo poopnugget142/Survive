@@ -46,8 +46,8 @@ local LocalTreeventory = TreeventoryCore.BuildTreeventory(
 
 --Inventory Cell Rendering
 local ItemCells = {}
-for i = 0, TEMPSIZE.X-1 do
-    for j = 0, TEMPSIZE.Y-1 do
+for i = 1, TEMPSIZE.X do
+    for j = 1, TEMPSIZE.Y do
         if not ItemCells[i] then
 			ItemCells[i] = {}
 		end
@@ -57,13 +57,13 @@ for i = 0, TEMPSIZE.X-1 do
         instance.Name = "cell_(" .. tostring(i) .. "," .. tostring(j) .. ")"
         local CellSize = CellMax
         instance.Position = UDim2.fromScale(
-            (i+0.5)/CellSize
-            ,(j+0.5)/CellSize
+            (i-0.5)/CellSize
+            ,(j-0.5)/CellSize
         )
         instance.Size = UDim2.fromScale(
-            1/CellSize +0.001
-            ,1/CellSize +0.001
-        )
+            1/CellSize
+            ,1/CellSize
+        ) + UDim2.fromOffset(1,1)
         instance.BackgroundTransparency = 0
 
         

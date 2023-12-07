@@ -12,12 +12,15 @@ local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
 local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
     local LocalPlayer = Players.LocalPlayer
 
 local TreeventoryCore = require(ReplicatedStorage.Scripts.Class.TreeventoryCore)
 local QuadtreeModule = require(ReplicatedStorage.Scripts.Util.Quadtree)
 local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
 local Tooltip = require(StarterPlayerScripts.warmechanic.gui.Tooltip)
+
+local Assorted = require(ReplicatedStorage.Scripts.Util.WarMechanicAssorted)
 
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local ScreenGui : ScreenGui = PlayerGui:WaitForChild("HUD")
@@ -289,9 +292,10 @@ end)
 
 
 RunService.RenderStepped:Connect(function(deltaTime)
+    local LocalMouse = LocalPlayer:GetMouse()
     if ItemHeld and ScreenGui.InventoryMenu.Visible then
         --item display handling, absolute mouse position
-        local LocalMouse = LocalPlayer:GetMouse()
+        --local LocalMouse = LocalPlayer:GetMouse()
         local VisualOffset = RotateVector2(
             ItemHeldVisualOffset
             ,ItemHeldRotationDelta

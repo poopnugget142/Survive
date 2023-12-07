@@ -24,7 +24,7 @@ Players.PlayerAdded:Connect(function(Player)
 
         local Entity = CharacterStates.World.entity()
         CharacterModule.RegisterCharacter(Entity, Character)
-        local HealthData = CharacterStates.Health.add(Entity, 100)
+        local HealthData = CharacterStates.Health.add(Entity, 200)
         HealthData.Update:Connect(HealthUpdate)
     end)
 end)

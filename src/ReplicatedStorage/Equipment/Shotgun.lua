@@ -138,7 +138,7 @@ Module.SetEquipmentModel = function(Entity, ItemModel : Model)
 end
 
 --Shooting
-RunService.RenderStepped:Connect(function(deltaTime)
+RunService.Heartbeat:Connect(function(deltaTime)
     for Entity in EquipmentStates.World.query{EquipmentStates[GunEnum], EquipmentStates.Shooting} do
         local EntityData = EquipmentStates.World.get(Entity)
 

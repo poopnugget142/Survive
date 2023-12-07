@@ -27,9 +27,9 @@ HealthUpdate.OnClientEvent:Connect(function(CurrentHealth, DamageType)
     end
 
     CurrentPromise = Promise.new(function(Resolve, Reject, onCancel)
-        local HealthNumber = math.max(CurrentHealth, 0)
+        local HealthNumber = CurrentHealth --math.max(CurrentHealth, 0)
 
-        HealthPercent.Text = tostring(math.floor(HealthNumber*100)) .. "%"
+        HealthPercent.Text = tostring(math.floor(HealthNumber*200)) --change *200 to a max health value in future
 
         local HealthSize = UDim2.new(HealthNumber, 0, 1, 0)
 

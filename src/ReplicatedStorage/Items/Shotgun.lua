@@ -5,8 +5,8 @@ local RunService = game:GetService("RunService")
 
 local Assets = ReplicatedStorage.Assets
 
-local EquipmentModule = require(script.Parent)
-local EquipmentStates = require(ReplicatedStorage.Scripts.States.Equipment)
+local ItemModule = require(script.Parent)
+local ItemStates = require(ReplicatedStorage.Scripts.States.Item)
 local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
 local PlayerModule = require(ReplicatedStorage.Scripts.Class.Player)
 local GunModule = require(ReplicatedStorage.Scripts.Class.Gun)
@@ -22,17 +22,17 @@ TerrainParams.IgnoreWater = true
 TerrainParams.FilterType = Enum.RaycastFilterType.Exclude
 TerrainParams.FilterDescendantsInstances = {JunkFolder, CharactersFolder}
 
-local GunEnum = Enums.Equipment.Shotgun
+local GunEnum = Enums.Item.Shotgun
 
 local Player = Players.LocalPlayer
 
 local Module = {}
 
 Module.Give = function(Entity)
-    EquipmentStates[GunEnum].add(Entity)
-    EquipmentStates.Cooldown.add(Entity, 0)
-    EquipmentStates.Firerate.add(Entity, 60/100)
-    EquipmentStates.Deviation.add(Entity, Vector2.zero)
+    ItemStates[GunEnum].add(Entity)
+    ItemStates.Cooldown.add(Entity, 0)
+    ItemStates.Firerate.add(Entity, 60/100)
+    ItemStates.Deviation.add(Entity, Vector2.zero)
 end
 
 Module.ServerGotItemID = function(Entity, ItemID)
@@ -41,7 +41,7 @@ end
 
 Module.Equip = function(Entity)
     local Model = Assets.Guns.Shotgun:Clone()
-    EquipmentStates.Model.add(Entity, Model)
+    ItemStates.Model.add(Entity, Model)
 
     local Handle = Model.Handle
     local Grip = Handle.Grip
@@ -92,19 +92,19 @@ Module.Equip = function(Entity)
         --Character.Head.Neck.C0 = HeadBase * CFrame.lookAt(Vector3.zero, Aimpoint) * CFrame.Angles(math.rad(0), math.rad(90) + math.atan2(Aimpoint.Z, Aimpoint.X), math.rad(0))
     end)
 
-    EquipmentModule.WaitUntilItemID(Entity)
+    ItemModule.WaitUntilItemID(Entity)
 
-    EquipmentModule.FireCustomAction(Entity, "SetEquipmentModel")
+    ItemModule.FireCustomAction(Entity, "SetEquipmentModel")
 end
 
 Module.Unequip = function(Entity)
-    EquipmentModule.FireCustomAction(Entity, "SetEquipmentModel")
+    ItemModule.FireCustomAction(Entity, "SetEquipmentModel")
 
     KeyBindings.UnbindAction("Attack", Enum.UserInputState.Begin)
     KeyBindings.UnbindAction("Attack", Enum.UserInputState.End)
 
-    EquipmentStates.Shooting.remove(Entity)
-    EquipmentStates.Model.remove(Entity)
+    ItemStates.Shooting.remove(Entity)
+    ItemStates.Model.remove(Entity)
 
     local Character = Player.Character
 
@@ -120,33 +120,33 @@ Module.Unequip = function(Entity)
 end
 
 Module.SetEquipmentModel = function(Entity, ItemModel : Model)
-    EquipmentStates.Model.remove(Entity)
-    EquipmentStates.Model.add(Entity, ItemModel)
+    ItemStates.Model.remove(Entity)
+    ItemStates.Model.add(Entity, ItemModel)
 
     KeyBindings.BindAction("Attack", Enum.UserInputState.Begin, function()
-        EquipmentStates.Shooting.add(Entity)
+        ItemStates.Shooting.add(Entity)
     end)
 
     KeyBindings.BindAction("Attack", Enum.UserInputState.End, function()
-        EquipmentStates.Shooting.remove(Entity)
+        ItemStates.Shooting.remove(Entity)
         repeat
             if true then
                 GunModule.DeviationRecovery(Entity, .1)
             end
-        until (--[[cooldown <= 0 or]] EquipmentStates.World.get(Entity)[EquipmentStates.Shooting])
+        until (--[[cooldown <= 0 or]] ItemStates.World.get(Entity)[ItemStates.Shooting])
     end)
 end
 
 --Shooting
 RunService.Heartbeat:Connect(function(deltaTime)
-    for Entity in EquipmentStates.World.query{EquipmentStates[GunEnum], EquipmentStates.Shooting} do
-        local EntityData = EquipmentStates.World.get(Entity)
+    for Entity in ItemStates.World.query{ItemStates[GunEnum], ItemStates.Shooting} do
+        local EntityData = ItemStates.World.get(Entity)
 
-        if not EntityData[EquipmentStates.Shooting] then continue end
+        if not EntityData[ItemStates.Shooting] then continue end
 
-        local Model = EntityData[EquipmentStates.Model]
+        local Model = EntityData[ItemStates.Model]
 
-        if EntityData[EquipmentStates.Cooldown] > 0 then
+        if EntityData[ItemStates.Cooldown] > 0 then
             continue
         end
 
@@ -154,7 +154,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
         local MouseCast = PlayerModule.MouseCast(TerrainParams, 10000)
         local Displacement = MouseCast.Position - Origin
         local DisplacementRight = Vector3.new(-Displacement.Z, 0, Displacement.X)
-        local Deviation = EntityData[EquipmentStates.Deviation]
+        local Deviation = EntityData[ItemStates.Deviation]
 
 
         local AimDeviation = (Displacement.Unit*Deviation.Y + DisplacementRight.Unit*Deviation.X)*Displacement.Magnitude*Vector3.new(1,0,1) or Vector3.zero
@@ -162,7 +162,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
         if (DeviatedAim.Magnitude == nil) then DeviatedAim = MouseCast.Position end
 
 
-        EquipmentModule.FireCustomAction(Entity, "Attack", DeviatedAim)
+        ItemModule.FireCustomAction(Entity, "Attack", DeviatedAim)
         
         --distance values to modify shotgun speed
         local MinDist = math.huge 
@@ -187,7 +187,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
         end
 
         local SpreadPermutations = 10^3
-        EntityData[EquipmentStates.Deviation] += Vector2.new( --RECOIL!!!
+        EntityData[ItemStates.Deviation] += Vector2.new( --RECOIL!!!
             math.random(
                 -0.75*SpreadPermutations
                 ,0.75*SpreadPermutations
@@ -197,7 +197,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
                 ,2*SpreadPermutations
             )/SpreadPermutations
         ) / math.clamp(Deviation.Magnitude+1, 1, math.huge) --reduce recoil impulse with magnitude
-        EntityData[EquipmentStates.Cooldown] = EntityData[EquipmentStates.Firerate]
+        EntityData[ItemStates.Cooldown] = EntityData[ItemStates.Firerate]
 
         GunModule.DeviationRecovery(Entity, .1)
     end

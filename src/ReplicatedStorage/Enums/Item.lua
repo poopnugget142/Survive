@@ -1,3 +1,5 @@
 return {
-    "Shotgun"
+    --Guns
+    "M1911"
+    ,"Shotgun"
 }

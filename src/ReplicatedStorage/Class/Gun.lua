@@ -9,7 +9,7 @@ local PlayerModule = require(ReplicatedStorage.Scripts.Class.Player)
 local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
 local AlphaPart = require(ReplicatedStorage.Scripts.Util.AlphaPart)
 local GunRegistry = require(ReplicatedStorage.Scripts.Registry.Gun)
-local EquipmentStates = require(ReplicatedStorage.Scripts.States.Equipment)
+local ItemStates = require(ReplicatedStorage.Scripts.States.Item)
 
 local TerrainParams = RaycastParams.new()
 TerrainParams.IgnoreWater = true
@@ -103,16 +103,16 @@ Module.CreateTracer = function(Origin : Vector3, Target : Vector3, GunEnum : num
 end
 
 Module.DeviationRecovery = function(Entity, deviationRecovery)
-    local EntityData = EquipmentStates.World.get(Entity)
-    local Deviation = EntityData[EquipmentStates.Deviation]
+    local EntityData = ItemStates.World.get(Entity)
+    local Deviation = EntityData[ItemStates.Deviation]
 
     local deltaTime = task.wait()
 
     if (Deviation.Magnitude > 0) then
-        EntityData[EquipmentStates.Deviation] -= (Deviation.Unit*math.min(deviationRecovery, Deviation.Magnitude)) * (deltaTime/(1/60))
+        EntityData[ItemStates.Deviation] -= (Deviation.Unit*math.min(deviationRecovery, Deviation.Magnitude)) * (deltaTime/(1/60))
     end
 
-    EntityData[EquipmentStates.Cooldown] -= deltaTime
+    EntityData[ItemStates.Cooldown] -= deltaTime
 end
 
 return Module

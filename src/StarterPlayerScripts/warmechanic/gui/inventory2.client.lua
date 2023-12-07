@@ -18,10 +18,6 @@ local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
 local playerGui = player:WaitForChild("PlayerGui")
 local screenGui : ScreenGui = playerGui:WaitForChild("ScreenGui")
 
-local stew = require(ReplicatedStorage.Packages.Stew)
-local world = stew.world()
-
-
 type InventoryCell = {
     Dummy : GuiObject --frame
     ;CellItemIndex : number --index that leads to item

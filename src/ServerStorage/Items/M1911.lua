@@ -2,7 +2,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Remotes = ReplicatedStorage.Remotes
 
-local EquipmentStates = require(ReplicatedStorage.Scripts.States.Equipment)
+local ItemStates = require(ReplicatedStorage.Scripts.States.Item)
 local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
 local Util = require(ReplicatedStorage.Scripts.Util)
@@ -10,7 +10,7 @@ local Enums = require(ReplicatedStorage.Scripts.Enums)
 
 local CreateTracerRemote : RemoteEvent = Remotes.CreateTracer
 
-local GunEnum = Enums.Equipment.M1911
+local GunEnum = Enums.Item.M1911
 
 local Module = {}
 
@@ -24,7 +24,7 @@ end
 
 --In the future we can check if this really hit but for now we trust it
 Module.Attack = function(Entity, HitPosition, NpcId)
-    local GunOwner = EquipmentStates.World.get(Entity).Owner
+    local GunOwner = ItemStates.World.get(Entity).Owner
 
     local Character = GunOwner.Character
     local HumanoidRootPart = Character.PrimaryPart

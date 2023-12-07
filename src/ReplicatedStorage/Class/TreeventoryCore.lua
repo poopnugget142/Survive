@@ -24,7 +24,7 @@ type Item = {
     ;Boundaries : table | Box --The space that an item takes up in an inventory; Table for complex shapes
 }
 
---hey, i learned something from you poopnugget!
+--hey, i learned something from you poopnugget! NO YOU DIDN'T YOU'RE A LIAR
 local Id = 0
 local function NextId()
     Id += 1
@@ -142,9 +142,10 @@ module.BuildTreeventory = function(Boundary : Box)
         ,Items = {}
     } :: Treeventory
 end
-module.BuildItem = function(Boundaries : Box | Table)
+module.BuildItem = function(Boundaries : Box | Table, Entity : any)
     return {
-        Id = NextId()
+        Entity = Entity
+        ,Id = NextId()
         ,Parent = nil
         ,Position = QuadtreeModule.newPoint(-1,-1)
         ,Rotation = 0 --value from 0 -> 3 (pi/2)

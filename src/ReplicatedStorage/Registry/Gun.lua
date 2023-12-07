@@ -25,13 +25,13 @@ end
 local Module = {}
 
 local TracerData : {[number] : {[number] : {} }} = {
-    [Enums.Equipment.M1911] = {
+    [Enums.Item.M1911] = {
         [Enums.Bullet["9mmTracer"]] = {
             Speed = 200;
             Behavior = BulletBehavior;
         };
     };
-    [Enums.Equipment.Shotgun] = {
+    [Enums.Item.Shotgun] = {
         [Enums.Bullet["9mmTracer"]] = {
             --Speed = 100;
             Behavior = BulletBehavior;

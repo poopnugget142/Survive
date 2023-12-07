@@ -1,6 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Equipment = require(ReplicatedStorage.Scripts.Equipment)
+local ItemModule = require(ReplicatedStorage.Scripts.Items)
 local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
 
 local Module = {}
@@ -10,7 +10,7 @@ local CurrentEquip
 Module.BindEquipToHotkey = function(Hotkey, GunEntity)
     KeyBindings.BindAction(tostring(Hotkey), Enum.UserInputState.Begin, function()
         if CurrentEquip then
-            Equipment.Unequip(CurrentEquip)
+            ItemModule.Unequip(CurrentEquip)
 
             if CurrentEquip == GunEntity then
                 CurrentEquip = nil
@@ -20,7 +20,7 @@ Module.BindEquipToHotkey = function(Hotkey, GunEntity)
 
         CurrentEquip = GunEntity
 
-        Equipment.Equip(GunEntity)
+        ItemModule.Equip(GunEntity)
     end)
 end
 

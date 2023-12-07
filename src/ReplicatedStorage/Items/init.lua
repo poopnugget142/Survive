@@ -4,27 +4,51 @@ local Remotes = ReplicatedStorage.Remotes
 local CustomActions = Remotes.Custom
 
 local Promise = require(ReplicatedStorage.Packages.Promise)
-local EquipmentStates = require(ReplicatedStorage.Scripts.States.Equipment)
+local ItemStates = require(ReplicatedStorage.Scripts.States.Item)
+local Enums = require(ReplicatedStorage.Scripts.Enums)
+local EventHandler = require(ReplicatedStorage.Scripts.Util.EventHandler)
 
 local RegisterEquipment : RemoteFunction = Remotes.RegisterEquipment
 
 local EquipmentIDs : { [any] : number? }= {}
 local EquipmentEntitys : { [number] : any } = {}
 
+local AllItemData = {}
+local ItemNames = {}
+
+for ItemName, ItemEnum : EnumItem in Enums.Item do
+    ItemNames[ItemEnum] = ItemName
+end
+
+for _, Item : ModuleScript in pairs(script:GetChildren()) do
+    AllItemData[Enums.Item[Item.Name]] = Item
+end
+
 local Module = {}
 
-Module.States = EquipmentStates
+Module.States = ItemStates
 
 --Gets the corresponding module script with the item name
-local function GetEquipmentData(ItemName : string) : table
-    local ItemData = script:FindFirstChild(ItemName)
+local function GetItemData(ItemEnum : number) : table
+    local ItemData = AllItemData[ItemEnum]
     if not ItemData then
-        error(ItemName.." does not exist")
+        return nil
     end
     return require(ItemData)
 end
 
-local function SetItemID(Entity : any, ItemName : string?)
+local function GetDataFromEntity(Entity : any) : table
+    local EntityData = ItemStates.World.get(Entity)
+    local ItemEnum = EntityData[ItemStates.Enum]
+    return GetItemData(ItemEnum)
+end
+
+local function GetItemName(ItemEnum : number) : string
+    return ItemNames[ItemEnum]
+end
+    
+
+local function SetItemID(Entity : any, ItemEnum : number?)
     local ItemID = EquipmentIDs[Entity]
     if ItemID then
         return ItemID
@@ -32,14 +56,14 @@ local function SetItemID(Entity : any, ItemName : string?)
 
     --Asks server for ItemID to mark item with
     local ItemPromise = Promise.new(function(resolve)
-        ItemID = RegisterEquipment:InvokeServer(ItemName)
+        ItemID = RegisterEquipment:InvokeServer(ItemEnum)
 
         EquipmentEntitys[ItemID] = Entity
         EquipmentIDs[Entity] = ItemID
 
-        EquipmentStates.ItemID.add(Entity, ItemID)
+        ItemStates.ItemID.add(Entity, ItemID)
 
-        local ItemData = GetEquipmentData(ItemName)
+        local ItemData = GetItemData(ItemEnum)
 
         ItemData.ServerGotItemID(Entity, ItemID)
 
@@ -49,30 +73,45 @@ local function SetItemID(Entity : any, ItemName : string?)
     EquipmentIDs[Entity] = ItemPromise
 end
 
-Module.CreateEntity = function(ItemName : string, ItemID : number?, ...)
+Module.CreateEntity = function(ItemEnum : number, ItemID : number?, ...)
     local Entity = Module.GetEntity(ItemID)
 
     --Entity does not exist on this client
     if not Entity then
-        Entity = EquipmentStates.World.entity()
+        Entity = ItemStates.World.entity()
 
-        EquipmentStates.Name.add(Entity, ItemName)
+        ItemStates.Enum.add(Entity, ItemEnum)
+        ItemStates.Name.add(Entity, GetItemName(ItemEnum))
 
         if ItemID then
             --Entity exists on server
-            EquipmentStates.ItemID.add(Entity, ItemID)
+            ItemStates.ItemID.add(Entity, ItemID)
         else
             --Entity does not exist on server
             --Requests item id from server
-            SetItemID(Entity, ItemName)
+            SetItemID(Entity, ItemEnum)
         end
     end
 
-    local ItemData = GetEquipmentData(ItemName)
+    local ItemData = GetItemData(ItemEnum)
 
-    ItemData.Give(Entity, ...)
+    if ItemData then
+        ItemData.Give(Entity, ...)
+    end
+
+    EventHandler.FireEvent("Item", "Add", Entity)
 
     return Entity
+end
+
+Module.RemoveEntity = function(Entity : any)
+    local ItemData = GetDataFromEntity(Entity)
+
+    if ItemData then
+        ItemData.Remove(Entity)
+    end
+
+    ItemStates.kill(Entity)
 end
 
 Module.WaitUntilItemID = function(Entity : any) : number?
@@ -92,22 +131,18 @@ Module.GetEntity = function(ItemId : number) : any
 end
 
 Module.Equip = function(Entity : any, ...)
-    local EntityData = EquipmentStates.World.get(Entity)
-    local ItemName = EntityData[EquipmentStates.Name]
-    local ItemData = GetEquipmentData(ItemName)
+    local ItemData = GetDataFromEntity(Entity)
     ItemData.Equip(Entity, ...)
 end
 
 Module.Unequip = function(Entity : any, ...)
-    local EntityData = EquipmentStates.World.get(Entity)
-    local ItemName = EntityData[EquipmentStates.Name]
-    local ItemData = GetEquipmentData(ItemName)
+    local ItemData = GetDataFromEntity(Entity)
     ItemData.Unequip(Entity, ...)
 end
 
 Module.FireCustomAction = function(Entity : any, ActionName : string, ...)
-    local EntityData = EquipmentStates.World.get(Entity)
-    local ItemID = EntityData[EquipmentStates.ItemID]
+    local EntityData = ItemStates.World.get(Entity)
+    local ItemID = EntityData[ItemStates.ItemID]
 
     local Action = CustomActions:FindFirstChild(ActionName)
 
@@ -121,9 +156,7 @@ end
 for _, Action : RemoteFunction in pairs(CustomActions:GetChildren()) do
     Action.OnClientEvent:Connect(function(ItemID, ...)
         local Entity = Module.GetEntity(ItemID)
-        local EntityData = EquipmentStates.World.get(Entity)
-        local ItemName = EntityData[EquipmentStates.Name]
-        local ItemData = GetEquipmentData(ItemName)
+        local ItemData = GetDataFromEntity(Entity)
         return ItemData[Action.Name](Entity, ...)
     end)
 end

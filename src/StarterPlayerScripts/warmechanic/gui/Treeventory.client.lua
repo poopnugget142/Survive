@@ -15,10 +15,12 @@ local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
     local LocalPlayer = Players.LocalPlayer
 
+local ItemStates = require(ReplicatedStorage.Scripts.States.Item)
 local TreeventoryCore = require(ReplicatedStorage.Scripts.Class.TreeventoryCore)
 local QuadtreeModule = require(ReplicatedStorage.Scripts.Util.Quadtree)
 local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
 local Tooltip = require(StarterPlayerScripts.warmechanic.gui.Tooltip)
+local EventHandler = require(ReplicatedStorage.Scripts.Util.EventHandler)
 
 local Assorted = require(ReplicatedStorage.Scripts.Util.WarMechanicAssorted)
 
@@ -129,8 +131,17 @@ local CreateItemDummy = function(Item)
     return true
 end
 
+local AddItem = EventHandler.CreateEvent("Item", "Add")
+
+AddItem:Connect(function(_, Entity)
+    local NewItem = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(0/4, 0/4, 1/2, 1/2)}, Entity)
+    TreeventoryCore.Item_PlaceInTreeventory(NewItem, LocalTreeventory, QuadtreeModule.newPoint(2,2))
+    CreateItemDummy(NewItem)
+end)
+
 
 --Temp Items
+--[[
 local TEMPITEM1 = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(2/4, 0/4, 2/2, 1/2), QuadtreeModule.BuildBox(-2/4, 0/4, 2/2, 1/2)})
 TreeventoryCore.Item_PlaceInTreeventory(TEMPITEM1, LocalTreeventory, QuadtreeModule.newPoint(4,4))
 CreateItemDummy(TEMPITEM1)
@@ -142,6 +153,7 @@ CreateItemDummy(TEMPITEM2)
 local TEMPITEM3 = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(0/4, 0/4, 1/2, 1/2)})
 TreeventoryCore.Item_PlaceInTreeventory(TEMPITEM3, LocalTreeventory, QuadtreeModule.newPoint(3,2))
 CreateItemDummy(TEMPITEM3)
+]]
 
 
 --Item Functions
@@ -204,7 +216,7 @@ local ItemPlace = function()
 
         ItemHeld = nil
         ItemHeldRotationDelta = 0
-        Tooltip.Visible(true)
+        --Tooltip.Visible(true)
     elseif Move.Error and #Move.Error and Move.Error[1].Error then --otherwise attempt to swap held items
         --check if there are multiple items among boundaries
         local DesiredItem = Move.Error[1].Error[1].Data.Item
@@ -255,7 +267,7 @@ local ItemPlace = function()
             ItemHeldVisualOffset = Vector2.zero
             ItemHeldCursorOffset = Vector2.zero
             ItemHeldRotationDelta = 0
-            Tooltip.Visible(true)
+            --Tooltip.Visible(true)
         end
     end
 end
@@ -339,11 +351,33 @@ RunService.RenderStepped:Connect(function(deltaTime)
                 )
                 if Move.Value == false and not (Move.Error ~= false and #Move.Error == 1 and table.unpack(Move.Error).Data.Item == ItemHeld) then warn("Potential Collision!") end
             end
+            return
+        end
 
             
-        else
-            Tooltip.Position(Vector2.new(LocalMouse.X, LocalMouse.Y))
+        Tooltip.Position(Vector2.new(LocalMouse.X, LocalMouse.Y))
+
+        local MousePosition = GetMouseRelativeToInventory()
+
+        local CursorPosition = Vector2.new(
+            math.ceil(MousePosition.X*CellMax)
+            ,math.ceil(MousePosition.Y*CellMax)
+        )
+        local ItemCheck = TreeventoryCore.Treeventory_CheckBox(LocalTreeventory, QuadtreeModule.BuildBox(math.ceil(CursorPosition.X), math.ceil(CursorPosition.Y), 0.5, 0.5))
+
+        if not (ItemCheck.Error and #ItemCheck.Error) then
+            Tooltip.Visible(false)
+            return
         end
+
+        Tooltip.Visible(true)
+
+        local DesiredItem = ItemCheck.Error[1].Data.Item
+
+        local Entity = DesiredItem.Entity
+        local EntityData = ItemStates.World.get(Entity)
+
+        Tooltip.Label(EntityData[ItemStates.Name])
     end
     
 end)

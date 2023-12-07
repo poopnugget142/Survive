@@ -4,7 +4,7 @@ local Assets = ReplicatedStorage.Assets
 local Remotes = ReplicatedStorage.Remotes
 
 local EquipmentModule = require(script.Parent)
-local EquipmentStates = require(ReplicatedStorage.Scripts.States.Equipment)
+local ItemStates = require(ReplicatedStorage.Scripts.States.Item)
 local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
 local PriorityQueue = require(ReplicatedStorage.Scripts.Util.PriorityQueue)
@@ -15,7 +15,7 @@ local Util = require(ReplicatedStorage.Scripts.Util)
 
 local CreateTracerRemote : RemoteEvent = Remotes.CreateTracer
 
-local GunEnum = Enums.Equipment.Shotgun
+local GunEnum = Enums.Item.Shotgun
 
 local Module = {}
 
@@ -23,10 +23,10 @@ Module.Register = function(Entity)
 end
 
 Module.SetEquipmentModel = function(Entity)
-    local EntityData = EquipmentStates.World.get(Entity)
+    local EntityData = ItemStates.World.get(Entity)
 
-    if EntityData[EquipmentStates.Model] then
-        EquipmentStates.Model.remove(Entity)
+    if EntityData[ItemStates.Model] then
+        ItemStates.Model.remove(Entity)
         return
     end
 
@@ -35,23 +35,23 @@ Module.SetEquipmentModel = function(Entity)
     local Handle = Model.Handle
     local Grip = Handle.Grip
 
-    local Player = EntityData[EquipmentStates.Owner]
+    local Player = EntityData[ItemStates.Owner]
 
     local Character = Player.Character
 
     Model.Parent = Character
     Grip.Part1 = Character.RightHand
 
-    EquipmentStates.Model.add(Entity, Model)
+    ItemStates.Model.add(Entity, Model)
 
     EquipmentModule.BackwardsAction("SetEquipmentModel", Entity, Model)
 end
 
 --In the future we can check if this really hit but for now we trust it
 Module.Attack = function(Entity, MousePosition)
-    local EquipmentData = EquipmentStates.World.get(Entity)
-    local GunOwner = EquipmentData[EquipmentStates.Owner]
-    local Model = EquipmentData[EquipmentStates.Model]
+    local EquipmentData = ItemStates.World.get(Entity)
+    local GunOwner = EquipmentData[ItemStates.Owner]
+    local Model = EquipmentData[ItemStates.Model]
 
     local Origin = Model.Muzzle.Position
 
@@ -121,7 +121,7 @@ Module.Attack = function(Entity, MousePosition)
             if not HitEntity then continue end
 
             local HitData = CharacterStates.World.get(HitEntity)
-            if not HitData[EquipmentStates.Health] then return end
+            if not HitData[ItemStates.Health] then return end
 
             CharacterModule.UpdateHealth(HitEntity, -100)
         end

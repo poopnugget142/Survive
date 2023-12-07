@@ -1,12 +1,13 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Equipment = require(ReplicatedStorage.Scripts.Equipment)
+local ItemModule = require(ReplicatedStorage.Scripts.Items)
 local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
 local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 local CharacterAnimations = require(ReplicatedStorage.Scripts.Registry.Animations.Character)
 local Hotkeys = require(ReplicatedStorage.Scripts.Util.Hotkeys)
 local Viewmodel = require(ReplicatedStorage.Scripts.Util.Viewmodel)
+local Enums = require(ReplicatedStorage.Scripts.Enums)
 
 local Player = Players.LocalPlayer
 
@@ -26,7 +27,7 @@ local function CreateCharacter(Character)
 
     Viewmodel.BindRigToCharacter(Character)
 
-    local GunEntity = Equipment.CreateEntity("Shotgun")
+    local GunEntity = ItemModule.CreateEntity(Enums.Item.Shotgun)
     Hotkeys.BindEquipToHotkey(1, GunEntity)
 end
 

@@ -16,7 +16,6 @@ for _, Script : ModuleScript in Children do
     end
 end
 
-print(Module.NPC.Guy)
 return Module
 
 --[[

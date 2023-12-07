@@ -12,6 +12,10 @@ Module.Name = World.factory({
     add = Util.EasyStewReturn;
 })
 
+Module.Enum = World.factory({
+    add = Util.EasyStewReturn;
+})
+
 Module.ItemID = World.factory({
     add = Util.EasyStewReturn;
 })
@@ -44,7 +48,7 @@ Module.LoadingConnections = World.factory({
 })
 
 --~Weapon~--
-for  _, GunEnum in Enums.Equipment do
+for  _, GunEnum in Enums.Item do
     Module[GunEnum] = World.tag()
 end
 

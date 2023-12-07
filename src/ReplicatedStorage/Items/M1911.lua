@@ -12,19 +12,18 @@
 --initialise dependencies
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
 
 local Remotes = ReplicatedStorage.Remotes
 local Assets = ReplicatedStorage.Assets
 
-local EquipmentStates = require(ReplicatedStorage.Scripts.States.Equipment)
+local ItemStates = require(ReplicatedStorage.Scripts.States.Item)
 local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
 local GunModule = require(ReplicatedStorage.Scripts.Class.Gun)
 local Enums = require(ReplicatedStorage.Scripts.Enums)
 local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
 local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 
-local GunEnum = Enums.Equipment.M1911
+local GunEnum = Enums.Item.M1911
 
 local Attack : RemoteEvent = Remotes.Custom.Attack
 local SetEquipmentModel : RemoteEvent = Remotes.SetEquipmentModel
@@ -35,7 +34,7 @@ local Module = {}
 
 Module.Give = function(Entity)
     local Model = Assets.Guns.M1911:Clone()
-    EquipmentStates.LoadingItem.add(Entity, Model)
+    ItemStates.LoadingItem.add(Entity, Model)
 
     local Handle = Model.Handle
     local Grip = Handle.Grip
@@ -68,7 +67,7 @@ end
 Module.ServerGotItemID = function(Entity, ItemID)
     local shooting = false
 
-    local EquipmentData = EquipmentStates.World.get(Entity)
+    local EquipmentData = ItemStates.World.get(Entity)
 
     local Model = EquipmentData.Model
     

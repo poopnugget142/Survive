@@ -4,7 +4,7 @@ local ServerStorage = game:GetService("ServerStorage")
 
 local Remotes = ReplicatedStorage.Remotes
 
-local Equipment = require(ServerStorage.Scripts.Equipment)
+local ItemModule = require(ServerStorage.Scripts.Items)
 local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
 local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 

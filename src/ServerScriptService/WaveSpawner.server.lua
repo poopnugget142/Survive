@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local DataFolder = game:GetService("ReplicatedStorage").Data
 
 local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
+local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 local Enums = require(ReplicatedStorage.Scripts.Enums)
 
 local WaveNumber = DataFolder.Wave
@@ -21,7 +22,7 @@ while true do
     end
 
     --Wait for wave to end
-    task.wait(10)
+    task.wait(15)
 
     --Next Wave
     WaveNumber.Value += 1

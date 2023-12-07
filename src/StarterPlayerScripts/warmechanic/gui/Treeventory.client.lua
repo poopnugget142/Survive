@@ -7,6 +7,7 @@ Notetaking
 ]]
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterPlayerScripts = game:GetService("StarterPlayer").StarterPlayerScripts
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
@@ -16,6 +17,7 @@ local Players = game:GetService("Players")
 local TreeventoryCore = require(ReplicatedStorage.Scripts.Class.TreeventoryCore)
 local QuadtreeModule = require(ReplicatedStorage.Scripts.Util.Quadtree)
 local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
+local Tooltip = require(StarterPlayerScripts.warmechanic.gui.Tooltip)
 
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local ScreenGui : ScreenGui = PlayerGui:WaitForChild("HUD")
@@ -68,6 +70,7 @@ for i = 0, TEMPSIZE.X-1 do
         instance.MouseEnter:Connect(function()  
             task.wait()
             instance.BackgroundColor3 = Color3.fromHSV(0,0,.5)
+            Tooltip.Position(instance.AbsolutePosition + instance.AbsoluteSize/2)
         end)
         
 

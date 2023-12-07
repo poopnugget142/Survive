@@ -272,6 +272,7 @@ end
 
 KeyBindings.BindAction("Inventory_Open", Enum.UserInputState.Begin, function()
     ScreenGui.InventoryMenu.Visible = not ScreenGui.InventoryMenu.Visible
+    Tooltip.Visible(ScreenGui.InventoryMenu.Visible)
     if (ScreenGui.InventoryMenu.Visible) then
         KeyBindings.BindAction("Inventory_Interact1", Enum.UserInputState.Begin, function()
             if not ItemHeld then ItemPick()

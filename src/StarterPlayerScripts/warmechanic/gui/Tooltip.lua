@@ -31,4 +31,8 @@ Module.Label = function(Text : string)
     Tooltip.Background.Text = Text
 end
 
+Module.Visible = function(Bool : boolean)
+    Tooltip.Visible = Bool
+end
+
 return Module

@@ -59,7 +59,7 @@ for i = 1, TEMPSIZE.X do
         instance.Position = UDim2.fromScale(
             (i-0.5)/CellSize
             ,(j-0.5)/CellSize
-        )
+        ) + UDim2.fromOffset(1,1)
         instance.Size = UDim2.fromScale(
             1/CellSize
             ,1/CellSize
@@ -73,7 +73,6 @@ for i = 1, TEMPSIZE.X do
         instance.MouseEnter:Connect(function()  
             task.wait()
             instance.BackgroundColor3 = Color3.fromHSV(0,0,.5)
-            Tooltip.Position(instance.AbsolutePosition + instance.AbsoluteSize/2)
         end)
         
 
@@ -173,6 +172,8 @@ local ItemPick = function()
         --offset item from cursor
         ItemHeldVisualOffset = -( MousePosition*CellMax - ItemScreenPosition) / CellMax
         ItemHeldCursorOffset = Vector2.new(math.round(ItemHeldVisualOffset.X*CellMax), math.round(ItemHeldVisualOffset.Y*CellMax))
+
+        Tooltip.Visible(false)
     end
 end
 
@@ -203,6 +204,7 @@ local ItemPlace = function()
 
         ItemHeld = nil
         ItemHeldRotationDelta = 0
+        Tooltip.Visible(true)
     elseif Move.Error and #Move.Error and Move.Error[1].Error then --otherwise attempt to swap held items
         --check if there are multiple items among boundaries
         local DesiredItem = Move.Error[1].Error[1].Data.Item
@@ -253,6 +255,7 @@ local ItemPlace = function()
             ItemHeldVisualOffset = Vector2.zero
             ItemHeldCursorOffset = Vector2.zero
             ItemHeldRotationDelta = 0
+            Tooltip.Visible(true)
         end
     end
 end
@@ -294,47 +297,54 @@ end)
 
 RunService.RenderStepped:Connect(function(deltaTime)
     local LocalMouse = LocalPlayer:GetMouse()
-    if ItemHeld and ScreenGui.InventoryMenu.Visible then
-        --item display handling, absolute mouse position
-        --local LocalMouse = LocalPlayer:GetMouse()
-        local VisualOffset = RotateVector2(
-            ItemHeldVisualOffset
-            ,ItemHeldRotationDelta
-        )
-
-        ItemHeld.Dummy.Parent = InventoryTilespace
-        ItemHeld.Dummy.Position = UDim2.fromOffset(
-            LocalMouse.X - InventoryTilespace.AbsolutePosition.X
-            ,LocalMouse.Y - InventoryTilespace.AbsolutePosition.Y
-        )
-        + UDim2.fromScale(
-            -0.5/CellMax
-            ,-0.5/CellMax
-        )
-        + UDim2.fromScale(
-            VisualOffset.X
-            ,VisualOffset.Y
-        )
-
-        --internal item position, relative mouse position
-        local MousePosition = GetMouseRelativeToInventory()
-        local CursorPosition = Vector2.new(
-            math.ceil(MousePosition.X*CellMax)
-            ,math.ceil(MousePosition.Y*CellMax)
-        )
-        local CursorOffset = RotateVector2(
-            ItemHeldCursorOffset
-            ,ItemHeldRotationDelta
-        )
-
-        --collision printing, not actually important
-        for _, Boundary in ItemHeld.Boundaries do
-            local Move = TreeventoryCore.Treeventory_CheckBox(
-                LocalTreeventory
-                ,TreeventoryCore.PositionPlusBoundary(CursorPosition + CursorOffset, Boundary, ItemHeld.Rotation)
+    if ScreenGui.InventoryMenu.Visible then
+        if ItemHeld then
+            --item display handling, absolute mouse position
+            --local LocalMouse = LocalPlayer:GetMouse()
+            local VisualOffset = RotateVector2(
+                ItemHeldVisualOffset
+                ,ItemHeldRotationDelta
             )
-            if Move.Value == false and not (Move.Error ~= false and #Move.Error == 1 and table.unpack(Move.Error).Data.Item == ItemHeld) then warn("Potential Collision!") end
+
+            ItemHeld.Dummy.Parent = InventoryTilespace
+            ItemHeld.Dummy.Position = UDim2.fromOffset(
+                LocalMouse.X - InventoryTilespace.AbsolutePosition.X
+                ,LocalMouse.Y - InventoryTilespace.AbsolutePosition.Y
+            )
+            + UDim2.fromScale(
+                -0.5/CellMax
+                ,-0.5/CellMax
+            )
+            + UDim2.fromScale(
+                VisualOffset.X
+                ,VisualOffset.Y
+            )
+
+            --internal item position, relative mouse position
+            local MousePosition = GetMouseRelativeToInventory()
+            local CursorPosition = Vector2.new(
+                math.ceil(MousePosition.X*CellMax)
+                ,math.ceil(MousePosition.Y*CellMax)
+            )
+            local CursorOffset = RotateVector2(
+                ItemHeldCursorOffset
+                ,ItemHeldRotationDelta
+            )
+
+            --collision printing, not actually important
+            for _, Boundary in ItemHeld.Boundaries do
+                local Move = TreeventoryCore.Treeventory_CheckBox(
+                    LocalTreeventory
+                    ,TreeventoryCore.PositionPlusBoundary(CursorPosition + CursorOffset, Boundary, ItemHeld.Rotation)
+                )
+                if Move.Value == false and not (Move.Error ~= false and #Move.Error == 1 and table.unpack(Move.Error).Data.Item == ItemHeld) then warn("Potential Collision!") end
+            end
+
+            
+        else
+            Tooltip.Position(Vector2.new(LocalMouse.X, LocalMouse.Y))
         end
     end
+    
 end)
 

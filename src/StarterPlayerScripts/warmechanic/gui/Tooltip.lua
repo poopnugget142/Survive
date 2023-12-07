@@ -20,8 +20,8 @@ Module.Position = function(AbsolutePosition : Vector2)
     Tooltip.Position = UDim2.fromOffset(AbsolutePosition.X, AbsolutePosition.Y)
 
     local TooltipCorner = UDim2.fromScale(
-        math.round((AbsolutePosition.X-1) / ViewportSize.X) -- minus 1 offsets to bias bottom right corner
-        ,math.round((AbsolutePosition.Y-1) / ViewportSize.Y)
+        math.round((AbsolutePosition.X-2) / ViewportSize.X) -- minus 2 offsets to bias bottom right corner
+        ,math.round((AbsolutePosition.Y-2) / ViewportSize.Y)
     )
 
     Tooltip.Background.Position = UDim2.fromScale(0.5, 0.5) - TooltipCorner

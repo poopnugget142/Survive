@@ -24,7 +24,7 @@ local Enums = require(ReplicatedStorage.Scripts.Enums)
 local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
 local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 
-local GunEnum = Enums.Gun.M1911
+local GunEnum = Enums.Equipment.M1911
 
 local Attack : RemoteEvent = Remotes.Custom.Attack
 local SetEquipmentModel : RemoteEvent = Remotes.SetEquipmentModel

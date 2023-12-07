@@ -44,7 +44,7 @@ Module.LoadingConnections = World.factory({
 })
 
 --~Weapon~--
-for  _, GunEnum in Enums.Gun do
+for  _, GunEnum in Enums.Equipment do
     Module[GunEnum] = World.tag()
 end
 

@@ -22,7 +22,7 @@ TerrainParams.IgnoreWater = true
 TerrainParams.FilterType = Enum.RaycastFilterType.Exclude
 TerrainParams.FilterDescendantsInstances = {JunkFolder, CharactersFolder}
 
-local GunEnum = Enums.Gun.Shotgun
+local GunEnum = Enums.Equipment.Shotgun
 
 local Player = Players.LocalPlayer
 

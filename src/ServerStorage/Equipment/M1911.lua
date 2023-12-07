@@ -10,7 +10,7 @@ local Enums = require(ReplicatedStorage.Scripts.Enums)
 
 local CreateTracerRemote : RemoteEvent = Remotes.CreateTracer
 
-local GunEnum = Enums.Gun.M1911
+local GunEnum = Enums.Equipment.M1911
 
 local Module = {}
 

@@ -1,0 +1,5 @@
+return {
+    "Bullet"
+    ,"Explosion"
+    ,"Physical"
+};

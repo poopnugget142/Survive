@@ -2,8 +2,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Assets = ReplicatedStorage.Assets
 local CharacterAssets = Assets.Characters
+local ReplicatedScripts = ReplicatedStorage.Scripts
 
-local Enums = require(ReplicatedStorage.Scripts.Enums)
+local Enums = require(ReplicatedScripts.Registry.Enums)
 
 local Module = {}
 

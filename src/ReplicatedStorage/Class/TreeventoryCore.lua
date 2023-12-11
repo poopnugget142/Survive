@@ -7,7 +7,9 @@ local MathSmall = 10^-5
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local QuadtreeModule = require(ReplicatedStorage.Scripts.Util.Quadtree)
+local ReplicatedScripts = ReplicatedStorage:WaitForChild("Scripts")
+
+local QuadtreeModule = require(ReplicatedScripts.Lib.Quadtree)
 
 local module = {}
 

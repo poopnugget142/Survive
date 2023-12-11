@@ -1,13 +1,15 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local ItemModule = require(ReplicatedStorage.Scripts.Items)
-local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
-local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
-local CharacterAnimations = require(ReplicatedStorage.Scripts.Registry.Animations.Character)
-local Hotkeys = require(ReplicatedStorage.Scripts.Util.Hotkeys)
-local Viewmodel = require(ReplicatedStorage.Scripts.Util.Viewmodel)
-local Enums = require(ReplicatedStorage.Scripts.Enums)
+local ReplicatedScripts = ReplicatedStorage.Scripts
+
+local ItemModule = require(ReplicatedScripts.Lib.Items)
+local CharacterModule = require(ReplicatedScripts.Class.Character)
+local CharacterStates = require(ReplicatedScripts.States.Character)
+local CharacterAnimations = require(ReplicatedScripts.Registry.Animations.Character)
+local Hotkeys = require(ReplicatedScripts.Lib.Player.Hotkeys)
+local Viewmodel = require(ReplicatedScripts.Lib.Player.GUI.Viewmodel)
+local Enums = require(ReplicatedScripts.Registry.Enums)
 
 local Player = Players.LocalPlayer
 

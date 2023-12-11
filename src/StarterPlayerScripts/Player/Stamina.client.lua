@@ -2,9 +2,10 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Assets = ReplicatedStorage.Assets.GUI
+local ReplicatedScripts = ReplicatedStorage.Scripts
 
-local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
-local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
+local CharacterStates = require(ReplicatedScripts.States.Character)
+local KeyBindings = require(ReplicatedScripts.Lib.Player.KeyBindings)
 
 local Player = game.Players.LocalPlayer
 

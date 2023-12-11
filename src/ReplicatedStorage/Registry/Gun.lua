@@ -1,9 +1,10 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local JunkFolder = workspace:WaitForChild("JunkFolder")
+local ReplicatedScripts = ReplicatedStorage.Scripts
 
-local Enums = require(ReplicatedStorage.Scripts.Enums)
-local AlphaPart = require(ReplicatedStorage.Scripts.Util.AlphaPart)
+local Enums = require(ReplicatedScripts.Registry.Enums)
+local AlphaPart = require(ReplicatedScripts.Lib.AlphaPart)
 
 --Perhaps move this to assets...
 local bullet = Instance.new("Part")

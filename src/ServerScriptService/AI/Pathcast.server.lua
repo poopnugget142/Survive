@@ -1,9 +1,11 @@
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local RunService = game:GetService("RunService")
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
-local Pathfinding = require(ReplicatedStorage.Scripts.Util.PathfindingCore)
+
+local ReplicatedScripts = ReplicatedStorage.Scripts
+
+local Pathfinding = require(ReplicatedStorage.Scripts.Lib.AI.PathfindingCore)
 
 local Promise = require(ReplicatedStorage.Packages.Promise)
 

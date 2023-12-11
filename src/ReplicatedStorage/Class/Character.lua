@@ -4,14 +4,15 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local SharedTableRegistry = game:GetService("SharedTableRegistry")
 
 local Remotes = ReplicatedStorage.Remotes
+local ReplicatedScripts = ReplicatedStorage.Scripts
 
-local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
+local CharacterStates = require(ReplicatedScripts.States.Character)
 local Squash = require(ReplicatedStorage.Packages.Squash)
 local Signal = require(ReplicatedStorage.Packages.Signal)
-local EventHandler = require(ReplicatedStorage.Scripts.Util.EventHandler)
-local QuadtreeModule = require(ReplicatedStorage.Scripts.Util.Quadtree)
-local NpcRegistry = require(ReplicatedStorage.Scripts.Registry.NPC)
-local Enums = require(ReplicatedStorage.Scripts.Enums)
+local EventHandler = require(ReplicatedScripts.Lib.Util.EventHandler)
+local QuadtreeModule = require(ReplicatedScripts.Lib.Quadtree)
+local NpcRegistry = require(ReplicatedScripts.Registry.NPC)
+local Enums = require(ReplicatedScripts.Registry.Enums)
 
 local NpcAction : RemoteEvent = Remotes.NpcAction
 

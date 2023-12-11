@@ -2,16 +2,16 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Assets = ReplicatedStorage.Assets
 local Remotes = ReplicatedStorage.Remotes
+local ReplicatedScripts = ReplicatedStorage.Scripts
 
 local EquipmentModule = require(script.Parent)
-local ItemStates = require(ReplicatedStorage.Scripts.States.Item)
-local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
-local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
-local PriorityQueue = require(ReplicatedStorage.Scripts.Util.PriorityQueue)
-local QuadtreeModule = require(ReplicatedStorage.Scripts.Util.Quadtree)
-local GunModule = require(ReplicatedStorage.Scripts.Class.Gun)
-local Enums = require(ReplicatedStorage.Scripts.Enums)
-local Util = require(ReplicatedStorage.Scripts.Util)
+local ItemStates = require(ReplicatedScripts.States.Item)
+local CharacterStates = require(ReplicatedScripts.States.Character)
+local CharacterModule = require(ReplicatedScripts.Class.Character)
+local QuadtreeModule = require(ReplicatedScripts.Lib.Quadtree)
+local GunModule = require(ReplicatedScripts.Class.Gun)
+local Enums = require(ReplicatedScripts.Registry.Enums)
+local Util = require(ReplicatedScripts.Lib.Util)
 
 local CreateTracerRemote : RemoteEvent = Remotes.CreateTracer
 

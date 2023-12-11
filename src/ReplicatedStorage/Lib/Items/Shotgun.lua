@@ -4,16 +4,17 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local Assets = ReplicatedStorage.Assets
+local ReplicatedScripts = ReplicatedStorage.Scripts
 
 local ItemModule = require(script.Parent)
-local ItemStates = require(ReplicatedStorage.Scripts.States.Item)
-local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
-local PlayerModule = require(ReplicatedStorage.Scripts.Class.Player)
-local GunModule = require(ReplicatedStorage.Scripts.Class.Gun)
-local Enums = require(ReplicatedStorage.Scripts.Enums)
-local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
-local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
-local Viewmodel = require(ReplicatedStorage.Scripts.Util.Viewmodel)
+local ItemStates = require(ReplicatedScripts.States.Item)
+local KeyBindings = require(ReplicatedScripts.Lib.Player.KeyBindings)
+local PlayerModule = require(ReplicatedScripts.Class.Player)
+local GunModule = require(ReplicatedScripts.Class.Gun)
+local Enums = require(ReplicatedScripts.Registry.Enums)
+local CharacterModule = require(ReplicatedScripts.Class.Character)
+local CharacterStates = require(ReplicatedScripts.States.Character)
+local Viewmodel = require(ReplicatedScripts.Lib.Player.GUI.Viewmodel)
 
 local CharactersFolder = workspace:WaitForChild("Characters")
 local JunkFolder = workspace:WaitForChild("JunkFolder")

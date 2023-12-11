@@ -1,7 +1,9 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
-local Enums = require(ReplicatedStorage.Scripts.Enums)
+local ReplicatedScripts = ReplicatedStorage.Scripts
+
+local CharacterModule = require(ReplicatedScripts.Class.Character)
+local Enums = require(ReplicatedScripts.Registry.Enums)
 
 return function (context, Type, Amount)
     local NPCEnum = Enums.NPC[Type]

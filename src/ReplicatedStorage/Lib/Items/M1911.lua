@@ -15,13 +15,14 @@ local Players = game:GetService("Players")
 
 local Remotes = ReplicatedStorage.Remotes
 local Assets = ReplicatedStorage.Assets
+local ReplicatedScripts = ReplicatedStorage.Scripts
 
-local ItemStates = require(ReplicatedStorage.Scripts.States.Item)
-local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
-local GunModule = require(ReplicatedStorage.Scripts.Class.Gun)
-local Enums = require(ReplicatedStorage.Scripts.Enums)
-local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
-local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
+local ItemStates = require(ReplicatedScripts.States.Item)
+local KeyBindings = require(ReplicatedScripts.Lib.Player.KeyBindings)
+local GunModule = require(ReplicatedScripts.Class.Gun)
+local Enums = require(ReplicatedScripts.Registry.Enums)
+local CharacterModule = require(ReplicatedScripts.Class.Character)
+local CharacterStates = require(ReplicatedScripts.States.Character)
 
 local GunEnum = Enums.Item.M1911
 

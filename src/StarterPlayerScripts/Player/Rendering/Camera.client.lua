@@ -1,7 +1,9 @@
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
+local ReplicatedScripts = ReplicatedStorage.Scripts
+
+local KeyBindings = require(ReplicatedScripts.Lib.Player.KeyBindings)
 
 local Player = game.Players.LocalPlayer
 local Camera = workspace.CurrentCamera

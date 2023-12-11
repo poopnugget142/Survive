@@ -1,10 +1,10 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local DataFolder = game:GetService("ReplicatedStorage").Data
+local DataFolder = ReplicatedStorage.Data
+local ReplicatedScripts = ReplicatedStorage.Scripts
 
-local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
-local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
-local Enums = require(ReplicatedStorage.Scripts.Enums)
+local CharacterModule = require(ReplicatedScripts.Class.Character)
+local Enums = require(ReplicatedScripts.Registry.Enums)
 
 local WaveNumber = DataFolder.Wave
 

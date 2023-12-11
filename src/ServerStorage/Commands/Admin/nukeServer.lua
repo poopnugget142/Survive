@@ -1,8 +1,10 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
-local Enums = require(ReplicatedStorage.Scripts.Enums)
-local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
+local ReplicatedScripts = ReplicatedStorage.Scripts
+
+local CharacterStates = require(ReplicatedScripts.States.Character)
+local Enums = require(ReplicatedScripts.Registry.Enums)
+local CharacterModule = require(ReplicatedScripts.Class.Character)
 
 return function (context)
     local Enemies = CharacterStates.World.query{CharacterStates[Enums.NPC.Guy]}

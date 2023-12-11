@@ -1,6 +1,8 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Enums = require(ReplicatedStorage.Scripts.Enums)
+local ReplicatedScripts = ReplicatedStorage.Scripts
+
+local Enums = require(ReplicatedScripts.Registry.Enums)
 
 local NpcType = {
 	Parse = function (value)

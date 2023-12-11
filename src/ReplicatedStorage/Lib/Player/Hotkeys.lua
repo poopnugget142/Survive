@@ -1,7 +1,9 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local ItemModule = require(ReplicatedStorage.Scripts.Items)
-local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
+local ReplicatedScripts = ReplicatedStorage.Scripts
+
+local ItemModule = require(ReplicatedScripts.Lib.Items)
+local KeyBindings = require(ReplicatedScripts.Lib.Player.KeyBindings)
 
 local Module = {}
 

@@ -2,11 +2,12 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Remotes = ReplicatedStorage.Remotes
 local CustomActions = Remotes.Custom
+local ReplicatedScripts = ReplicatedStorage.Scripts
 
 local Promise = require(ReplicatedStorage.Packages.Promise)
-local ItemStates = require(ReplicatedStorage.Scripts.States.Item)
-local Enums = require(ReplicatedStorage.Scripts.Enums)
-local EventHandler = require(ReplicatedStorage.Scripts.Util.EventHandler)
+local ItemStates = require(ReplicatedScripts.States.Item)
+local Enums = require(ReplicatedScripts.Registry.Enums)
+local EventHandler = require(ReplicatedScripts.Lib.Util.EventHandler)
 
 local RegisterEquipment : RemoteFunction = Remotes.RegisterEquipment
 

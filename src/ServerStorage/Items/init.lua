@@ -5,8 +5,10 @@ local CustomActions = Remotes.Custom
 
 local RegisterEquipment : RemoteFunction = Remotes.RegisterEquipment
 
-local ItemStates = require(ReplicatedStorage.Scripts.States.Item)
-local Enums = require(ReplicatedStorage.Scripts.Enums)
+local ReplicatedScripts = ReplicatedStorage.Scripts
+
+local ItemStates = require(ReplicatedScripts.States.Item)
+local Enums = require(ReplicatedScripts.Registry.Enums)
 
 local Equipment = {}
 

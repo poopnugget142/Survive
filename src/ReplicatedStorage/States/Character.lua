@@ -1,9 +1,11 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CollectionService = game:GetService("CollectionService")
 
+local ReplicatedScripts = ReplicatedStorage:WaitForChild("Scripts")
+
 local Stew = require(ReplicatedStorage.Packages.Stew)
 local Signal = require(ReplicatedStorage.Packages.Signal)
-local Enums =  require(ReplicatedStorage.Scripts.Enums)
+local Enums =  require(ReplicatedScripts.Registry.Enums)
 
 local World = Stew.world()
 

@@ -1,10 +1,12 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
-local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
-local Enums = require(ReplicatedStorage.Scripts.Enums)
-local EventHandler = require(ReplicatedStorage.Scripts.Util.EventHandler)
-local NpcRegistry = require(ReplicatedStorage.Scripts.Registry.NPC)
+local ReplicatedScripts = ReplicatedStorage.Scripts
+
+local CharacterStates = require(ReplicatedScripts.States.Character)
+local CharacterModule = require(ReplicatedScripts.Class.Character)
+local Enums = require(ReplicatedScripts.Registry.Enums)
+local EventHandler = require(ReplicatedScripts.Lib.Util.EventHandler)
+local NpcRegistry = require(ReplicatedScripts.Registry.NPC)
 
 local NpcEnum = Enums.NPC.Guy
 

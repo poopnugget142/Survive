@@ -8,22 +8,20 @@ Notetaking
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayerScripts = game:GetService("StarterPlayer").StarterPlayerScripts
-local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-
 local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-    local LocalPlayer = Players.LocalPlayer
 
-local ItemStates = require(ReplicatedStorage.Scripts.States.Item)
-local TreeventoryCore = require(ReplicatedStorage.Scripts.Class.TreeventoryCore)
-local QuadtreeModule = require(ReplicatedStorage.Scripts.Util.Quadtree)
-local KeyBindings = require(ReplicatedStorage.Scripts.Util.KeyBindings)
-local Tooltip = require(StarterPlayerScripts.warmechanic.gui.Tooltip)
-local EventHandler = require(ReplicatedStorage.Scripts.Util.EventHandler)
+local ReplicatedScripts = ReplicatedStorage.Scripts
 
-local Assorted = require(ReplicatedStorage.Scripts.Util.WarMechanicAssorted)
+local ItemStates = require(ReplicatedScripts.States.Item)
+local TreeventoryCore = require(ReplicatedScripts.Class.TreeventoryCore)
+local QuadtreeModule = require(ReplicatedScripts.Lib.Quadtree)
+local KeyBindings = require(ReplicatedScripts.Lib.Player.KeyBindings)
+local Tooltip = require(ReplicatedScripts.Lib.Player.GUI.Tooltip)
+local EventHandler = require(ReplicatedScripts.Lib.Util.EventHandler)
+local Util = require(ReplicatedScripts.Lib.Util)
 
+local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local ScreenGui : ScreenGui = PlayerGui:WaitForChild("HUD")
 local InventoryTilespace = ScreenGui.InventoryMenu.Background.Tileinset.Tilespace
@@ -134,7 +132,7 @@ end
 local AddItem = EventHandler.CreateEvent("Item", "Add")
 
 AddItem:Connect(function(_, Entity)
-    local NewItem = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(0/4, 0/4, 1/2, 1/2)}, Entity)
+    local NewItem = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(1/4, 1/4, 2/2, 2/2)}, Entity)
     TreeventoryCore.Item_PlaceInTreeventory(NewItem, LocalTreeventory, QuadtreeModule.newPoint(2,2))
     CreateItemDummy(NewItem)
 end)

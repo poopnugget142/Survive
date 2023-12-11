@@ -5,11 +5,13 @@ local TweenService = game:GetService("TweenService")
 local CharactersFolder = workspace:WaitForChild("Characters")
 local JunkFolder = workspace:WaitForChild("JunkFolder")
 
-local PlayerModule = require(ReplicatedStorage.Scripts.Class.Player)
-local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
-local AlphaPart = require(ReplicatedStorage.Scripts.Util.AlphaPart)
-local GunRegistry = require(ReplicatedStorage.Scripts.Registry.Gun)
-local ItemStates = require(ReplicatedStorage.Scripts.States.Item)
+local ReplicatedScripts = ReplicatedStorage:WaitForChild("Scripts")
+
+local PlayerModule = require(ReplicatedScripts.Class.Player)
+local CharacterModule = require(ReplicatedScripts.Class.Character)
+local AlphaPart = require(ReplicatedScripts.Lib.AlphaPart)
+local GunRegistry = require(ReplicatedScripts.Registry.Gun)
+local ItemStates = require(ReplicatedScripts.States.Item)
 
 local TerrainParams = RaycastParams.new()
 TerrainParams.IgnoreWater = true

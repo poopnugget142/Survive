@@ -3,11 +3,13 @@ local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
 local SharedTableRegistry = game:GetService("SharedTableRegistry")
 
-local Quadtree = require(ReplicatedStorage.Scripts.Util.Quadtree)
-local CharacterClass = require(ReplicatedStorage.Scripts.Class.Character)
-local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
-local Enums = require(ReplicatedStorage.Scripts.Enums)
-local NPCRegistry = require(ReplicatedStorage.Scripts.Registry.NPC)
+local ReplicatedScripts = ReplicatedStorage.Scripts
+
+local Quadtree = require(ReplicatedScripts.Lib.Quadtree)
+local CharacterClass = require(ReplicatedScripts.Class.Character)
+local CharacterStates = require(ReplicatedScripts.States.Character)
+local Enums = require(ReplicatedScripts.Registry.Enums)
+local NPCRegistry = require(ReplicatedScripts.Registry.NPC)
 
 
 local AllMovementData = SharedTableRegistry:GetSharedTable("AllMovementData")

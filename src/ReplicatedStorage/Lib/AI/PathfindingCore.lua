@@ -18,7 +18,10 @@ end
 
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local PriorityQueue = require(ReplicatedStorage.Scripts.Util.PriorityQueue)
+
+local ReplicatedScripts = ReplicatedStorage:WaitForChild("Scripts")
+
+local PriorityQueue = require(ReplicatedScripts.Lib.PriorityQueue)
 local Promise = require(ReplicatedStorage.Packages.Promise)
 
 local Tilegrid = {}

@@ -1,18 +1,17 @@
-local PathfindingService = game:GetService("PathfindingService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
 
-local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
-local Enums = require(ReplicatedStorage.Scripts.Enums)
-local pathfinding = require(ServerScriptService.warmechanic.DjikstraPathfinding)
-local Pathfinding = require(ReplicatedStorage.Scripts.Util.PathfindingCore)
-local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
-local NpcRegistry = require(ReplicatedStorage.Scripts.Registry.NPC)
+local ReplicatedScripts = ReplicatedStorage.Scripts
 
-local QuadtreeModule = require(ReplicatedStorage.Scripts.Util.Quadtree)
+local CharacterStates = require(ReplicatedScripts.States.Character)
+local Enums = require(ReplicatedScripts.Registry.Enums)
+local Pathfinding = require(ReplicatedScripts.Lib.AI.PathfindingCore)
+local CharacterModule = require(ReplicatedScripts.Class.Character)
+local NpcRegistry = require(ReplicatedScripts.Registry.NPC)
+local QuadtreeModule = require(ReplicatedScripts.Lib.Quadtree)
 
-local CharacterController = ServerScriptService.CharacterController
+local CharacterController = ServerScriptService.AI.CharacterController
 
 local NpcEnum = Enums.NPC.Big
 local CollisionRadius = NpcRegistry.GetCollisionRadius(NpcEnum)
@@ -66,7 +65,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
         local Velocity = MovementData.Velocity
         local NpcId = EntityData.NPC
 
-        local targets = pathfinding.targets
+        local targets = Pathfinding.targets
 	    local distanceThreshold = math.huge
 
         local finalTarget

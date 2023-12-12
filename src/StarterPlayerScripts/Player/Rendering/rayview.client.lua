@@ -17,7 +17,7 @@ local runService : RunService = game:GetService("RunService")
 local userInputService: UserInputService = game:GetService("UserInputService")
 local replicatedStorage = game:GetService("ReplicatedStorage")
 
-local module = require(replicatedStorage.Scripts.warmechanic.rayview)
+local module = require(replicatedStorage.Scripts.Lib.Rayview)
 
 local player : Player = players.LocalPlayer
 local screenGui : ScreenGui = player.PlayerGui:WaitForChild("ScreenGui")

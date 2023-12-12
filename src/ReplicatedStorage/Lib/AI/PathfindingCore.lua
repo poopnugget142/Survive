@@ -590,6 +590,8 @@ function Tilegrid:UniformCostSearch(
 
     NewNavgrid.Tilegrid = self
     NewNavgrid.Map = ClosedFronts
+    NewNavgrid.Targets = Targets
+    --print(Targets)
 
     if Name then
         AllNavgrids[Name] = NewNavgrid
@@ -817,7 +819,9 @@ Module.BuildTarget = function(Input : Vector3 | Part)
     local deltaTime = task.wait()
     return {
         Position = Vector2.new(output.Position.X, output.Position.Z)
+        ,Position3 = output.Position
         ,Velocity = Vector2.new(output.Velocity.X, output.Velocity.Z) * 0.1 * deltaTime/(1/60)
+        ,Velocity3 = output.Velocity
         ,Part = output.Part or nil
     } :: Target
 end

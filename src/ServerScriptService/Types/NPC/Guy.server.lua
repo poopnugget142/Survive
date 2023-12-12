@@ -12,7 +12,7 @@ local NpcRegistry = require(ReplicatedScripts.Registry.NPC)
 local QuadtreeModule = require(ReplicatedScripts.Lib.Quadtree)
 
 local CharacterController = ServerScriptService.AI.CharacterController
-
+    
 local NpcEnum = Enums.NPC.Guy
 
 local AttackRange = NpcRegistry.GetAttackRange(NpcEnum)
@@ -87,12 +87,18 @@ RunService.Heartbeat:Connect(function(deltaTime)
         local Velocity = MovementData.Velocity
         local NPCId = EntityData[CharacterStates.NPCId]
 
-        local targets = Pathfinding.targets
+        local Navgrid = Pathfinding.GetNavgrid("ZombieGeneric")
+
+        if not Navgrid then continue end
+
+        local targets = Navgrid.Targets
+        --print(Navgrid.Targets)
 	    local distanceThreshold = math.huge
 
         local finalTarget
         local finalDistance = distanceThreshold
 
+        if not targets or #targets == 0 then continue end
         for _, target in targets do
             --[[
             if (type(target) == "userdata") then target = target.Position end
@@ -102,8 +108,12 @@ RunService.Heartbeat:Connect(function(deltaTime)
                 finalTarget = target
             end
             ]]
-            target = Pathfinding.BuildTarget(target)
-            local distance = (target.Position + target.Velocity - Position).Magnitude
+            --target = Pathfinding.BuildTarget(target)
+            local distance = (
+                target.Position3
+                + target.Velocity3
+                - Position
+            ).Magnitude
             if (distance < finalDistance) then
                 finalDistance = distance
                 finalTarget = target
@@ -115,20 +125,16 @@ RunService.Heartbeat:Connect(function(deltaTime)
         local travel = Vector3.zero
         local displacement : Vector3
         if (finalTarget) then
-            displacement = (finalTarget.Position + finalTarget.Velocity - Position) * Vector3.new(1,0,1)
+            displacement = (finalTarget.Position3 + finalTarget.Velocity3 - Position) * Vector3.new(1,0,1)
         end
-
-        local Navgrid = Pathfinding.GetNavgrid("ZombieGeneric")
-
-        if not Navgrid then continue end
 
         travel = Navgrid:KernalConvolute(Position + Velocity*0.1)
         if (finalTarget) then
             if (finalTarget.Part) then
-                local theta = math.acos(travel:Dot(finalTarget.Position - Position))
+                local theta = math.acos(travel:Dot(finalTarget.Position3 - Position))
                 --print(math.deg(theta))
                 if (theta <= math.rad(15)) then
-                    travel = (finalTarget.Position - Position).Unit
+                    travel = (finalTarget.Position3 - Position).Unit
                 end
             end
         end

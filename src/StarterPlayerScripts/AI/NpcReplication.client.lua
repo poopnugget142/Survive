@@ -4,14 +4,17 @@ local SharedTableRegistry = game:GetService("SharedTableRegistry")
 local Player = game:GetService("Players").LocalPlayer
 
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
-local Replicator = Player.PlayerScripts:WaitForChild("Replicator")
+local Replicator = Player.PlayerScripts.AI:WaitForChild("Replicator")
+
+local ReplicatedScripts = ReplicatedStorage.Scripts
 
 local Squash = require(ReplicatedStorage.Packages.Squash)
-local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
-local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 local Promise = require(ReplicatedStorage.Packages.Promise)
-local Enums = require(ReplicatedStorage.Scripts.Enums)
-local EventHandler = require(ReplicatedStorage.Scripts.Util.EventHandler)
+
+local CharacterModule = require(ReplicatedScripts.Class.Character)
+local CharacterStates = require(ReplicatedScripts.States.Character)
+local Enums = require(ReplicatedScripts.Registry.Enums)
+local EventHandler = require(ReplicatedScripts.Lib.Util.EventHandler)
 
 local NpcReplication : Script = Replicator:WaitForChild("NpcReplicator")
 

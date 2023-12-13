@@ -10,6 +10,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayerScripts = game:GetService("StarterPlayer").StarterPlayerScripts
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
 
 local ReplicatedScripts = ReplicatedStorage.Scripts
 
@@ -81,7 +82,7 @@ for i = 1, TEMPSIZE.X do
 end
 
 local GetMouseRelativeToInventory = function()
-    local LocalMouse = LocalPlayer:GetMouse()
+    local LocalMouse = UserInputService:GetMouseLocation()
     
     local MouseRelativeX = LocalMouse.X - InventoryTilespace.AbsolutePosition.X
     local MouseRelativeY = LocalMouse.Y - InventoryTilespace.AbsolutePosition.Y
@@ -306,7 +307,7 @@ end)
 
 
 RunService.RenderStepped:Connect(function(deltaTime)
-    local LocalMouse = LocalPlayer:GetMouse()
+    local LocalMouse = UserInputService:GetMouseLocation()
     if ScreenGui.InventoryMenu.Visible then
         if ItemHeld then
             --item display handling, absolute mouse position
@@ -351,9 +352,8 @@ RunService.RenderStepped:Connect(function(deltaTime)
             end
             return
         end
-
-            
-        Tooltip.Position(Vector2.new(LocalMouse.X, LocalMouse.Y))
+        
+        Tooltip.Position(UserInputService:GetMouseLocation())
 
         local MousePosition = GetMouseRelativeToInventory()
 

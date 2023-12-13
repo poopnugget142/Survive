@@ -82,7 +82,7 @@ for i = 1, TEMPSIZE.X do
 end
 
 local GetMouseRelativeToInventory = function()
-    local LocalMouse = UserInputService:GetMouseLocation()
+    local LocalMouse = LocalPlayer:GetMouse()
     
     local MouseRelativeX = LocalMouse.X - InventoryTilespace.AbsolutePosition.X
     local MouseRelativeY = LocalMouse.Y - InventoryTilespace.AbsolutePosition.Y
@@ -133,7 +133,7 @@ end
 local AddItem = EventHandler.CreateEvent("Item", "Add")
 
 AddItem:Connect(function(_, Entity)
-    local NewItem = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(1/4, 1/4, 2/2, 2/2)}, Entity)
+    local NewItem = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox((4-1)/2, (2-1)/2, 4/2, 2/2)}, Entity)
     TreeventoryCore.Item_PlaceInTreeventory(NewItem, LocalTreeventory, QuadtreeModule.newPoint(2,2))
     CreateItemDummy(NewItem)
 end)
@@ -307,7 +307,7 @@ end)
 
 
 RunService.RenderStepped:Connect(function(deltaTime)
-    local LocalMouse = UserInputService:GetMouseLocation()
+    local LocalMouse = LocalPlayer:GetMouse()
     if ScreenGui.InventoryMenu.Visible then
         if ItemHeld then
             --item display handling, absolute mouse position
@@ -353,7 +353,7 @@ RunService.RenderStepped:Connect(function(deltaTime)
             return
         end
         
-        Tooltip.Position(UserInputService:GetMouseLocation())
+        Tooltip.Position(LocalMouse)
 
         local MousePosition = GetMouseRelativeToInventory()
 

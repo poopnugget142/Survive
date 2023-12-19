@@ -11,8 +11,6 @@ local CharacterModule = require(ReplicatedScripts.Class.Character)
 local NpcRegistry = require(ReplicatedScripts.Registry.NPC)
 local QuadtreeModule = require(ReplicatedScripts.Lib.Quadtree)
 
-local CharacterController = ServerScriptService.AI.CharacterController
-
 local NpcEnum = Enums.NPC.Big
 local CollisionRadius = NpcRegistry.GetCollisionRadius(NpcEnum)
 local AttackRange = NpcRegistry.GetAttackRange(NpcEnum)
@@ -144,7 +142,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
 
         if (travel ~= Vector3.zero and travel ~= nil) then
             local MoveDirection = ((travel*1)+(MoveAwayVector*2.25)).Unit
-            CharacterController:SendMessage("UpdateMoveDirection", NpcId, MoveDirection)
+            CharacterModule.UpdateMoveDirection(Entity, MoveDirection)
             --MovementData.travel = travel
         end
 	    --return travel

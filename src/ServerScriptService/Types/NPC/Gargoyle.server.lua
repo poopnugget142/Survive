@@ -11,8 +11,6 @@ local Pathfinding = require(ReplicatedScripts.Lib.AI.PathfindingCore)
 local CharacterModule = require(ReplicatedScripts.Class.Character)
 local NpcRegistry = require(ReplicatedScripts.Registry.NPC)
 
-local CharacterController = ServerScriptService.AI.CharacterController
-
 local NpcEnum = Enums.NPC.Gargoyle
 local AttackRange = NpcRegistry.GetAttackRange(NpcEnum)
 
@@ -109,7 +107,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
 
         if (travel ~= Vector3.zero and travel ~= nil) then
             local MoveDirection = travel.Unit
-            CharacterController:SendMessage("UpdateMoveDirection", NpcId, MoveDirection)
+            CharacterModule.UpdateMoveDirection(Entity, MoveDirection)
             --MovementData.travel = travel
         end
 	    --return travel

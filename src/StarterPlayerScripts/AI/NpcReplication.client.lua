@@ -30,7 +30,7 @@ local QueryNpcModels = SharedTable.new()
 SharedTableRegistry:SetSharedTable("NpcData", SharedNpcData)
 SharedTableRegistry:SetSharedTable("QueryNpcModels", QueryNpcModels)
 
-local DeleteNpc = EventHandler.CreateEvent("Npc", "DeleteNpc")
+local DeleteNpc = EventHandler.CreateEvent("DeleteNpc")
 
 local NumberOfActors = 64
 local CoreNumber = 0
@@ -135,10 +135,10 @@ RunService.RenderStepped:Connect(function(DeltaTime)
         if not Entity then continue end
 
         if not Value then
-            EventHandler.FireEvent(Entity, "RemoveModel")
+            EventHandler.FireEntityEvent(Entity, "RemoveModel")
             continue
         end
         
-        EventHandler.FireEvent(Entity, "CreateModel", Value)
+        EventHandler.FireEntityEvent(Entity, "CreateModel", Value)
     end
 end)

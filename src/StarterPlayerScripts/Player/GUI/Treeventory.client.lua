@@ -130,7 +130,7 @@ local CreateItemDummy = function(Item)
     return true
 end
 
-local AddItem = EventHandler.CreateEvent("Item", "Add")
+local AddItem = EventHandler.CreateEvent("ItemAdd")
 
 AddItem:Connect(function(_, Entity)
     local NewItem = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox((4-1)/2, (2-1)/2, 4/2, 2/2)}, Entity)

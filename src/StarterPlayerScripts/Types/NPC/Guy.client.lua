@@ -41,7 +41,7 @@ local function Action(Entity : any, ActionEnum : number)
     local EntityData = CharacterStates.World.get(Entity)
 
     if ActionEnum == Enums.Action.Die then
-        EventHandler.FireEvent("Npc", "DeleteNpc", EntityData[CharacterStates.NPCId])
+        EventHandler.FireEvent("DeleteNpc", EntityData[CharacterStates.NPCId])
         CharacterStates.World.kill(Entity)
     elseif ActionEnum == Enums.Action.Attack then
         CharacterModule.SetState(Entity, Enums.States.Attacking)
@@ -64,16 +64,16 @@ CharacterStates[NpcEnum] = CharacterStates.World.factory({
 
         CharacterModule.SetState(Entity, Enums.States.Walking)
 
-        local CreateModelSignal = EventHandler.CreateEvent(Entity, "CreateModel")
+        local CreateModelSignal = EventHandler.CreateEntityEvent(Entity, "CreateModel")
         CreateModelSignal:Connect(CreateModel)
 
-        local RemoveModelSignal = EventHandler.CreateEvent(Entity, "RemoveModel")
+        local RemoveModelSignal = EventHandler.CreateEntityEvent(Entity, "RemoveModel")
         RemoveModelSignal:Connect(RemoveModel)
 
-        local SetStateSignal = EventHandler.CreateEvent(Entity, "SetState")
+        local SetStateSignal = EventHandler.CreateEntityEvent(Entity, "SetState")
         SetStateSignal:Connect(SetState)
 
-        local ActionSignal = EventHandler.CreateEvent(Entity, "Action")
+        local ActionSignal = EventHandler.CreateEntityEvent(Entity, "Action")
         ActionSignal:Connect(Action)
 
         return true

@@ -1,11 +1,13 @@
+if script:GetActor() == nil then
+    return
+end
+
 local RunService = game:GetService("RunService")
 local SharedTableRegistry = game:GetService("SharedTableRegistry")
 
 --for raycastparams
 local CharactersFolder = workspace:WaitForChild("Characters")
 local JunkFolder = workspace:WaitForChild("JunkFolder")
-
-local Actor : Actor = script.Parent
 
 local FRAMERATE = 1 / 240
 local STIFFNESS = 300
@@ -14,17 +16,16 @@ local PRECISION = 0.001
 local STEPHEIGHT = 1
 
 local AllMovementData = SharedTableRegistry:GetSharedTable("AllMovementData")
+local RenderedGuys = {}
 
-Actor:BindToMessage("UpdateMoveDirection", function(NpcId : number, MoveDirection : Vector3)
-    assert(AllMovementData[NpcId], "Movement data hasn't been created yet")
+local Actor = script:GetActor()
 
-    AllMovementData[NpcId].MoveDirection = MoveDirection
+Actor:BindToMessageParallel("AddNpc", function(NpcId : number)
+    RenderedGuys[NpcId] = true
 end)
 
-Actor:BindToMessage("UpdateWalkSpeed", function(NpcId : number, WalkSpeed : number)
-    assert(AllMovementData[NpcId], "Movement data hasn't been created yet")
-
-    AllMovementData[NpcId].WalkSpeed = WalkSpeed
+Actor:BindToMessageParallel("RemoveNpc", function(NpcId : number)
+    RenderedGuys[NpcId] = nil
 end)
 
 local Module = {}
@@ -51,8 +52,9 @@ TerrainParams.FilterType = Enum.RaycastFilterType.Exclude
 TerrainParams.FilterDescendantsInstances = {JunkFolder, CharactersFolder}
 
 RunService.Heartbeat:ConnectParallel(function(deltaTime)
-    debug.profilebegin("Enemy Step")
-    for NpcId, MovementData in AllMovementData do
+    for NpcId, Value in RenderedGuys do
+        local MovementData = AllMovementData[NpcId]
+
         local Position = MovementData.Position
 
         local Velocity = MovementData.Velocity or Vector3.zero
@@ -147,7 +149,6 @@ RunService.Heartbeat:ConnectParallel(function(deltaTime)
         local newPosition = Position + Vector3.yAxis*step + MovementData.Velocity*deltaTime
         MovementData.Position = newPosition
     end
-    debug.profileend()
 end)
 
 return Module

@@ -60,9 +60,10 @@ Module.UpdateSpeed = function(Entity : any, NewSpeed : number)
 
     local EntityData = CharacterStates.World.get(Entity)
     local SpeedData = EntityData[CharacterStates.WalkSpeed]
+    local EntityNpcId = EntityData[CharacterStates.NPCId]
 
     SpeedData.Current = NewSpeed
-    CharacterController:SendMessage("UpdateWalkSpeed", EntityData.NPCId, NewSpeed)
+    AllMovementData[EntityNpcId].WalkSpeed = NewSpeed
 end
 
 --Adds all proper tags to the character and registers it's entity to it's model
@@ -130,6 +131,15 @@ Module.CreateMovementData = function(Entity : any, SpawnPosition : Vector3?)
         ;Position = SpawnPosition or Vector3.zero
         ;WalkSpeed = WalkSpeed or 16
     }
+
+    EventHandler.FireEvent("CreateMovementData", Entity)
+end
+
+Module.UpdateMoveDirection = function(Entity : any, MoveDirection : Vector3)
+    local CharacterData = CharacterStates.World.get(Entity)
+    local EntityNpcId = CharacterData[CharacterStates.NPCId]
+
+    AllMovementData[EntityNpcId].MoveDirection = MoveDirection
 end
 
 Module.RemoveMovementData = function(Entity : any)
@@ -137,6 +147,8 @@ Module.RemoveMovementData = function(Entity : any)
     local EntityNpcId = CharacterData[CharacterStates.NPCId]
 
     AllMovementData[EntityNpcId] = nil
+
+    EventHandler.FireEvent("RemoveMovementData", Entity)
 end
 
 Module.GetPosition = function(Entity : any)
@@ -189,7 +201,7 @@ Module.SetState = function(Entity: any, State : number, ...)
     local StateData = Module.GetStateData(Entity, State)
     StateData.Enter:Fire(Entity, ...)
 
-    EventHandler.FireEvent(Entity, "SetState", State)
+    EventHandler.FireEntityEvent(Entity, "SetState", State)
 
     return StateData
 end

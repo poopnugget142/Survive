@@ -100,7 +100,7 @@ Module.CreateEntity = function(ItemEnum : number, ItemID : number?, ...)
         ItemData.Give(Entity, ...)
     end
 
-    EventHandler.FireEvent("Item", "Add", Entity)
+    EventHandler.FireEvent("ItemAdd", Entity)
 
     return Entity
 end

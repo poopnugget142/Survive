@@ -1,10 +1,5 @@
 local MathSmall = 10^-5
 
-
-
-
-
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local ReplicatedScripts = ReplicatedStorage:WaitForChild("Scripts")
@@ -26,7 +21,7 @@ type Item = {
     ;Boundaries : table | Box --The space that an item takes up in an inventory; Table for complex shapes
 }
 
---hey, i learned something from you poopnugget! NO YOU DIDN'T YOU'RE A LIAR
+--hey, i learned something from you poopnugget! NO YOU DIDN'T YOU'RE A LIAR (poop)
 local Id = 0
 local function NextId()
     Id += 1
@@ -122,21 +117,6 @@ module.Item_PlaceInTreeventory = function(Item : Item, Treeventory : Treeventory
     return {Value = true}
 end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 module.BuildTreeventory = function(Boundary : Box)
     return {
         Id = -1
@@ -144,6 +124,7 @@ module.BuildTreeventory = function(Boundary : Box)
         ,Items = {}
     } :: Treeventory
 end
+
 module.BuildItem = function(Boundaries : Box | Table, Entity : any)
     return {
         Entity = Entity

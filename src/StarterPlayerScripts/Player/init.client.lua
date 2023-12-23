@@ -30,7 +30,6 @@ local function CreateCharacter(Character)
     Viewmodel.BindRigToCharacter(Character)
 
     local GunEntity = ItemModule.CreateEntity(Enums.Item.Shotgun)
-    Hotkeys.BindEquipToHotkey(1, GunEntity)
 end
 
 if Player.Character then CreateCharacter(Player.Character) end

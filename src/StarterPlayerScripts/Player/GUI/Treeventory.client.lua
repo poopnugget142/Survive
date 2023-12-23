@@ -7,10 +7,8 @@ Notetaking
 ]]
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local StarterPlayerScripts = game:GetService("StarterPlayer").StarterPlayerScripts
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
 
 local ReplicatedScripts = ReplicatedStorage.Scripts
 
@@ -20,14 +18,14 @@ local QuadtreeModule = require(ReplicatedScripts.Lib.Quadtree)
 local KeyBindings = require(ReplicatedScripts.Lib.Player.KeyBindings)
 local Tooltip = require(ReplicatedScripts.Lib.Player.GUI.Tooltip)
 local EventHandler = require(ReplicatedScripts.Lib.Util.EventHandler)
-local Util = require(ReplicatedScripts.Lib.Util)
+local Hotkeys = require(ReplicatedScripts.Lib.Player.Hotkeys)
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local ScreenGui : ScreenGui = PlayerGui:WaitForChild("HUD")
 local InventoryTilespace = ScreenGui.InventoryMenu.Background.Tileinset.Tilespace
 
-
+local HoverItem
 local ItemHeld
 local ItemHeldVisualOffset
 local ItemHeldCursorOffset
@@ -132,7 +130,7 @@ end
 
 local AddItem = EventHandler.CreateEvent("ItemAdd")
 
-AddItem:Connect(function(_, Entity)
+AddItem:Connect(function(Entity)
     local NewItem = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox((4-1)/2, (2-1)/2, 4/2, 2/2)}, Entity)
     TreeventoryCore.Item_PlaceInTreeventory(NewItem, LocalTreeventory, QuadtreeModule.newPoint(2,2))
     CreateItemDummy(NewItem)
@@ -283,25 +281,52 @@ local ItemRotate = function(amount : number)
     end
 end
 
+local NumberPress = function(Number : number)
+    print("Pressed ", Number)
+
+    if not HoverItem then return end
+
+    Hotkeys.BindEquipToHotkey(Number, HoverItem.Entity)
+end
+
 
 KeyBindings.BindAction("Inventory_Open", Enum.UserInputState.Begin, function()
     ScreenGui.InventoryMenu.Visible = not ScreenGui.InventoryMenu.Visible
     Tooltip.Visible(ScreenGui.InventoryMenu.Visible)
-    if (ScreenGui.InventoryMenu.Visible) then
-        KeyBindings.BindAction("Inventory_Interact1", Enum.UserInputState.Begin, function()
-            if not ItemHeld then ItemPick()
-                else ItemPlace() end
-        end, 2)
-        KeyBindings.BindAction("Inventory_RotateLeft", Enum.UserInputState.Begin, function()
-            ItemRotate(-1)
-        end)
-        KeyBindings.BindAction("Inventory_RotateRight", Enum.UserInputState.Begin, function()
-            ItemRotate(1)
-        end)
-    else
+
+    --Closing inventory
+    if not (ScreenGui.InventoryMenu.Visible) then
         KeyBindings.UnbindAction("Inventory_Interact1")
         KeyBindings.UnbindAction("Inventory_RotateLeft")
         KeyBindings.UnbindAction("Inventory_RotateRight")
+
+        for i = 0, 9 do
+            local StringI = tostring(i)
+            KeyBindings.UnbindAction("Inventory_"..StringI, Enum.UserInputState.Begin)
+        end
+        return
+    end
+
+    --Opening inventory
+    KeyBindings.BindAction("Inventory_Interact1", Enum.UserInputState.Begin, function()
+        if not ItemHeld then ItemPick()
+            else ItemPlace() end
+    end, 2)
+    KeyBindings.BindAction("Inventory_RotateLeft", Enum.UserInputState.Begin, function()
+        ItemRotate(-1)
+    end)
+    KeyBindings.BindAction("Inventory_RotateRight", Enum.UserInputState.Begin, function()
+        ItemRotate(1)
+    end)
+
+    --Bind keys to numbers
+    for i = 0, 9 do
+        local StringI = tostring(i)
+
+        KeyBindings.SetKeys("Inventory_"..StringI, KeyBindings.GetKeys(StringI))
+        KeyBindings.BindAction("Inventory_"..StringI, Enum.UserInputState.Begin, function()
+            NumberPress(i)
+        end, 1)
     end
 end)
 
@@ -352,8 +377,6 @@ RunService.RenderStepped:Connect(function(deltaTime)
             end
             return
         end
-        
-        Tooltip.Position(LocalMouse)
 
         local MousePosition = GetMouseRelativeToInventory()
 
@@ -361,22 +384,24 @@ RunService.RenderStepped:Connect(function(deltaTime)
             math.ceil(MousePosition.X*CellMax)
             ,math.ceil(MousePosition.Y*CellMax)
         )
+
+        Tooltip.Position()
+
         local ItemCheck = TreeventoryCore.Treeventory_CheckBox(LocalTreeventory, QuadtreeModule.BuildBox(math.ceil(CursorPosition.X), math.ceil(CursorPosition.Y), 0.5, 0.5))
 
         if not (ItemCheck.Error and #ItemCheck.Error) then
             Tooltip.Visible(false)
+            HoverItem = nil
             return
         end
 
         Tooltip.Visible(true)
 
-        local DesiredItem = ItemCheck.Error[1].Data.Item
+        HoverItem = ItemCheck.Error[1].Data.Item
 
-        local Entity = DesiredItem.Entity
+        local Entity = HoverItem.Entity
         local EntityData = ItemStates.World.get(Entity)
 
         Tooltip.Label(EntityData[ItemStates.Name])
     end
-    
 end)
-

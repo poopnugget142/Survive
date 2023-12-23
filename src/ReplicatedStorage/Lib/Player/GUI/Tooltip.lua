@@ -4,6 +4,7 @@ local RunService = game:GetService("RunService")
 
 local Players = game:GetService("Players")
     local LocalPlayer = Players.LocalPlayer
+    local LocalMouse = LocalPlayer:GetMouse()
 
 
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -16,7 +17,12 @@ local ViewportSize = CurrentCamera.ViewportSize
 
 local Module = {}
 
-Module.Position = function(AbsolutePosition : Vector2)
+Module.Position = function(AbsolutePosition : Vector2?)
+
+    if not AbsolutePosition then
+        AbsolutePosition = UserInputService:GetMouseLocation()
+    end
+
     Tooltip.Position = UDim2.fromOffset(AbsolutePosition.X, AbsolutePosition.Y)
 
     local TooltipCorner = UDim2.fromScale(

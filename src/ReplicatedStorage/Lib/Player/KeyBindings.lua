@@ -47,6 +47,10 @@ end
 
 local Module = {}
 
+Module.SetKeys = function(ActionName : string, Inputs : Enum.UserInputType | Enum.KeyCode)
+    InputActions[ActionName] = Inputs
+end
+
 --this needs to be updated to reload CAS as well
 Module.SetKey = function(ActionName : string, Input : Enum.UserInputType | Enum.KeyCode)
     if not InputActions[ActionName] then
@@ -61,6 +65,10 @@ end
 Module.RemoveKey = function(ActionName : string, Input : Enum.UserInputType | Enum.KeyCode)
     local CurrentInput = table.find(InputActions[ActionName], Input)
     table.remove(InputActions[ActionName], CurrentInput)
+end
+
+Module.GetKeys = function(ActionName : string)
+    return InputActions[ActionName]
 end
 
 Module.BindAction = function(ActionName : string, InputState : Enum.UserInputState, Action, Priority : number?)

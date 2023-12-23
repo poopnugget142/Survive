@@ -31,6 +31,9 @@ local ItemHeldVisualOffset
 local ItemHeldCursorOffset
 local ItemHeldRotationDelta = 0 -- a separate rotation counter for visual item offsets
 
+local NumberBindings = {}
+local BoundItems = {}
+
 --Create inventory
 local TEMPSIZE = Vector2.new(13,7)--TEMP SIZE, REFERENCE LATER !!!!!!!!!!!!!
 local CellMax = math.max(TEMPSIZE.X, TEMPSIZE.Y)
@@ -43,7 +46,7 @@ local LocalTreeventory = TreeventoryCore.BuildTreeventory(
     )
 )
 
---Inventory Cell Rendering
+--Renders the background cells of the inventory
 local ItemCells = {}
 for i = 1, TEMPSIZE.X do
     for j = 1, TEMPSIZE.Y do
@@ -282,13 +285,37 @@ local ItemRotate = function(amount : number)
 end
 
 local NumberPress = function(Number : number)
-    print("Pressed ", Number)
-
     if not HoverItem then return end
 
-    Hotkeys.BindEquipToHotkey(Number, HoverItem.Entity)
-end
+    local HoversLastNumber = BoundItems[HoverItem]
 
+    --If this item has already been bound to a number, unbind it
+    if HoversLastNumber then
+        Hotkeys.UnbindFromHotkey(HoversLastNumber)
+        NumberBindings[HoversLastNumber].Dummy.AnchorParent.Frame.NumberBound.Visible = false
+        BoundItems[NumberBindings[HoversLastNumber]] = nil
+        table.remove(NumberBindings, HoversLastNumber)
+        if HoversLastNumber == Number then return end
+    end
+
+    --Unbinds the item that was previously bound to this number
+    if NumberBindings[Number] then
+        Hotkeys.UnbindFromHotkey(Number)
+        NumberBindings[Number].Dummy.AnchorParent.Frame.NumberBound.Visible = false
+        BoundItems[NumberBindings[Number]] = nil
+        table.remove(NumberBindings, Number)
+    end
+
+    table.insert(NumberBindings, Number, HoverItem)
+    BoundItems[HoverItem] = Number
+
+    Hotkeys.BindEquipToHotkey(Number, HoverItem.Entity)
+
+    local NumberUI = HoverItem.Dummy.AnchorParent.Frame.NumberBound
+
+    NumberUI.Visible = true
+    NumberUI.Text = tostring(Number)
+end
 
 KeyBindings.BindAction("Inventory_Open", Enum.UserInputState.Begin, function()
     ScreenGui.InventoryMenu.Visible = not ScreenGui.InventoryMenu.Visible

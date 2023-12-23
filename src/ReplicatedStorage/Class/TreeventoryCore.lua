@@ -117,6 +117,10 @@ module.Item_PlaceInTreeventory = function(Item : Item, Treeventory : Treeventory
     return {Value = true}
 end
 
+module.BuildItemBoundary = function(w : number, h : number, xOffset : number?, yOffset : number?)
+    return QuadtreeModule.BuildBox((w-1)/2 + (xOffset or 0), (h-1)/2 + (yOffset or 0), w/2, h/2)
+end
+
 module.BuildTreeventory = function(Boundary : Box)
     return {
         Id = -1

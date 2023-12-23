@@ -134,7 +134,7 @@ end
 local AddItem = EventHandler.CreateEvent("ItemAdd")
 
 AddItem:Connect(function(Entity)
-    local NewItem = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox((4-1)/2, (2-1)/2, 4/2, 2/2)}, Entity)
+    local NewItem = TreeventoryCore.BuildItem({TreeventoryCore.BuildItemBoundary(4,2)}, Entity)
     TreeventoryCore.Item_PlaceInTreeventory(NewItem, LocalTreeventory, QuadtreeModule.newPoint(2,2))
     CreateItemDummy(NewItem)
 end)

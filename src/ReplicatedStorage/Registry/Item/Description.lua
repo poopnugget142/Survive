@@ -21,7 +21,7 @@ return {
     with supressors, but has no high capacity magazines available.
     ]]
     ;[Item["Colt M1911"]] =
-    [[
+    [[    
     .45 Caliber Semi-Automatic Handgun from the United States, considered the first modern Autoloading Handgun. Designed in 1911, as the name
     implies, it survied service in both World Wars, and will likely only be discontinued <i>when humans are.</i> 
     ]]

@@ -3,7 +3,7 @@ return {
 
     --~/Handguns/~--
 
-    --/Semi Automatic Pistol/--
+    --/Semi Automatic Pistols/--
     "Colt M1911"
     ,"H&K Mk.23"
     ,"Glock 17"
@@ -17,6 +17,10 @@ return {
 
     --~/Shotguns/~--
     ,"Remington 870"
+
+    --~/Submachine Guns/~--
+    ,"Steyr TMP"
+    ,"H&K UMP"
 
     --~==AMMO==~--
 

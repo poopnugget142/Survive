@@ -15,16 +15,19 @@ return {
     9mm Semi-Automatic Handgun from Austria, famous for its reliability. While its sriker-fired design makes it less accurate than the Berreta,
     it makes up for this by allowing high capacity magazines.
     ]]
+    
     ;[Item["Berreta M9A1"]] =
     [[
     9mm Semi-Automatic Handgun from Italy, famous for its double to single action trigger mechanism. More accurate than the Glock and compatiable
     with supressors, two are often seen in the hands of action heroes.
     ]]
+
     ;[Item["Colt M1911"]] =
     [[    
     .45 Caliber Semi-Automatic Handgun from the United States, considered the first modern Autoloading Handgun. Designed in 1911, as the name
     implies, it survied service in both World Wars, and will likely only be discontinued <i>when humans are.</i> 
     ]]
+
     ;[Item["H&K Mk.23"]] =
     [[
     .45 Caliber Semi-Automatic Handgun from Germany, famous for its use by special military services. Accurate, powerful, generously large
@@ -37,11 +40,13 @@ return {
     .38 Caliber Double-Action Revolver from the United States, holds the record for the most sucessful revolver in American history. Moderately powerful, 
     of moderate size, it comes from a more moderate time. 
     ]]
+
     ;[Item["Colt Python"]] =
     [[
     .357 Magnum Double-Action Revolver from the United States, famous for its powerful cartridge, and stylish design. It is also compatiable 
     with .38 rounds. High recoil remains a worthy tradeoff for high stopping power. 
     ]]
+
     ;[Item["Colt Anaconda"]] =
     [[
     .44 Magnum Double-Action Revolver from the United States, known as the even bigger brother of the Colt Python. At one time, the .44 was

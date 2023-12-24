@@ -40,11 +40,13 @@ return {
     ,"5.56 FMJ"
     ,"5.56 HP"
     ,"5.56 AP"
+    ,"5.56 Tracer"
 
     --/.45/--
     ,".45 FMJ"
     ,".45 HP"
     ,".45 +P"
+    ,".45 Tracer"
 
     --/.38/--
     ,".38 FMJ"
@@ -58,4 +60,10 @@ return {
     ,".44 FMJ"
     ,".44 HP"
     ,".44 Penetrator"
+
+    --/9mm/--
+    ,"9mm FMJ"
+    ,"9mm HP"
+    ,"9mm +P"
+    ,"9mm Tracer"
 }

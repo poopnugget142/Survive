@@ -19,6 +19,7 @@ local KeyBindings = require(ReplicatedScripts.Lib.Player.KeyBindings)
 local Tooltip = require(ReplicatedScripts.Lib.Player.GUI.Tooltip)
 local EventHandler = require(ReplicatedScripts.Lib.Util.EventHandler)
 local Hotkeys = require(ReplicatedScripts.Lib.Player.Hotkeys)
+local ItemRegistry = require(ReplicatedScripts.Registry.Item)
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -134,27 +135,15 @@ end
 local AddItem = EventHandler.CreateEvent("ItemAdd")
 
 AddItem:Connect(function(Entity)
-    local NewItem = TreeventoryCore.BuildItem({TreeventoryCore.BuildItemBoundary(4,2)}, Entity)
+    local EntityData = ItemStates.World.get(Entity)
+    local ItemEnum = EntityData[ItemStates.Enum]
+
+    local ItemSize = ItemRegistry.GetSize(ItemEnum)
+
+    local NewItem = TreeventoryCore.BuildItem({TreeventoryCore.BuildItemBoundary(table.unpack(ItemSize))}, Entity)
     TreeventoryCore.Item_PlaceInTreeventory(NewItem, LocalTreeventory, QuadtreeModule.newPoint(2,2))
     CreateItemDummy(NewItem)
 end)
-
-
---Temp Items
---[[
-local TEMPITEM1 = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(2/4, 0/4, 2/2, 1/2), QuadtreeModule.BuildBox(-2/4, 0/4, 2/2, 1/2)})
-TreeventoryCore.Item_PlaceInTreeventory(TEMPITEM1, LocalTreeventory, QuadtreeModule.newPoint(4,4))
-CreateItemDummy(TEMPITEM1)
-
-local TEMPITEM2 = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(0/4, 0/4, 1/2, 1/2)})
-TreeventoryCore.Item_PlaceInTreeventory(TEMPITEM2, LocalTreeventory, QuadtreeModule.newPoint(2,2))
-CreateItemDummy(TEMPITEM2)
-
-local TEMPITEM3 = TreeventoryCore.BuildItem({QuadtreeModule.BuildBox(0/4, 0/4, 1/2, 1/2)})
-TreeventoryCore.Item_PlaceInTreeventory(TEMPITEM3, LocalTreeventory, QuadtreeModule.newPoint(3,2))
-CreateItemDummy(TEMPITEM3)
-]]
-
 
 --Item Functions
 local ItemPick = function()

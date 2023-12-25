@@ -12,8 +12,8 @@ return {
 
     [Item["Glock 17"]] =
     [[
-    9mm Semi-Automatic Handgun from Austria, famous for its reliability. While its sriker-fired design makes it less accurate than the Berreta,
-    it makes up for this by allowing high capacity magazines.
+    9mm Semi-Automatic Handgun from Austria, famous for its reliability. While its sriker-fired design makes it less accurate than the 
+    Berreta M9, it makes up for this by allowing high capacity magazines.
     ]]
     
     ;[Item["Berreta M9A1"]] =
@@ -33,12 +33,17 @@ return {
     .45 Caliber Semi-Automatic Handgun from Germany, famous for its use by special military services. Accurate, powerful, generously large
     and out-of-the-box compatiable with suppressors, its no wonder why it's been used by those who perfer to lurk in the shadows. 
     ]]
+    ;[Item["FN Five-seveN"]] =
+    [[
+    5.7mm Semi-Automatic Handgun from Belgium, famous for its armor penetrating capabilities. With 20 rounds of the 5.7x28mm cartridge, the same as the 
+    P90, the Five-seveN is a perfect tool for those who require armor penetration on a size budget. 
+    ]]
 
     --/Revolvers/--
     ;[Item["S&W Model 10"]] =
     [[
-    .38 Caliber Double-Action Revolver from the United States, holds the record for the most sucessful revolver in American history. Moderately powerful, 
-    of moderate size, it comes from a more moderate time. 
+    .38 Caliber Double-Action Revolver from the United States, holds the record for the most commercially succesful revolver in American history.
+    Moderately powerful, of moderate size, it comes from a more moderate time. 
     ]]
 
     ;[Item["Colt Python"]] =
@@ -66,12 +71,18 @@ return {
     ;[Item["Steyr TMP"]] =
     [[
     9mm Submachine Gun from Austria, famous for its compact size. Features Semi and Fully-Automatic firing modes. While the lack of a stock noticably 
-    decreases its accuracy and recoil control, this is likely made up for by the extra room in your backpack. 
+    decreases its accuracy and recoil control, this is made up for by the extra room in your backpack. 
     ]]
 
     ;[Item["H&K UMP"]] =
     [[
-    .45 Caliber Submachine Gun from Germany, often seen as the cheap alternative to its big brother, the MP5. Features Semi-Automatic, Fully-Automatic, and 2-Round Burst 
-    firing modes. Your enemies wont be able to criticize its polymer construction when they're pockmarked with .45 caliber holes. 
+    .45 Caliber Submachine Gun from Germany, often seen as the cheaper alternative to its big brother, the MP5. Features Semi-Automatic, Fully-Automatic,
+    and 2-Round Burst firing modes. Your enemies wont be able to criticize its polymer construction when they're pockmarked with .45 caliber holes. 
+    ]]
+
+    ;[Item["FN P90"]] =
+    [[
+    5.7mm Submachine Gun (or Personal Defense Weapon) from Belgium, famous for its armor penetrating capabilities. Features Semi and Fully-Automatic firing modes.
+    An odd looking piece, but its incredible 50-round capacity and top of the line armor penetration among Submachine Guns make criticism seem childish. 
     ]]
 }

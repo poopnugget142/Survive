@@ -8,6 +8,7 @@ return {
     ,"H&K Mk.23"
     ,"Glock 17"
     ,"Berreta M9A1"
+    ,"FN Five-seveN"
 
     --/Revolvers/--
 
@@ -21,6 +22,7 @@ return {
     --~/Submachine Guns/~--
     ,"Steyr TMP"
     ,"H&K UMP"
+    ,"FN P90"
 
     --~==AMMO==~--
 

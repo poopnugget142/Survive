@@ -35,4 +35,12 @@ Module.CameraExtrapolate = function(ScreenPosition: Vector2)
     return CacheOut
 end
 
+Module.MathSummation = function(Values : table | number)
+    local out = 0
+    for _, Value : number in Values do
+        out += Value
+    end
+    return out
+end
+
 return Module

@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
     local ReplicatedScripts = ReplicatedStorage.Scripts
 --
-local Pathfinding = require(ReplicatedScripts.Lib.AI.PathfindingCore2)
+local Pathfinding = require(ReplicatedScripts.Lib.AI.FastPathCore)
 
 local newTilegrid = Pathfinding.BuildTileGrid("ZombieGeneric", Vector2.new(5,5)) :: Pathfinding.TileGrid
 

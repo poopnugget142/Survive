@@ -66,6 +66,12 @@ return {
     design that remains highly effective. 
     ]]
 
+    ;[Item["Serbu Super Shorty"]] =
+    [[
+    12 Gauge Pump-Action Shotgun from the United States, known for its incredibly small size. It has a measly magazine capacity of 2 rounds, but its compact 
+    nature and breaching muzzle device make it ideal as a secondary weapon. 
+    ]]
+
     --~/Submachine Guns/~--
 
     ;[Item["Steyr TMP"]] =

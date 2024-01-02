@@ -8,7 +8,8 @@ local newTilegrid = Pathfinding.BuildTileGrid("ZombieGeneric", Vector2.new(5,5))
 for i = 0, (60-newTilegrid.TileSize.X), newTilegrid.TileSize.X do
     for j = 0, (60-newTilegrid.TileSize.Y), newTilegrid.TileSize.Y do
         --print(i,j)
-        newTilegrid:BuildTile(i,j)
+        local newTile = newTilegrid:BuildTile(i,j)
+        newTile.Interpolants["floor"] = 1
         task.wait(0.01)
     end
 end

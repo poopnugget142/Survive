@@ -2,9 +2,9 @@
     NOTETAKING
 
     store way more data, make the system more robust
-        dont use step up/down logic, index every position with a tile for abstraction
+        dont use step up/down logic, index every position with a Tile for Abstraction
+    --
 
-    
 --]]
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -22,9 +22,10 @@ local AllTileGrids = {}
 
 local NavGrid = {}
 NavGrid.__index = NavGrid
-local AllNavGrids = {}
 
 local Module = {}
+
+export type Function = any
 
 export type Point = QuadtreeModule.Point
 export type Box = QuadtreeModule.Box
@@ -32,20 +33,20 @@ export type Box = QuadtreeModule.Box
 export type Node = {
     TileGrid : TileGrid
     ,Layer : number
-    ,Boundary : Box
-    ,Parent : Abstraction --abstraction layers, helpful for 'stepping up' layers
-    ,Children : table | Node --used exclusively by abstraction layers
+    ,Boundary : Box | Point
+    ,Parent : Abstraction --Abstraction Layers, helpful for 'stepping up' Layers
+    ,Children : table | Node --used exclusively by Abstraction Layers
     ,Adjacents : table | Node
     ,Interpolants : table | number
 }
 
-export type Tile = Node --tiles are primary containers for navigation information
+export type Tile = Node --Tiles are primary containers for navigation information
 export type Adjacent = {
     Node : Tile | Abstraction
     ,Interpolants : table | number
 }
 
-export type Abstraction = Node --abstractions are similar to tiles, but contain aggregated data instead
+export type Abstraction = Node --Abstractions are similar to Tiles, but contain aggregated data instead
 export type AbstractionLayer = {
     Abstractions : Abstraction
     ,AbstractionSize : Vector2
@@ -79,8 +80,13 @@ export type Target = {
     ,Time : number --position + velocity
 }
 
-
-local StandardAdjacents : table | Vector2 = {
+local ManhattanAdjacents : table | Vector2 = {
+    Vector2.new(0,1),   -- 12 o'clock
+    Vector2.new(1,0),   -- 3  o'clock
+    Vector2.new(0,-1),  -- 6  o'clock
+    Vector2.new(-1,0),  -- 9  o'clock
+}
+local EuclideanAdjacents : table | Vector2 = {
     Vector2.new(0,1),   -- 12 o'clock
     Vector2.new(1,1),   --
     Vector2.new(1,0),   -- 3  o'clock
@@ -91,19 +97,20 @@ local StandardAdjacents : table | Vector2 = {
     Vector2.new(-1,1)   --
 }
 
-local GetEdgeChildrenInDirection = function(Tile : Tile, Direction : Vector2) --first, get adjacent abstraction in a direction, then get children tiles in opposite direction to step down
+local GetEdgeChildrenInDirection = function(Tile : Tile, Direction : Vector2) --first, get Adjacent Abstraction in a direction, then get children Tiles in opposite direction to step down
     local Side = Vector2.new(
         0.5 + math.sign(Direction.X) * 0.5
         ,0.5 + math.sign(Direction.Y) * 0.5
     )
-    --output a row/column of tiles/abstractions for single vectors
+    --output a row/column of Tiles/Abstractions for single vectors
 
 
-    --if both axes have entries, then output a corner tile
+    --if both axes have entries, then output a corner Tile
 
 end
 
-function TileGrid:GetAdjacents(Node : Tile | Abstraction | Node)
+--get Adjacent nodes on a TileGrid / Abstraction Layer
+function TileGrid:GetAdjacents(Node : Tile | Abstraction | Node) : table | Adjacent
     local out = {}
     local U = Node.Boundary.X
     local V = Node.Boundary.Y
@@ -113,31 +120,34 @@ function TileGrid:GetAdjacents(Node : Tile | Abstraction | Node)
     local TileGrid = AbstractionLayer.Abstractions
     local TileSize = AbstractionLayer.AbstractionSize
 
-    --cycle through table of standard adjacents and store adjacent tiles in each tile
-    for _, Adjacent : Vector2 in StandardAdjacents do
-        local AdjacentNode : Node
-        
-        if TileGrid[U+Adjacent.X*TileSize.X] then --check to see if X exists to avoid error
-            AdjacentNode = TileGrid[U+Adjacent.X*TileSize.X][V+Adjacent.Y*TileSize.Y]
-            if not AdjacentNode then continue end
-            local AdjacentInterpolants
-            --query the cost of the node
-            if AdjacentNode.Layer == 0 then
-                AdjacentInterpolants = AdjacentNode.Interpolants
-            else
-                --A* pathfind through an abstraction to return an approximate cost
-            end
+    local SearchAdjacents
+    if Layer == 0 then SearchAdjacents = EuclideanAdjacents else SearchAdjacents = ManhattanAdjacents end --Abstractions use manhattan Adjacents (there are no edges between corners dummy!)
 
-            --add adjacent to list of adjacents
-            table.insert(
-                out
-                ,{
-                    Node = AdjacentNode
-                    ,Interpolants = AdjacentInterpolants
-                } :: Adjacent
-            )
-            
+    --cycle through table of standard Adjacents and store Adjacent Tiles in each Tile
+    for _, Adjacent : Vector2 in EuclideanAdjacents do
+        local AdjacentNode : Node
+
+        if not TileGrid[U+Adjacent.X*TileSize.X] then continue end --check to see if X exists to avoid error
+
+        AdjacentNode = TileGrid[U+Adjacent.X*TileSize.X][V+Adjacent.Y*TileSize.Y]
+        if not AdjacentNode then continue end
+
+        local AdjacentInterpolants
+        --query the cost of the node
+        if AdjacentNode.Layer == 0 then
+            AdjacentInterpolants = AdjacentNode.Interpolants
+        else
+            --A* pathfind through an Abstraction to return an approximate cost !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         end
+
+        --add Adjacent to list of Adjacents
+        table.insert(
+            out
+            ,{
+                Node = AdjacentNode
+                ,Interpolants = AdjacentInterpolants
+            } :: Adjacent
+        )
     end
 
     return out
@@ -145,13 +155,15 @@ end
 
 function TileGrid:CornerCheck(U,V)
     if U < self.OriginCorner.X then self.OriginCorner = Vector2.new(U,self.OriginCorner.Y) 
-        elseif U > self.LeadingCorner.X then self.LeadingCorner = Vector2.new(U,self.LeadingCorner.Y) end
+        elseif U > self.LeadingCorner.X then self.LeadingCorner = Vector2.new(U,self.LeadingCorner.Y) 
+            end
     if V < self.OriginCorner.Y then self.OriginCorner = Vector2.new(self.OriginCorner.X, V) 
-        elseif V > self.LeadingCorner.Y then self.LeadingCorner = Vector2.new(self.LeadingCorner.X, V) end
+        elseif V > self.LeadingCorner.Y then self.LeadingCorner = Vector2.new(self.LeadingCorner.X, V) 
+            end
 end
 
 function TileGrid:BuildTile(U,V)
-    -- define a tile at a position
+    -- define a Tile at a position
     local NewTile = {
         TileGrid = self
         ,Layer = 0
@@ -161,9 +173,9 @@ function TileGrid:BuildTile(U,V)
         ,Interpolants = {}
     } :: Tile
 
-    --populate adjacents for this tile
+    --populate Adjacents for this Tile
     NewTile.Adjacents = self:GetAdjacents(NewTile)
-        --add this tile to adjacents
+        --add this Tile to Adjacents
         for _, Adjacent : Adjacent in NewTile.Adjacents do
             local NewAdjacent = {
                 Node = NewTile
@@ -175,6 +187,7 @@ function TileGrid:BuildTile(U,V)
                 ,NewAdjacent
             )
         end
+    --
 
     --add new Tile to TileGrid
     if not self.Tiles[U] then self.Tiles[U] = {} end
@@ -186,8 +199,9 @@ function TileGrid:BuildTile(U,V)
     return NewTile
 end
 
+--TileGrid Abstraction creates multiple layers of less refined TileGrid s that cache navigation data to be read faster
 function TileGrid:Abstract(Layer : number?)
-    --create multiple abstractions of the tilegrid based on a parsed size
+    --create multiple Abstractions of the Tilegrid based on a parsed size
     --  has support for obtuse sizes
     if not Layer then Layer = 0 end
 
@@ -214,7 +228,7 @@ function TileGrid:Abstract(Layer : number?)
     local TileGridLeadingCornerV = self.LeadingCorner.Y
     --
 
-    --iterate through the child grid based on a given size for our abstractions
+    --iterate through the child grid based on a given size for our Abstractions
     for i = TileGridOriginCornerU, TileGridLeadingCornerU, AbstractionSizeU do
         for j = TileGridOriginCornerV, TileGridLeadingCornerV, AbstractionSizeV do      
             local Children = {}
@@ -241,31 +255,57 @@ function TileGrid:Abstract(Layer : number?)
                 ,Interpolants = {}
             }
 
-            --identify children's parent as this abstraction
+            --identify children's parent as this Abstraction
             for U = i, i+AbstractionSizeU-ChildSizeU, ChildSizeU do
                 for V = j, j+AbstractionSizeV-ChildSizeV, ChildSizeV do
                     Children[U][V].Parent = NewAbstract
                 end
             end
 
-            --populate abstraction adjacents
+            --populate Abstraction Adjacents
             self:GetAdjacents(NewAbstract)
 
-            --add abstract to layer
+            --add abstract to Layer
             if not AbstractionGrid[i] then AbstractionGrid[i] = {} end
             AbstractionGrid[i][j] = NewAbstract
-            --print(NewAbstract)
         end
     end
 
-    --recursively abstract until all abstraction layers have been parsed
+    --recursively abstract until all Abstraction Layers have been parsed
     self:Abstract(Layer+1)
 end
 
+function TileGrid:AStarQuery(
+    Origin : Target
+    ,Target : Target
+    ,Abstraction : Abstraction?
+    ,HeuristicFunction : Function | number?
+)
+
+
+    --return interpolants
+end
+
+function TileGrid:BuildNavGrid(Name : string)
+    local NewNavGrid = setmetatable({}, NavGrid) :: NavGrid
+
+    NewNavGrid.Name = Name
+    NewNavGrid.Targets = {}
+    NewNavGrid.InterpolantMultipliers = {}
+
+    NewNavGrid.HeuristicFunction = function() return 0 end
+
+    if Name then
+        self.NavGrids[Name] = NewNavGrid
+    end
+
+    return NewNavGrid
+end
+
 function TileGrid:UniformCostSearch(
-    NavGrid : NavGrid 
+    NavGrid : NavGrid
     ,Targets : table
-    ,HeuristicFunction : Function
+    ,HeuristicFunction : Function | number --the heuristic is passed to navgrid fronts
 )
 return Promise.new(function(resolve, reject, onCancel)
     --red blob games ucs
@@ -275,10 +315,15 @@ return Promise.new(function(resolve, reject, onCancel)
 end) end
 
 
+--NavGrid class
+
+
+
+
 Module.BuildTileGrid = function(Name : string, TileSize : Vector2?)
     local NewTileGrid = setmetatable({}, TileGrid) :: TileGrid
 
-    NewTileGrid.Tiles = {} --contains tiles (duh)
+    NewTileGrid.Tiles = {} --contains Tiles (duh)
     NewTileGrid.TileCount = 0
     NewTileGrid.TileSize = TileSize or Vector2.new(1,1)
     NewTileGrid.AbstractionLayers = {
@@ -287,8 +332,8 @@ Module.BuildTileGrid = function(Name : string, TileSize : Vector2?)
             ,AbstractionSize = NewTileGrid.TileSize
         } :: AbstractionLayer
     }
-    NewTileGrid.OriginCorner = Vector2.new(10000,10000) --origin corner is the minimum corner, automatically assigned at tile creation
-    NewTileGrid.LeadingCorner = Vector2.new(-10000,-10000) --leading corner is the maximum corner, automatically assigned at tile creation
+    NewTileGrid.OriginCorner = Vector2.new(10000,10000) --origin corner is the minimum corner, automatically assigned at Tile creation
+    NewTileGrid.LeadingCorner = Vector2.new(-10000,-10000) --leading corner is the maximum corner, automatically assigned at Tile creation
     NewTileGrid.NavGrids = {}
 
     if Name then
@@ -297,7 +342,6 @@ Module.BuildTileGrid = function(Name : string, TileSize : Vector2?)
 
     return NewTileGrid
 end
-
 Module.GetTileGrid = function(Name : string)
     return AllTileGrids[Name]
 end

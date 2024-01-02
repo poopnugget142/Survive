@@ -18,6 +18,7 @@ return {
 
     --~/Shotguns/~--
     ,"Remington 870"
+    ,"Serbu Super Shorty"
 
     --~/Submachine Guns/~--
     ,"Steyr TMP"
@@ -33,7 +34,7 @@ return {
     ,"12Guage Shell Slug" --Green
     ,"12Guage Shell Birdshot" --Pink
     ,"12Guage Shell Flechette" --White
-    ,"12Guage Shell Breacher" --Blue
+    ,"12Guage Shell Breaching" --Blue
 
     --~/Bullets/~--
 

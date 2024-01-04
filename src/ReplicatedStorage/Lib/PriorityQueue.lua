@@ -1,52 +1,49 @@
-local Queue = {}
-Queue.__index = Queue
+export type ComparatorFn<T> = (a : T, b : T) -> number
 
-function Queue:Comparator(a, b)
-    local _a = self.ComparatorGetFunction(a)
-    local _b = self.ComparatorGetFunction(b)
-    if (_a == nil or _b == nil) then
-        return 0
-    end
+export type Null = any
+export type PriorityQueue = {
+    ComparatorFn : ComparatorFn<T>
+    ,IsEmpty : (nil) -> boolean
+    ,Enqueue : (Value : any) -> Null
+    ,Dequeue : (nil) -> any
+    ,HeapSort : (nil) -> table
+}
 
-    return(_a - _b)
+local PriorityQueue = {}
+PriorityQueue.__index = PriorityQueue
+
+function PriorityQueue:IsEmpty()
+    if PriorityQueue.RealLength == 0 then return true end
 end
 
-function Queue:HeapSort()
-    local out = {}
-    for e = 1, self.Length do
-        table.insert(out, self:Dequeue())
-    end
-
-    return out
-end
-
-function Queue:Parent(NodeIndex : number) --called for a child to get the node in the tree level above it
-    if (NodeIndex == 1) then return nil end
+local function Parent(NodeIndex : number) --called for a child to get the node in the tree level above it
+    if (NodeIndex == 1) then return end
     return math.floor(NodeIndex/2)
 end
 
-function Queue:LeftChild(NodeIndex : number) --called for a parent to get the left childs
-    local child = (NodeIndex*2)
-    if (child >= self.Length) then return nil end
-    return child
+local function LeftChild(Queue : PriorityQueue, NodeIndex : number) --called for a parent to get the left child
+    local Child = NodeIndex*2
+    if Child >= Queue.RealLength then return end
+    return Child
 end
 
-function Queue:RightChild(NodeIndex : number) --called for a parent to get the right child
-    local child = (NodeIndex*2)+1
-    if (child >= self.Length) then return nil end
-    return child
+local function RightChild(Queue : PriorityQueue, NodeIndex : number) --called for a parent to get the right child
+    local Child = NodeIndex*2 +1
+    if Child >= Queue.RealLength then return end
+    return Child
 end
 
-function Queue:ShiftUp() --move smaller frontier up the binary tree
-    local index = self.Length
+local function ShiftUp(Queue: PriorityQueue)
+    local Index = Queue.RealLength
 
-    while (true) do
-        local parentIndex = self:Parent(index)
+    while true do
+        local Parent = Parent(Index)
 
-        if (parentIndex ~= nil and (self:Comparator( index, parentIndex ) < 0) ) then
-            local temp = self.Values[index]
-            self.Values[index] = self.Values[parentIndex]
-            self.Values[parentIndex] = temp
+        if (Parent ~= nil and Queue.ComparatorFn(Queue.Values[Index], Queue.Values[Parent]) < 0) then
+            local Temp = Queue.Values[Index]
+            Queue.Values[Index] = Queue.Values[Parent]
+            Queue.Values[Parent] = Temp
+            Index = Parent
             continue
         end
 
@@ -54,76 +51,77 @@ function Queue:ShiftUp() --move smaller frontier up the binary tree
     end
 end
 
-function Queue:ShiftDown() --move bigger frontier down the binary tree
-    local index = 1
+local function ShiftDown(Queue: PriorityQueue)
+    local Index = 1
 
     while true do
-        local left = self:LeftChild(index)
-        local right = self:RightChild(index)
-        
-        local swapCandidiate = index
-        if (left ~= nil and (self:Comparator( swapCandidiate, left ) > 0) ) then
-            swapCandidiate = left
+        local Left = LeftChild(Queue, Index)
+        local Right = RightChild(Queue, Index)
+
+        local SwapCandidate = Index
+        if Left ~= nil and Queue.ComparatorFn(Queue.Values[SwapCandidate], Queue.Values[Left]) > 0 then
+            SwapCandidate = Left
         end
-        if (right ~= nil and (self:Comparator( swapCandidiate, right ) > 0) ) then
-            swapCandidiate = right
+        if Right ~= nil and Queue.ComparatorFn(Queue.Values[SwapCandidate], Queue.Values[Right]) > 0 then
+            SwapCandidate = Right
         end
-        if (swapCandidiate ~= index) then --check to see if swap candidate was altered by the two previous ifs
-            local temp = self.Values[index]
-            self.Values[index] = self.Values[swapCandidiate]
-            self.Values[swapCandidiate] = temp
-            index = swapCandidiate
+
+        if SwapCandidate ~= Index then
+            local Temp = Queue.Values[Index]
+            Queue.Values[Index] = Queue.Values[SwapCandidate]
+            Queue.Values[SwapCandidate] = Temp
+            Index = SwapCandidate
             continue
         end
 
-        return --otherwise break the operation
+        return
     end
 end
 
-function Queue:Enqueue(Value)
-    if (self.Length2 ~= nil) then
-        if (self.Length2 <= self.Length) then --increase array length exponentially depending on value count
-            self.Length2 = math.max(1, self.Length2 * 2)
-        end
-    else
-        self.Length2 = 1
+function PriorityQueue:Enqueue(Value : any)
+    if (self.VirtualLength <= self.RealLength) then
+        self.VirtualLength = math.max(1, self.RealLength * 2)
     end
-    self.Values[self.Length+1] = Value --add
-    self.Length+=1 --add
-    self:ShiftUp()
-
-    return true
+    self.Values[self.RealLength+1] = Value
+    self.RealLength+=1
+    ShiftUp(self)
 end
 
-function Queue:Dequeue()
-    if (self.Length == 0) then return nil end --skip if theres nothing to remove
+function PriorityQueue:Dequeue()
+    if self:IsEmpty() then return end
 
-    local node = self.Values[1] --look at our first value
+    local Node = self.Values[1]
 
-    if (self.Length == 1) then --if theres only one value, we require no further computations
-        self.Length = 0 
-        self.Values[1] = nil
-        return node
+    if self.RealLength == 1 then
+        self.RealLength = 0
+        self.Values = {}
+        return Node
     end
 
-    self.Values[1] = self.Values[self.Length] --move the topmost value to the bottom of the binary tree, to do some swapping
-    self.Values[self.Length] = nil
-    self.Length-=1
-    self:ShiftDown() --swapping function
-    
-    return node
+    self.Values[1] = self.Values[self.RealLength]
+    self.Values[self.RealLength] = nil
+    self.RealLength -= 1
+
+    ShiftDown(self)
+
+    return Node
+end
+
+function PriorityQueue:HeapSort()
+    local out
+    while not PriorityQueue:IsEmpty() do
+        self:Dequeue()
+    end
 end
 
 local Module = {}
+Module.BuildPriorityQueue = function(ComparatorFn : ComparatorFn<T>) : PriorityQueue
+    local NewPriorityQueue = setmetatable({}, PriorityQueue)
+    NewPriorityQueue.Values = {}
+    NewPriorityQueue.ComparatorFn = ComparatorFn or function(a, b) return a - b end
+    NewPriorityQueue.VirtualLength = 0
+    NewPriorityQueue.RealLength = 0
 
-Module.Create = function(ComparatorGetFunction : any)
-    local NewQueue = setmetatable({}, Queue)
-    NewQueue.Length = 0
-    NewQueue.Length2 = 0
-    NewQueue.ComparatorGetFunction = ComparatorGetFunction or function (Value) return Value end
-    NewQueue.Values = {}
-
-    return NewQueue
+    return NewPriorityQueue :: PriorityQueue
 end
-
 return Module

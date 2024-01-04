@@ -109,8 +109,8 @@ Module.BuildBoxFromCorners = function(X1,Y1,X2,Y2)
     return {
         X = (X1+X2)/2
         ;Y = (Y1+Y2)/2
-        ;w = math.abs(X1-X2)/2
-        ;h = math.abs(Y1-Y2)/2
+        ;w = math.abs(math.max(X1,X2)-math.min(X1,X2))/2
+        ;h = math.abs(math.max(Y1,Y2)-math.min(Y1,Y2))/2
     }
 end
 Module.BuildCircle = function(X,Y,r)

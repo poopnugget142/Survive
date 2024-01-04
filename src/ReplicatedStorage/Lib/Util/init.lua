@@ -37,6 +37,7 @@ end
 
 Module.MathSummation = function(Values : table | number)
     local out = 0
+    if not Values then return out end
     for _, Value : number in Values do
         out += Value
     end

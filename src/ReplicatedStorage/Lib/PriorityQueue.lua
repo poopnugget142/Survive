@@ -14,6 +14,7 @@ PriorityQueue.__index = PriorityQueue
 
 function PriorityQueue:IsEmpty()
     if PriorityQueue.RealLength == 0 then return true end
+    return
 end
 
 local function Parent(NodeIndex : number) --called for a child to get the node in the tree level above it

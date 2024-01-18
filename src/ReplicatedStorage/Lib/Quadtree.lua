@@ -129,12 +129,13 @@ Module.newPoint = function(X,Y)
     } :: Point
 end
 
-Module.BoxCheck = function(Box : Box, Other : Box | Circle | Point)
+Module.BoxCheck = function(Box : Box, Other : Box | Circle | Point, Offset : number)
+    if not Offset then Offset = 0 end
     return not (
-        Box.X - Box.w >= Other.X + (Other.w or Other.r or 0) or
-        Box.X + Box.w < Other.X - (Other.w or Other.r or 0) or
-        Box.Y - Box.h >= Other.Y + (Other.h or Other.r or 0) or
-        Box.Y + Box.h < Other.Y - (Other.h or Other.r or 0)
+        Box.X - ((Box.w or 0) + Offset) >= Other.X + ((Other.w or Other.r or 0) + Offset) or
+        Box.X + ((Box.w or 0) + Offset) < Other.X - ((Other.w or Other.r or 0) + Offset) or
+        Box.Y - ((Box.h or 0) + Offset) >= Other.Y + ((Other.h or Other.r or 0) + Offset) or
+        Box.Y + ((Box.h or 0) + Offset) < Other.Y - ((Other.h or Other.r or 0) + Offset)
     )
 end
 Module.CircleCheck = function(Circle : Circle, Other : Circle | Point)

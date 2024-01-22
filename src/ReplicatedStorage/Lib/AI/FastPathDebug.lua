@@ -1,1 +1,0 @@
---module with client sided functions for rendering shit

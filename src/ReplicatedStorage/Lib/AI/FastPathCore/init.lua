@@ -16,6 +16,8 @@ local PriorityQueueModule = require(ReplicatedScripts.Lib.PriorityQueue)
 local QuadtreeModule = require(ReplicatedScripts.Lib.Quadtree)
 local Promise = require(ReplicatedStorage.Packages.Promise)
 
+local Debug = require(script.Debug)
+
 local TileGrid = {}
 TileGrid.__index = TileGrid
 local AllTileGrids = {}
@@ -99,6 +101,12 @@ local EuclideanAdjacents : (table) -> Vector2 = {
     Vector2.new(-1,1)   --
 }
 
+local ManhattanDistance = function(A : Vector2, B : Vector2)
+    return Vector2.new(
+        math.abs(A.X - B.X)
+        ,math.abs(A.Y - B.Y)
+    )
+end
 --[==[local GetEdgeChildrenInDirection = function(Tile : Tile, Direction : Vector2) --first, get Adjacent Abstraction in a direction, then get Children Tiles in opposite direction to step down
     local Side = Vector2.new(
         0.5 + math.sign(Direction.X) * 0.5
@@ -131,21 +139,17 @@ function TileGrid:GetAdjacents(Node : Node) : (table) -> Adjacent
         ChildSize = ChildLayer.AbstractionSize
     end
 
-    local SearchAdjacents = EuclideanAdjacents
-    --if Layer == 0 then SearchAdjacents = EuclideanAdjacents else SearchAdjacents = EuclideanAdjacents end --Abstractions use manhattan Adjacents (there are no edges between Corners dummy!)
+    local SearchAdjacents --= EuclideanAdjacents
+    if Layer == 0 then SearchAdjacents = EuclideanAdjacents else SearchAdjacents = ManhattanAdjacents end --Abstractions use manhattan Adjacents (there are no edges between Corners dummy!)
 
     --cycle through table of standard Adjacents and store Adjacent Tiles in each Tile
     for _, Adjacent : Vector2 in SearchAdjacents do
         local AdjacentNode : Node
 
-        if not AbstractionGrid[U+Adjacent.X*AbstractionSize.X] then
-            continue 
-        end --check to see if X exists to avoid error
+        if not AbstractionGrid[U+Adjacent.X*AbstractionSize.X] then continue end --check to see if X exists to avoid error
 
         AdjacentNode = AbstractionGrid[U+Adjacent.X*AbstractionSize.X][V+Adjacent.Y*AbstractionSize.Y]
-        if not AdjacentNode then 
-            continue 
-        end
+        if not AdjacentNode then continue end
 
         local AdjacentInterpolants
         --query the cost of the Node
@@ -155,7 +159,6 @@ function TileGrid:GetAdjacents(Node : Node) : (table) -> Adjacent
             --store pathfinding cost for abstraction interpolants
             local HeuristicFn = function(Front : Front)
                 return Vector2.new(AdjacentNode.PrimaryChild.Boundary.X - Front.Boundary.X, AdjacentNode.PrimaryChild.Boundary.Y - Front.Boundary.Y).Magnitude*2
-                --return math.abs(NodeChild.Boundary.X - Node.Boundary.X) + math.abs(NodeChild.Boundary.Y - NodeChild.Boundary.Y) --this method assumes that a child will be in the center, fix later
             end
             local Query = self:AStarQuery(Node.PrimaryChild, AdjacentNode.PrimaryChild, HeuristicFn)
             if not Query then continue end
@@ -170,8 +173,17 @@ function TileGrid:GetAdjacents(Node : Node) : (table) -> Adjacent
                 ,Interpolants = AdjacentInterpolants
             } :: Adjacent
         )
+
+        table.insert(
+            AdjacentNode.Adjacents
+            ,{
+                Node = Node
+                ,Interpolants = AdjacentInterpolants
+            }
+        )
     end
 
+    Node.Adjacents = out
     return out
 end
 
@@ -182,6 +194,12 @@ function TileGrid:CornerCheck(U,V)
     if V < self.OriginCorner.Y then self.OriginCorner = Vector2.new(self.OriginCorner.X, V) 
         elseif V > self.LeadingCorner.Y then self.LeadingCorner = Vector2.new(self.LeadingCorner.X, V) 
             end
+    self.Boundary = QuadtreeModule.BuildBox(
+        (self.OriginCorner.X + self.LeadingCorner.X)/2
+        ,(self.OriginCorner.Y + self.LeadingCorner.Y)/2
+        ,math.abs(self.OriginCorner.X - self.LeadingCorner.X)/2
+        ,math.abs(self.OriginCorner.Y - self.LeadingCorner.Y)/2
+    )
 end
 
 function TileGrid:BuildTile(U,V)
@@ -198,6 +216,7 @@ function TileGrid:BuildTile(U,V)
     --populate Adjacents for this Tile
     newTile.Adjacents = self:GetAdjacents(newTile)
         --add this Tile to Adjacents
+        --[[
         for _, Adjacent : Adjacent in newTile.Adjacents do
             local newAdjacent = {
                 Node = newTile
@@ -209,6 +228,7 @@ function TileGrid:BuildTile(U,V)
                 ,newAdjacent
             )
         end
+        ]]
     --
 
     --add new Tile to TileGrid
@@ -280,15 +300,13 @@ function TileGrid:Abstract(Layer : number?)
                 ,Interpolants = {}
             }
 
-            --identify Children's Parent as this Abstraction, and discover a PrimaryChild
-            local ChildrenDistanceFilter = PriorityQueueModule.BuildPriorityQueue(
-                function(a, b)
-                    local A = Vector2.new(newAbstract.Boundary.X - a.Boundary.X, newAbstract.Boundary.Y - a.Boundary.Y).Magnitude
-                    local B = Vector2.new(newAbstract.Boundary.X - b.Boundary.X, newAbstract.Boundary.Y - b.Boundary.Y).Magnitude
-                    return A - B
-                end
-            )
-            --
+            --identify Children's Parent as this Abstraction
+            local ChildrenDistanceFilter = PriorityQueueModule.BuildPriorityQueue(function(a, b)
+                local A = Vector2.new(newAbstract.Boundary.X - a.Boundary.X, newAbstract.Boundary.Y - a.Boundary.Y).Magnitude
+                local B = Vector2.new(newAbstract.Boundary.X - b.Boundary.X, newAbstract.Boundary.Y - b.Boundary.Y).Magnitude
+                return A - B
+            end)
+            --set closest Child to center as the PrimaryChild
             for U = i, i+AbstractionSizeU-ChildSize.X, ChildSize.X do
                 if not Children[U] then continue end
                 for V = j, j+AbstractionSizeV-ChildSize.Y, ChildSize.Y do
@@ -300,13 +318,13 @@ function TileGrid:Abstract(Layer : number?)
             end
 
             --populate Abstraction Adjacents
-            newAbstract.Adjacents = self:GetAdjacents(newAbstract)
+            self:GetAdjacents(newAbstract)
                 --add this Tile to Adjacents
+                --[[
                 for _, Adjacent : Adjacent in newAbstract.Adjacents do
-                    --use pathfinding cost for abstraction interpolants
+                    --use pathfinding cost for Abstraction Interpolants
                     local HeuristicFn = function(Front : Front)
-                        return Vector2.new(Adjacent.Node.PrimaryChild.Boundary.X - Front.Boundary.X, Adjacent.Node.PrimaryChild.Boundary.Y - Front.Boundary.Y).Magnitude*2
-                        --return math.abs(newAbstract.Boundary.X - NodeChild.Boundary.X) + math.abs(newAbstract.Boundary.Y - NodeChild.Boundary.Y) --this method assumes that a child will be in the center, fix later
+                        return Vector2.new(newAbstract.PrimaryChild.Boundary.X - Front.Boundary.X, newAbstract.PrimaryChild.Boundary.Y - Front.Boundary.Y).Magnitude*2
                     end
                     local Query = self:AStarQuery(Adjacent.Node.PrimaryChild, newAbstract.PrimaryChild, HeuristicFn)
                     local newAdjacent = {
@@ -319,6 +337,7 @@ function TileGrid:Abstract(Layer : number?)
                         ,newAdjacent
                     )
                 end
+                ]]
             --
             --add Abstract to Layer
             if not AbstractionGrid[newAbstract.Boundary.X] then AbstractionGrid[newAbstract.Boundary.X] = {} end
@@ -352,18 +371,19 @@ function TileGrid:BuildNavGrid(
 end
 
 local function Backstep(Front : Front)
-    local out
+    local out = Vector2.new()
     local PreviousFront = Front.PreviousFront
     if PreviousFront then
         PreviousFront.Force = Vector2.new(
             Front.Boundary.X - PreviousFront.Boundary.X
             ,Front.Boundary.Y - PreviousFront.Boundary.Y
-        )
+        ).Unit
 
-        out = Backstep(PreviousFront)
+        out += Backstep(PreviousFront)
     else
-        out = Front.Force
+        out += Front.Force/(1+Front.Priority)
     end
+    --print(out)
 
     return out
 end
@@ -378,6 +398,7 @@ function TileGrid:AStarQuery(
         ,Direction = Vector2.zero
     }
     if not (Origin or Target) then return end
+
     --build Origin and Target Nodes
     local OriginNode
     if Origin.Position then
@@ -388,7 +409,8 @@ function TileGrid:AStarQuery(
         if not self.Tiles[_Origin.Position.X] then return end
         OriginNode = self.Tiles[_Origin.Position.X][_Origin.Position.Y]
         if not OriginNode then return end
-    else 
+    else
+        if not (Origin or QuadtreeModule.BoxCheck(self.Boundary, Origin)) then return end
         OriginNode = Origin
     end
     local TargetNode
@@ -401,6 +423,7 @@ function TileGrid:AStarQuery(
         TargetNode = self.Tiles[_Target.Position.X][_Target.Position.Y]
         if not TargetNode then return end
     else
+        if not (Target or QuadtreeModule.BoxCheck(self.Boundary, Target)) then return end
         TargetNode = Target
     end
 
@@ -414,6 +437,7 @@ function TileGrid:AStarQuery(
         ,PreviousFront = nil
         ,Force = Vector2.zero
         ,Target = Target
+        ,TargetNode = TargetNode
         ,CumulativeInterpolants = {}
         ,Priorty = 0
     } :: Front
@@ -459,7 +483,7 @@ function TileGrid:AStarQuery(
                 ,Layer = CurrentNode.Layer
                 ,Steps = generationSteps
             })
-            ]==]
+            --]==]
             break
         end
 
@@ -470,7 +494,9 @@ function TileGrid:AStarQuery(
 
             --'Step Up' Abstractions when leaving our parent tile
             if Abstraction == true then
-                if CurrentNode.Parent and not QuadtreeModule.BoxCheck(CurrentNode.Parent.Boundary, AdjacentNode.Boundary) then
+                if ((CurrentNode.Parent and AdjacentNode.Parent) and (CurrentNode.Parent.Parent ~= AdjacentNode.Parent.Parent)) 
+                or (CurrentNode.Parent ~= AdjacentNode.Parent) 
+                then
                     AdjacentNode = Adjacent.Node.Parent
                     if not AdjacentNode then continue end
                 end
@@ -479,7 +505,9 @@ function TileGrid:AStarQuery(
             --apply Costs to each Interpolant on the Front
             for Index, Cost in Adjacent.Interpolants do
                 if not CurrentInterpolants[Index] then newInterpolants[Index] = Cost else
-                    newInterpolants[Index] = CurrentInterpolants[Index] + Cost end
+                    newInterpolants[Index] = CurrentInterpolants[Index] + Cost 
+                    newInterpolants[Index] *= 1 + CurrentNode.Layer*0.1
+                end
             end
 
             if not (
@@ -496,6 +524,7 @@ function TileGrid:AStarQuery(
                     ,PreviousFront = CurrentFront
                     ,Force = Vector2.zero
                     ,Target = Target
+                    ,TargetNode = TargetNode
                     ,CumulativeInterpolants = newInterpolants
                     ,Priorty = math.huge
                 } :: Front
@@ -511,7 +540,7 @@ function TileGrid:AStarQuery(
     end
     local generationDelta = os:clock() - generationStart
     --print(generationDelta, generationSteps)
-    print(1/generationDelta)
+    --print(1/generationDelta)
 
     return out
 end

@@ -12,7 +12,7 @@ return function (context, Type, Amount)
         error("what the heck, where is ze enemy")
     end
 
-    for i = 1, Amount do
+    for i = 1, Amount or 1 do
         CharacterModule.CreateNPC(NPCEnum, Vector3.new(20, 0.5, 20))
 
         task.wait()

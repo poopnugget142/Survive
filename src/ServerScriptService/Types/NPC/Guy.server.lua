@@ -1,17 +1,23 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
 
 local ReplicatedScripts = ReplicatedStorage.Scripts
 
+local Util = require(ReplicatedScripts.Lib.Util)
 local CharacterStates = require(ReplicatedScripts.States.Character)
 local Enums = require(ReplicatedScripts.Registry.Enums)
-local Pathfinding = require(ReplicatedScripts.Lib.AI.PathfindingCore)
+--local Pathfinding = require(ReplicatedScripts.Lib.AI.PathfindingCore)
+local Pathfinding2 = require(ReplicatedScripts.Lib.AI.FastPathCore)
 local CharacterModule = require(ReplicatedScripts.Class.Character)
 local NpcRegistry = require(ReplicatedScripts.Registry.NPC)
 local QuadtreeModule = require(ReplicatedScripts.Lib.Quadtree)
-    
+local PriorityQueueModule = require(ReplicatedScripts.Lib.PriorityQueue)
+
 local NpcEnum = Enums.NPC.Guy
+print(NpcEnum)
 
 local AttackRange = NpcRegistry.GetAttackRange(NpcEnum)
 
@@ -85,6 +91,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
         local Velocity = MovementData.Velocity
         local NPCId = EntityData[CharacterStates.NPCId]
 
+        --[==[
         local Navgrid = Pathfinding.GetNavgrid("ZombieGeneric")
 
         if not Navgrid then continue end
@@ -136,6 +143,32 @@ RunService.Heartbeat:Connect(function(deltaTime)
                 end
             end
         end
+        ]==]
+
+        local Targets = PriorityQueueModule.BuildPriorityQueue(function(a, b)
+            local A = (a - Position).Magnitude
+            local B = (b - Position).Magnitude 
+            return A - B
+        end)
+        for _, Player : Player in Players:GetPlayers() do
+            if not Player.Character then continue end
+            local Target = Player.Character.PrimaryPart.CFrame.Position
+            Targets:Enqueue(Target)
+        end 
+
+        local TileGrid : Pathfinding2.TileGrid = Pathfinding2.GetTileGrid("ZombieGeneric")
+        local Target = Targets:Dequeue()
+
+        local HeuristicFn = function(Front)
+            return Vector2.new(Target.X - Front.Boundary.X, Target.Z - Front.Boundary.Y).Magnitude*2*(Front.Node.Layer+1)
+        end
+        local Query = TileGrid:AStarQuery(Pathfinding2.BuildTarget(Position), Pathfinding2.BuildTarget(Target), HeuristicFn, true)
+        local Direction = Query.Direction.Unit
+
+        local Delta = (Target - Position)
+        local travel = (Vector3.new(Direction.X, 0, Query.Direction.Y) 
+            + Delta.Unit*25/Delta.Magnitude
+        ).Unit
 
 
         --[[NOTE
@@ -152,9 +185,8 @@ RunService.Heartbeat:Connect(function(deltaTime)
 
         local MoveAwayVector = CharacterModule.GetMoveAwayVector(Quad, Entity)
 
-        if (travel ~= Vector3.zero and travel ~= nil) then
-            local MoveDirection = ((travel*1)+(MoveAwayVector*2.25)).Unit
-            CharacterModule.UpdateMoveDirection(Entity, MoveDirection)
-        end
+        if not travel then travel = Vector3.zero end
+        local MoveDirection = ((travel*1)+(MoveAwayVector*2.25)).Unit
+        CharacterModule.UpdateMoveDirection(Entity, MoveDirection)
     end
 end)

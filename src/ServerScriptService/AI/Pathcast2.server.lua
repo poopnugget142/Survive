@@ -16,6 +16,32 @@ for i = 0, (405-newTilegrid.TileSize.X), newTilegrid.TileSize.X do
     end
 end
 
+for i = 0, 200, newTilegrid.TileSize.X do
+    for j = 0, 200, newTilegrid.TileSize.Y do
+        local distance = (Vector2.new(100,100) - Vector2.new(i, j)).Magnitude
+        if (distance < 40) then
+            if not newTilegrid.Tiles[i] then continue end
+            if not newTilegrid.Tiles[i][j] then continue end
+
+            local tile = newTilegrid.Tiles[i][j]
+            if not tile then continue end
+
+            tile.Interpolants.LowWall = 50
+
+            local block = Instance.new("Part")
+            block.Anchored = true
+            block.Parent = workspace
+            block.Position = Vector3.new(tile.Boundary.X, 0, tile.Boundary.Y)
+            block.Size = Vector3.new(1, 10, 1)
+
+            if distance < 10 then
+                tile.Interpolants.HighWall = 100
+                block.Size = Vector3.new(2, 30, 2)
+            end
+        end
+    end
+end
+
 newTilegrid.AbstractionLayers[1] = {
     AbstractionGrid = {}
     ,AbstractionSize = Vector2.new(15,15)

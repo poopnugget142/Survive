@@ -6,3 +6,6 @@
 Packages/
 ServerPackages/
 wally.lock
+Packages/Stew.lua
+wally.lock
+wally.toml

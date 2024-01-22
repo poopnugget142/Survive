@@ -6,7 +6,7 @@ local Promise = require(ReplicatedStorage.Packages.Promise)
 
 local World = CharacterStates.World
 
-CharacterStates.Crippled = World.factory("Crippled", {
+CharacterStates.Crippled = World.factory({
     add = function(Factory, Entity : Model, SlowFactor : number)
         if (World.get(Entity).WalkSpeed == nil) then return false end
         Promise.try(function(resolve, reject, onCancel)

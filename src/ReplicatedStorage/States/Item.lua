@@ -6,7 +6,7 @@ local Stew = require(ReplicatedStorage.Packages.Stew)
 local Util = require(ReplicatedScripts.Lib.Util)
 local Enums = require(ReplicatedScripts.Registry.Enums)
 
-local World = Stew.world()
+local World = Stew.world {}
 
 local Module = {}
 
@@ -51,10 +51,10 @@ Module.LoadingConnections = World.factory({
 
 --~Weapon~--
 for  _, GunEnum in Enums.Item do
-    Module[GunEnum] = World.tag()
+    Module[GunEnum] = World.tag {}
 end
 
-Module.Shooting = World.tag()
+Module.Shooting = World.tag {}
 
 Module.Cooldown = World.factory({
     add = Util.EasyStewReturn;

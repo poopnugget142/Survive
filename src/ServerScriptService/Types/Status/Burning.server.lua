@@ -6,7 +6,7 @@ local Promise = require(ReplicatedStorage.Packages.Promise)
 
 local World = CharacterStates.World
 
-CharacterStates.Burning = World.factory("Burning", {
+CharacterStates.Burning = World.factory({
     add = function(Factory, Entity : Model, Damage : number)
         if (World.get(Entity).Health == nil) then return false end
 

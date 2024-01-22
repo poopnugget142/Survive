@@ -3,24 +3,24 @@ local CollectionService = game:GetService("CollectionService")
 
 local ReplicatedScripts = ReplicatedStorage:WaitForChild("Scripts")
 
-local Stew = require(ReplicatedStorage.Packages.Stew)
+local Stew =   require(ReplicatedStorage.Packages.Stew)
 local Signal = require(ReplicatedStorage.Packages.Signal)
 local Enums =  require(ReplicatedScripts.Registry.Enums)
 
-local World = Stew.world()
+local World = Stew.world {}
 
 local Module = {}
 
-Module.Moving = World.tag()
-Module.AutoRotate = World.tag()
-Module.LookAtMouse = World.tag()
-Module.Baddie = World.tag()
+Module.Moving = World.tag {}
+Module.AutoRotate = World.tag {}
+Module.LookAtMouse = World.tag {}
+Module.Baddie = World.tag {}
 
 for _, StateEnum in Enums.States do
-    Module[StateEnum] = World.tag()
+    Module[StateEnum] = World.tag {}
 end
 
-Module.Health = World.factory({
+Module.Health = World.factory{
     add = function(Factory, Entity : any, Health : number)
         return {
             Max = Health
@@ -35,9 +35,9 @@ Module.Health = World.factory({
         HealthData.Update:Destroy()
     end;
 
-})
+}
 
-Module.Character = World.factory({
+Module.Character = World.factory{
     add = function(Factory, Entity : any)
         local Character = World.get(Entity).Model
 
@@ -51,18 +51,18 @@ Module.Character = World.factory({
 
         CollectionService:RemoveTag(Character, "Character")
     end;
-})
+}
 
-Module.WalkSpeed = World.factory({
+Module.WalkSpeed = World.factory{
     add = function(Factory, Entity : Model, WalkSpeed : number)
         return {
             Base = WalkSpeed
             ;Current = WalkSpeed   
         }
     end;
-})
+}
 
-Module.Model = World.factory({
+Module.Model = World.factory{
     add = function(Factory, Entity : any, Model : any)
         return Model
     end;
@@ -71,13 +71,13 @@ Module.Model = World.factory({
         local Model = World.get(Entity)[Module.Model]
         Model:Destroy()
     end;
-})
+}
 
-Module.NPCId = World.factory({
+Module.NPCId = World.factory{
     add = function(Factory, Entity : any, NpcId : number)
         return NpcId
     end;
-})
+}
 
 --[[
 Module.Gridventory = World.factory({
@@ -87,35 +87,35 @@ Module.Gridventory = World.factory({
 })
 ]]
 
-Module.NPCType = World.factory({
+Module.NPCType = World.factory{
     add = function(Factory, Entity : any, NpcType : number)
         return NpcType
     end;
-})
+}
 
-Module.State = World.factory({
+Module.State = World.factory{
     add = function(Factory, Entity : any, State : number)
         return State
     end;
-})
+}
 
-Module.LoadedAnimations = World.factory({
+Module.LoadedAnimations = World.factory{
     add = function(Factory, Entity : any, Animations : any)
         return Animations
     end;
-})
+}
 
-Module.CurrentAnimation = World.factory({
+Module.CurrentAnimation = World.factory{
     add = function(Factory, Entity : any, Animation : AnimationTrack)
         return Animation
     end;
-})
+}
 
-Module.IKControllers = World.factory({
+Module.IKControllers = World.factory{
     add = function(Factory, Entity : any, IKControllers : any)
         return IKControllers
     end;
-})
+}
 
 Module.World = World
 

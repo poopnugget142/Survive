@@ -1,1 +1,1 @@
-return require(script.Parent._Index["data-oriented-house_stew@3.5.1"]["stew"])
+return require(script.Parent._Index["data-oriented-house_stew@5.4.1"]["stew"])

@@ -9,7 +9,7 @@ dependencies = []
 
 [[package]]
 name = "data-oriented-house/stew"
-version = "3.5.1"
+version = "5.4.1"
 dependencies = []
 
 [[package]]
@@ -25,7 +25,7 @@ dependencies = []
 [[package]]
 name = "poopnugget142/poopy"
 version = "0.1.0"
-dependencies = [["Promise", "evaera/promise@4.0.0"], ["Signal", "sleitnick/signal@1.5.0"], ["Squash", "data-oriented-house/squash@1.1.6"], ["Stew", "data-oriented-house/stew@3.5.1"]]
+dependencies = [["Promise", "evaera/promise@4.0.0"], ["Signal", "sleitnick/signal@1.5.0"], ["Squash", "data-oriented-house/squash@1.1.6"], ["Stew", "data-oriented-house/stew@5.4.1"]]
 
 [[package]]
 name = "sleitnick/signal"

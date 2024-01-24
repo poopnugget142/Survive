@@ -17,7 +17,6 @@ local QuadtreeModule = require(ReplicatedScripts.Lib.Quadtree)
 local PriorityQueueModule = require(ReplicatedScripts.Lib.PriorityQueue)
 
 local NpcEnum = Enums.NPC.Guy
-print(NpcEnum)
 
 local AttackRange = NpcRegistry.GetAttackRange(NpcEnum)
 

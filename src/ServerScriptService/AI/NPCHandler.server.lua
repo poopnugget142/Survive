@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ReplicatedScripts = ReplicatedStorage.Scripts
 local ServerScriptService = game:GetService("ServerScriptService")
 local SharedTableRegistry = game:GetService("SharedTableRegistry")
 
@@ -8,6 +9,7 @@ local Squash = require(ReplicatedStorage.Packages.Squash)
 local CharacterModule = require(ReplicatedStorage.Scripts.Class.Character)
 local CharacterStates = require(ReplicatedStorage.Scripts.States.Character)
 local EventHandler = require(ReplicatedStorage.Scripts.Lib.Util.EventHandler)
+local CompressionModule = require(ReplicatedScripts.Lib.Util.Compression)
 
 local CharacterControllerWorkers = ServerScriptService.AI.CharacterControllerWorkers
 local CharacterController = CharacterControllerWorkers.CharacterController
@@ -73,7 +75,7 @@ while task.wait(0.05) do
     for NpcId, MovementData in AllMovementData do
         local Position = MovementData.Position
         table.insert(PositionDataArray, Squash.uint.ser(NpcId, 2))
-        table.insert(PositionDataArray, Squash.Vector3.ser(Position))
+        table.insert(PositionDataArray, Squash.Vector3int16.ser(CompressionModule.ParseVector3(Position)))
     end
 
     if #PositionDataArray == 0 then continue end

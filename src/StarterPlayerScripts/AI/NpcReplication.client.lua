@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ReplicatedScripts = ReplicatedStorage.Scripts
 local RunService = game:GetService("RunService")
 local SharedTableRegistry = game:GetService("SharedTableRegistry")
 local Player = game:GetService("Players").LocalPlayer
@@ -15,6 +16,7 @@ local CharacterModule = require(ReplicatedScripts.Class.Character)
 local CharacterStates = require(ReplicatedScripts.States.Character)
 local Enums = require(ReplicatedScripts.Registry.Enums)
 local EventHandler = require(ReplicatedScripts.Lib.Util.EventHandler)
+local CompressionModule = require(ReplicatedScripts.Lib.Util.Compression)
 
 local NpcReplication : Script = Replicator:WaitForChild("NpcReplicator")
 
@@ -76,7 +78,7 @@ end
 UpdateNPCPosition.OnClientEvent:Connect(function(PositionDataArray)
     for i = 1, #PositionDataArray, 2  do
         local NpcId = Squash.uint.des(PositionDataArray[i], 2)
-        local Position = Squash.Vector3.des(PositionDataArray[i + 1])
+        local Position =  CompressionModule.ReceiveVector3(Squash.Vector3int16.des(PositionDataArray[i + 1]))
 
         local Entity = CharacterModule.GetEntityFromNpcId(NpcId)
 
